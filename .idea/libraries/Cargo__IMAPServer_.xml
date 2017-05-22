@@ -1,21 +1,21 @@
 <component name="libraryTable">
   <library name="Cargo &lt;IMAPServer&gt;">
     <CLASSES>
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/serde-0.9.15" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/itoa-0.3.1" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/toml-0.2.1" />
       <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/nom-2.2.1" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/num-traits-0.1.37" />
       <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/dtoa-0.4.1" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/winapi-0.2.8" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-serialize-0.3.24" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/xdg-2.1.0" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/app_dirs-1.1.1" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/winapi-build-0.1.1" />
-      <root url="file://$USER_HOME$/.cargo/git/checkouts/config-rs-753d70ca56f8adb9/1266d11" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/ole32-sys-0.2.0" />
       <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/shell32-sys-0.1.1" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/toml-0.2.1" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/itoa-0.3.1" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-serialize-0.3.24" />
       <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_json-0.9.10" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/winapi-build-0.1.1" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/app_dirs-1.1.1" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/serde-0.9.15" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/ole32-sys-0.2.0" />
+      <root url="file://$USER_HOME$/.cargo/git/checkouts/config-rs-753d70ca56f8adb9/1266d11" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/num-traits-0.1.37" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/xdg-2.1.0" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/winapi-0.2.8" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
