@@ -1,0 +1,16 @@
+[package]
+name = "IMAPServer"
+version = "0.0.0"
+authors = ["MTRNord <mtrnord1@gmail.com>"]
+description = "A Basic IMAP Server written in Rust (WIP)"
+repository = "..."
+keywords = ["IMAP", "imap", "web", "tcp", "server", "bin", "email"]
+categories = ["email", "network-programming"]
+exclude = [
+    ".idea/*",
+    ".gitignore"
+]
+
+[dependencies]
+config = { git = "https://github.com/mehcode/config-rs", branch = "master", features = ["json"] }
+app_dirs = "1.1.1"

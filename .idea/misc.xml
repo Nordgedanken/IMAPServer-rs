@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectRootManager">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+  <component name="RustProjectSettings">
+    <option name="explicitPathToStdlib" value="C:\Users\marce\.rustup\toolchains\nightly-x86_64-pc-windows-msvc\lib\rustlib\src\rust\src" />
+    <option name="toolchainHomeDirectory" value="C:\Users\marce\.rustup\toolchains\nightly-x86_64-pc-windows-msvc\bin" />
+    <option name="useCargoCheckForBuild" value="true" />
+  </component>
+</project>
