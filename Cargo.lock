@@ -3,7 +3,7 @@ name = "IMAPServer"
 version = "0.0.0"
 dependencies = [
  "app_dirs 1.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "config 0.4.1 (git+https://github.com/mehcode/config-rs)",
+ "config 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -20,7 +20,7 @@ dependencies = [
 [[package]]
 name = "config"
 version = "0.4.1"
-source = "git+https://github.com/mehcode/config-rs#1266d110ba31a9d0f9f4908a5a30291899ffc8fc"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "nom 2.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 0.9.10 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -111,7 +111,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
 "checksum app_dirs 1.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "b7d1c0d48a81bbb13043847f957971f4d87c81542d80ece5e84ba3cba4058fd4"
-"checksum config 0.4.1 (git+https://github.com/mehcode/config-rs)" = "<none>"
+"checksum config 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "51517c6ffbd1201b94b75dc16d00978696db5a82292d74fc7375731e79e92cea"
 "checksum dtoa 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "80c8b71fd71146990a9742fc06dcbbde19161a267e0ad4e572c35162f4578c90"
 "checksum itoa 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "eb2f404fbc66fd9aac13e998248505e7ecb2ad8e44ab6388684c5fb11c6c251c"
 "checksum nom 2.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "cf51a729ecf40266a2368ad335a5fdde43471f545a967109cd62146ecf8b66ff"
