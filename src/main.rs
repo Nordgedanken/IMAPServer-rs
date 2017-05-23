@@ -16,6 +16,8 @@ use tokio_service::Service;
 use futures::{future, Future, BoxFuture};
 use tokio_proto::TcpServer;
 use std::net::SocketAddr;
+use futures::Stream;
+use futures::Sink;
 
 pub struct ImapCodec;
 impl Decoder for ImapCodec {
@@ -64,9 +66,40 @@ impl<T: AsyncRead + AsyncWrite + 'static> ServerProto<T> for ImapProto {
 
     /// A bit of boilerplate to hook in the codec:
     type Transport = Framed<T, ImapCodec>;
-    type BindTransport = Result<Self::Transport, io::Error>;
+    type BindTransport = Box<Future<Item = Self::Transport,
+        Error = io::Error>>;
     fn bind_transport(&self, io: T) -> Self::BindTransport {
-        Ok(io.framed(ImapCodec))
+        // Construct the line-based transport
+        let transport = io.framed(ImapCodec);
+
+        // The handshake requires that the client sends `You ready?`,
+        // so wait to receive that line. If anything else is sent,
+        // error out the connection
+        Box::new(transport.into_future()
+            // If the transport errors out, we don't care about
+            // the transport anymore, so just keep the error
+            .map_err(|(e, _)| e)
+            .and_then(|(line, transport)| {
+                // A line has been received, check to see if it
+                // is the handshake
+                match line {
+                    Some(ref msg) if msg.contains("CAPABILITY") => {
+                        println!("SERVER: received client handshake");
+                        // Send back the acknowledgement
+                        let ret = transport.send("* CAPABILITY IMAP4rev1 AUTH=PLAIN LOGINDISABLED".into());
+                        Box::new(ret) as Self::BindTransport
+                    }
+                    _ => {
+                        // The client sent an unexpected handshake,
+                        // error out the connection
+                        println!("SERVER: client handshake INVALID");
+                        let err = io::Error::new(io::ErrorKind::Other,
+                                                 "invalid handshake");
+                        let ret = future::err(err);
+                        Box::new(ret) as Self::BindTransport
+                    }
+                }
+            }))
     }
 }
 
@@ -84,14 +117,8 @@ impl Service for Imap {
 
     // Produce a future for computing a response from a request.
     fn call(&self, req: Self::Request) -> Self::Future {
-        if req.contains("CAPABILITY")  {
-            let res = "* CAPABILITY IMAP4rev1 AUTH=PLAIN LOGINDISABLED".to_string();;
-            future::ok(res).boxed()
-        }else {
-            // In this case, the response is immediate.
-            future::ok(req).boxed()
-        }
-
+        // In this case, the response is immediate.
+        future::ok(req).boxed()
     }
 }
 
