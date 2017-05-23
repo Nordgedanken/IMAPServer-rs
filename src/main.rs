@@ -23,7 +23,7 @@ impl Decoder for ImapCodec {
     type Error = io::Error;
 
     fn decode(&mut self, buf: &mut BytesMut) -> io::Result<Option<String>> {
-        if let Some(i) = buf.iter().position(|&b| b == b'\n') {
+        if let Some(i) = buf.iter().position(|&b| b) {
             // remove the serialized frame from the buffer.
             let line = buf.split_to(i);
 
@@ -97,7 +97,7 @@ impl Service for Imap {
 fn main() {
     let mut config = helper::get_config();
     config.set_default("RFC", "3501").unwrap();
-    config.set_default("address", "127.0.0.1:143").unwrap();
+    config.set_default("address", "0.0.0.0:143").unwrap();
     // Specify the localhost address
     let addr: SocketAddr =  config.get_str("address").unwrap().parse().unwrap();
 
