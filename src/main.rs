@@ -23,7 +23,8 @@ impl Decoder for ImapCodec {
     type Error = io::Error;
 
     fn decode(&mut self, buf: &mut BytesMut) -> io::Result<Option<String>> {
-        if let Some(i) = buf.iter().position(|&b| b) {
+        if let Some(i) = buf.iter().position(|&b| b == b) {
+            println!("some request happened");
             // remove the serialized frame from the buffer.
             let line = buf.split_to(i);
 
