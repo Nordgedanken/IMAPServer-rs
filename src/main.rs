@@ -5,120 +5,168 @@ extern crate futures;
 extern crate tokio_io;
 extern crate tokio_proto;
 extern crate tokio_service;
-use std::io;
-use std::str;
-use bytes::BytesMut;
-use tokio_io::codec::{Encoder, Decoder};
-use tokio_proto::pipeline::ServerProto;
-use tokio_io::{AsyncRead, AsyncWrite};
-use tokio_io::codec::Framed;
-use tokio_service::Service;
-use futures::{future, Future, BoxFuture};
-use tokio_proto::TcpServer;
-use std::net::SocketAddr;
-use futures::Stream;
-use futures::Sink;
 
-pub struct ImapCodec;
+use futures::{future, Future, Stream};
+
+use tokio_io::{AsyncRead, AsyncWrite};
+use tokio_io::codec::{Encoder, Decoder, Framed};
+use tokio_proto::streaming::pipeline::{Frame, ServerProto};
+use tokio_proto::streaming::{Body, Message};
+use tokio_proto::TcpServer;
+use tokio_service::Service;
+
+use bytes::{BytesMut};
+
+use std::{io, str};
+use std::net::SocketAddr;
+
+pub struct ImapCodec {
+    decoding_head: bool,
+}
 impl Decoder for ImapCodec {
-    type Item = String;
+    type Item = Frame<String, String, io::Error>;
     type Error = io::Error;
 
-    fn decode(&mut self, buf: &mut BytesMut) -> io::Result<Option<String>> {
-        if let Some(i) = buf.iter().position(|&b| b == b) {
-            println!("some request happened");
-            // remove the serialized frame from the buffer.
-            let line = buf.split_to(i);
+    fn decode(&mut self, buf: &mut BytesMut)
+              -> Result<Option<Self::Item>, io::Error>
+    {
+        // Find the position of the next newline character and split off the
+        // line if we find it.
+        let line = match buf.iter().position(|b| *b == b'\n') {
+            Some(n) => buf.split_to(n),
+            None => return Ok(None),
+        };
 
-            // Also remove the '\n'
-            buf.split_to(1);
+        // Also remove the '\n'
+        buf.split_to(1);
 
-            // Turn this data into a UTF string and return it in a Frame.
-            match str::from_utf8(&line) {
-                Ok(s) => Ok(Some(s.to_string())),
-                Err(_) => Err(io::Error::new(io::ErrorKind::Other,
-                                             "invalid UTF-8")),
+        // Turn this data into a string and return it in a Frame
+        let s = try!(str::from_utf8(&line).map_err(|e| {
+            io::Error::new(io::ErrorKind::Other, e)
+        }));
+
+        // Got an empty line, which means that the state
+        // should be toggled.
+        if s == "" {
+            let decoding_head = self.decoding_head;
+            // Toggle the state
+            self.decoding_head = !decoding_head;
+
+            if decoding_head {
+                Ok(Some(Frame::Message {
+                    // The message head is an empty line
+                    message: s.to_string(),
+                    // We will be streaming a body next
+                    body: true,
+                }))
+            } else {
+                // The streaming body termination frame,
+                // is represented as `None`.
+                Ok(Some(Frame::Body {
+                    chunk: None
+                }))
             }
         } else {
-            Ok(None)
+            if self.decoding_head {
+                // This is a "oneshot" message with no
+                // streaming body
+                Ok(Some(Frame::Message {
+                    message: s.to_string(),
+                    body: false,
+                }))
+            } else {
+                // Streaming body line chunk
+                Ok(Some(Frame::Body {
+                    chunk: Some(s.to_string()),
+                }))
+            }
         }
     }
 }
 
 impl Encoder for ImapCodec {
-    type Item = String;
+    type Item = Frame<String, String, io::Error>;
     type Error = io::Error;
 
-    fn encode(&mut self, msg: String, buf: &mut BytesMut) -> io::Result<()> {
-        buf.extend(msg.as_bytes());
+    fn encode(&mut self, msg: Frame<String, String, io::Error>, buf: &mut BytesMut) -> io::Result<()> {
+        match msg {
+            Frame::Message { message, body } => {
+                // Our protocol dictates that a message head that
+                // includes a streaming body is an empty string.
+                assert!(message.is_empty() == body);
+
+                buf.extend(message.as_bytes());
+            }
+            Frame::Body { chunk } => {
+                if let Some(chunk) = chunk {
+                    buf.extend(chunk.as_bytes());
+                }
+            }
+            Frame::Error { error } => {
+                // Our protocol does not support error frames, so
+                // this results in a connection level error, which
+                // will terminate the socket.
+                return Err(error)
+            }
+        }
+
+        // Push the new line
         buf.extend(b"\n");
+
         Ok(())
     }
 }
 
 pub struct ImapProto;
 impl<T: AsyncRead + AsyncWrite + 'static> ServerProto<T> for ImapProto {
-    /// For this protocol style, `Request` matches the `Item` type of the codec's `Encoder`
     type Request = String;
-
-    /// For this protocol style, `Response` matches the `Item` type of the codec's `Decoder`
+    type RequestBody = String;
     type Response = String;
+    type ResponseBody = String;
+    type Error = io::Error;
 
-    /// A bit of boilerplate to hook in the codec:
+    // `Framed<T, LineCodec>` is the return value
+    // of `io.framed(LineCodec)`
     type Transport = Framed<T, ImapCodec>;
-    type BindTransport = Box<Future<Item = Self::Transport,
-        Error = io::Error>>;
+    type BindTransport = Result<Self::Transport, io::Error>;
     fn bind_transport(&self, io: T) -> Self::BindTransport {
-        // Construct the line-based transport
-        let transport = io.framed(ImapCodec);
+    // Initialize the codec to be parsing message heads
+    let codec = ImapCodec {
+        decoding_head: true,
+    };
 
-        // The handshake requires that the client sends `You ready?`,
-        // so wait to receive that line. If anything else is sent,
-        // error out the connection
-        Box::new(transport.into_future()
-            // If the transport errors out, we don't care about
-            // the transport anymore, so just keep the error
-            .map_err(|(e, _)| e)
-            .and_then(|(line, transport)| {
-                // A line has been received, check to see if it
-                // is the handshake
-                match line {
-                    Some(ref msg) if msg.contains("CAPABILITY") => {
-                        println!("SERVER: received client handshake");
-                        // Send back the acknowledgement
-                        let ret = transport.send("* CAPABILITY IMAP4rev1 AUTH=PLAIN LOGINDISABLED".into());
-                        Box::new(ret) as Self::BindTransport
-                    }
-                    _ => {
-                        // The client sent an unexpected handshake,
-                        // error out the connection
-                        println!("SERVER: client handshake INVALID");
-                        let err = io::Error::new(io::ErrorKind::Other,
-                                                 "invalid handshake");
-                        let ret = future::err(err);
-                        Box::new(ret) as Self::BindTransport
-                    }
-                }
-            }))
-    }
+    Ok(io.framed(codec))
+}
 }
 
 pub struct Imap;
 impl Service for Imap {
-    // These types must match the corresponding protocol types:
-    type Request = String;
-    type Response = String;
-
-    // For non-streaming protocols, service errors are always io::Error
+    type Request = Message<String, Body<String, io::Error>>;
+    type Response = Message<String, Body<String, io::Error>>;
     type Error = io::Error;
-
-    // The future for computing the response; box it for simplicity.
-    type Future = BoxFuture<Self::Response, Self::Error>;
+    type Future = Box<Future<Item = Self::Response,
+        Error = Self::Error>>;
 
     // Produce a future for computing a response from a request.
     fn call(&self, req: Self::Request) -> Self::Future {
-        // In this case, the response is immediate.
-        future::ok(req).boxed()
+        let resp = Message::WithoutBody("Ok".to_string());
+
+        match req {
+            Message::WithoutBody(line) => {
+                println!("{}", line);
+                Box::new(future::done(Ok(resp)))
+            }
+            Message::WithBody(_, body) => {
+                let resp = body
+                    .for_each(|line| {
+                        println!(" + {}", line);
+                        Ok(())
+                    })
+                    .map(move |_| resp);
+
+                Box::new(resp) as Self::Future
+            }
+        }
     }
 }
 

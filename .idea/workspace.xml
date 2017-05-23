@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c5270b1a-413d-4dd8-9a45-419ab77b4d99" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Cargo__IMAPServer_.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Cargo__IMAPServer_.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Cargo.lock" afterPath="$PROJECT_DIR$/Cargo.lock" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Cargo.toml" afterPath="$PROJECT_DIR$/Cargo.toml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main.rs" afterPath="$PROJECT_DIR$/src/main.rs" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
@@ -44,8 +40,8 @@
       <file leaf-file-name="main.rs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="306">
-              <caret line="87" column="56" lean-forward="true" selection-start-line="87" selection-start-column="56" selection-end-line="87" selection-end-column="56" />
+            <state relative-caret-position="-1982">
+              <caret line="39" column="31" lean-forward="true" selection-start-line="39" selection-start-column="31" selection-end-line="39" selection-end-column="31" />
               <folding />
             </state>
           </provider>
@@ -85,8 +81,8 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Line</find>
       <find>TcpServer</find>
+      <find>Line</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -326,7 +322,7 @@
       <workItem from="1495473506128" duration="78000" />
       <workItem from="1495473605235" duration="3757000" />
       <workItem from="1495478607304" duration="1806000" />
-      <workItem from="1495480769954" duration="13831000" />
+      <workItem from="1495480769954" duration="15849000" />
     </task>
     <task id="LOCAL-00001" summary="IDE Updates">
       <created>1495480336431</created>
@@ -377,11 +373,18 @@
       <option name="project" value="LOCAL" />
       <updated>1495563217274</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Add handshake">
+      <created>1495564735099</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1495564735099</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="19543000" />
+    <option name="totallyTimeSpent" value="21561000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1928" y="-8" width="1936" height="1096" extended-state="6" />
@@ -418,7 +421,8 @@
     <MESSAGE value="fix Cargo.toml max keywords" />
     <MESSAGE value="Implement basic Server without any features yet" />
     <MESSAGE value="fix some issues" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix some issues" />
+    <MESSAGE value="Add handshake" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add handshake" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -590,8 +594,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main.rs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="87" column="56" lean-forward="true" selection-start-line="87" selection-start-column="56" selection-end-line="87" selection-end-column="56" />
+        <state relative-caret-position="-1982">
+          <caret line="39" column="31" lean-forward="true" selection-start-line="39" selection-start-column="31" selection-end-line="39" selection-end-column="31" />
           <folding />
         </state>
       </provider>
