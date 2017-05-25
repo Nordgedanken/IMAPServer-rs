@@ -88,7 +88,7 @@ fn main() {
                         for (y, tx) in iter {
                             if y == &addr {
                                 tx.send(format!("{}: {}", addr, "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED\r\n")).unwrap();
-                                tx.send(format!  ("{}: {}{}", addr, identifier, " OK CAPABILITY completed")).unwrap();
+                                tx.send(format!("{}: {}{}", addr, identifier, " OK CAPABILITY completed")).unwrap();
                             }else {
                                 tx.send(format!("{}: {}", addr, "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED\r\n")).unwrap();
                             }
@@ -105,7 +105,7 @@ fn main() {
                         for (y, tx) in iter {
                             if y == &addr {
                                 tx.send(format!("{}: {}", addr, "* BYE IMAP4rev1 Server logging out\r\n")).unwrap();
-                                tx.send(format!  ("{}: {}{}", addr, identifier, " OK LOGOUT completed")).unwrap();
+                                tx.send(format!("{}: {}{}", addr, identifier, " OK LOGOUT completed")).unwrap();
                             }else {
                                 tx.send(format!("{}: {}", addr, "* BYE IMAP4rev1 Server logging out\r\n")).unwrap();
                             }
@@ -122,7 +122,7 @@ fn main() {
                         for (y, tx) in iter {
                             if y == &addr {
                                 tx.send(format!("{}: {}", addr, "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED")).unwrap();
-                                tx.send(format!  ("{}: {}{}", addr, identifier, " OK CAPABILITY completed")).unwrap();
+                                tx.send(format!("{}: {}{}", addr, identifier, " OK CAPABILITY completed")).unwrap();
                             }else {
                                 tx.send(format!("{}: {}", addr, "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED")).unwrap();
                             }

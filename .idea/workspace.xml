@@ -40,8 +40,8 @@
       <file leaf-file-name="main.rs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="534">
-              <caret line="107" column="101" lean-forward="false" selection-start-line="107" selection-start-column="101" selection-end-line="107" selection-end-column="101" />
+            <state relative-caret-position="602">
+              <caret line="124" column="47" lean-forward="false" selection-start-line="124" selection-start-column="47" selection-end-line="124" selection-end-column="47" />
               <folding />
             </state>
           </provider>
@@ -306,7 +306,7 @@
       <workItem from="1495478607304" duration="1806000" />
       <workItem from="1495480769954" duration="16475000" />
       <workItem from="1495567407334" duration="2061000" />
-      <workItem from="1495753690232" duration="903000" />
+      <workItem from="1495753690232" duration="999000" />
     </task>
     <task id="LOCAL-00001" summary="IDE Updates">
       <created>1495480336431</created>
@@ -406,11 +406,18 @@
       <option name="project" value="LOCAL" />
       <updated>1495754436991</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Add Logout Command">
+      <created>1495754606489</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1495754606489</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="25151000" />
+    <option name="totallyTimeSpent" value="25247000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1928" y="-8" width="1936" height="1096" extended-state="6" />
@@ -453,7 +460,8 @@
     <MESSAGE value="Default send COMPABILITY Response according to rfc." />
     <MESSAGE value="Send COMPABILITY Response on new connection according to rfc" />
     <MESSAGE value="Fix empty message check" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix empty message check" />
+    <MESSAGE value="Add Logout Command" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add Logout Command" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -766,8 +774,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main.rs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="534">
-          <caret line="107" column="101" lean-forward="false" selection-start-line="107" selection-start-column="101" selection-end-line="107" selection-end-column="101" />
+        <state relative-caret-position="602">
+          <caret line="124" column="47" lean-forward="false" selection-start-line="124" selection-start-column="47" selection-end-line="124" selection-end-column="47" />
           <folding />
         </state>
       </provider>
