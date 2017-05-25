@@ -97,10 +97,19 @@ fn main() {
                     } else {
                         // For each open connection except the sender, send the
                         // string via the channel.
-                        let iter = conns.iter_mut()
-                            .map(|(_, v)| v);
-                        for tx in iter {
-                            tx.send(format!("{}: {}", addr, msg)).unwrap();
+                        let iter = conns
+                            .iter_mut()
+                            .map(|(y, v)| (y, v));
+
+                        let mut identifier_iter = msg.split_whitespace();
+                        let identifier = identifier_iter.nth(0).unwrap();
+                        for (y, tx) in iter {
+                            if y == &addr {
+                                tx.send(format!("{}: {}", addr, "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED")).unwrap();
+                                tx.send(format!  ("{}: {}{}", addr, identifier, " OK CAPABILITY completed")).unwrap();
+                            }else {
+                                tx.send(format!("{}: {}", addr, "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED")).unwrap();
+                            }
                         }
                     }
                 } else {
