@@ -93,8 +93,6 @@ fn main() {
                                 tx.send(format!("{}: {}", addr, "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED")).unwrap();
                             }
                         }
-                    } else if msg.contains("\r\n"){
-                        println!("Empty message from {}. Nothing to do here.", addr);
                     } else {
                         // For each open connection except the sender, send the
                         // string via the channel.
