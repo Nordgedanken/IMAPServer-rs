@@ -40,8 +40,8 @@
       <file leaf-file-name="main.rs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="296">
-              <caret line="94" column="25" lean-forward="false" selection-start-line="94" selection-start-column="25" selection-end-line="94" selection-end-column="25" />
+            <state relative-caret-position="534">
+              <caret line="107" column="101" lean-forward="false" selection-start-line="107" selection-start-column="101" selection-end-line="107" selection-end-column="101" />
               <folding />
             </state>
           </provider>
@@ -88,7 +88,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-8" />
+    <option name="x" value="-1928" />
     <option name="y" value="-8" />
     <option name="width" value="1936" />
     <option name="height" value="1096" />
@@ -306,7 +306,7 @@
       <workItem from="1495478607304" duration="1806000" />
       <workItem from="1495480769954" duration="16475000" />
       <workItem from="1495567407334" duration="2061000" />
-      <workItem from="1495753690232" duration="732000" />
+      <workItem from="1495753690232" duration="903000" />
     </task>
     <task id="LOCAL-00001" summary="IDE Updates">
       <created>1495480336431</created>
@@ -399,14 +399,21 @@
       <option name="project" value="LOCAL" />
       <updated>1495754352296</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Fix empty message check">
+      <created>1495754436991</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1495754436991</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="24980000" />
+    <option name="totallyTimeSpent" value="25151000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1096" extended-state="6" />
+    <frame x="-1928" y="-8" width="1936" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -445,7 +452,8 @@
     <MESSAGE value="Implement basic server with CAPABILITY command" />
     <MESSAGE value="Default send COMPABILITY Response according to rfc." />
     <MESSAGE value="Send COMPABILITY Response on new connection according to rfc" />
-    <option name="LAST_COMMIT_MESSAGE" value="Send COMPABILITY Response on new connection according to rfc" />
+    <MESSAGE value="Fix empty message check" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix empty message check" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -758,8 +766,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main.rs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="296">
-          <caret line="94" column="25" lean-forward="false" selection-start-line="94" selection-start-column="25" selection-end-line="94" selection-end-column="25" />
+        <state relative-caret-position="534">
+          <caret line="107" column="101" lean-forward="false" selection-start-line="107" selection-start-column="101" selection-end-line="107" selection-end-column="101" />
           <folding />
         </state>
       </provider>
