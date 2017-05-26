@@ -78,56 +78,13 @@ fn main() {
                 let mut conns = connections.borrow_mut();
                 if let Ok(msg) = message {
                     if msg.contains("CAPABILITY") {
-                        // For each open connection except the sender, send the
-                        // string via the channel.
-                        let iter = conns
-                            .iter_mut()
-                            .map(|(y, v)| (y, v));
-
-                        let mut identifier_iter = msg.split_whitespace();
-                        let identifier = identifier_iter.nth(0).unwrap();
-                        for (y, tx) in iter {
-                            if y == &addr {
-                                tx.send(format!("{}", "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED\r\n")).unwrap();
-                                tx.send(format!("{}{}", identifier, " OK CAPABILITY completed")).unwrap();
-                            }else {
-                                tx.send(format!("{}", "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED\r\n")).unwrap();
-                            }
-                        }
+                        commands::capability(conns, msg, &addr);
                     } else if msg.contains("LOGOUT") {
-                        // For each open connection except the sender, send the
-                        // string via the channel.
-                        let iter = conns
-                            .iter_mut()
-                            .map(|(y, v)| (y, v));
-
-                        let mut identifier_iter = msg.split_whitespace();
-                        let identifier = identifier_iter.nth(0).unwrap();
-                        for (y, tx) in iter {
-                            if y == &addr {
-                                tx.send(format!("{}", "* BYE IMAP4rev1 Server logging out\r\n")).unwrap();
-                                tx.send(format!("{}{}", identifier, " OK LOGOUT completed")).unwrap();
-                            }else {
-                                tx.send(format!("{}", "* BYE IMAP4rev1 Server logging out\r\n")).unwrap();
-                            }
-                        }
+                        commands::logout(conns, msg, &addr);
+                    } else if msg.contains("LOGIN") {
+                        commands::login(conns, msg, &addr);
                     } else {
-                        // For each open connection except the sender, send the
-                        // string via the channel.
-                        let iter = conns
-                            .iter_mut()
-                            .map(|(y, v)| (y, v));
-
-                        let mut identifier_iter = msg.split_whitespace();
-                        let identifier = identifier_iter.nth(0).unwrap();
-                        for (y, tx) in iter {
-                            if y == &addr {
-                                tx.send(format!("{}", "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED")).unwrap();
-                                tx.send(format!("{}{}", identifier, " OK CAPABILITY completed")).unwrap();
-                            }else {
-                                tx.send(format!("{}","* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED")).unwrap();
-                            }
-                        }
+                        commands::capability(conns, msg, &addr);
                     }
                 } else {
                     let tx = conns.get_mut(&addr).unwrap();
@@ -166,3 +123,4 @@ fn main() {
 }
 
 mod helper;
+mod commands;
