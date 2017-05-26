@@ -4,6 +4,7 @@ extern crate futures;
 extern crate tokio_core;
 extern crate tokio_io;
 
+
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -42,7 +43,7 @@ fn main() {
         // send us messages. Then register our address with the stream to send
         // data to us.
         let (tx, rx) = futures::sync::mpsc::unbounded();
-        tx.send(format!("{}: {}", addr, "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED")).unwrap();
+        tx.send(format!("{}: {}", addr, "* OK IMAP4rev1 Service Ready")).unwrap();
         connections.borrow_mut().insert(addr, tx);
 
         // Define here what we do for the actual I/O. That is, read a bunch of
