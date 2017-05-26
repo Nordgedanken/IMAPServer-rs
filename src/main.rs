@@ -43,7 +43,7 @@ fn main() {
         // send us messages. Then register our address with the stream to send
         // data to us.
         let (tx, rx) = futures::sync::mpsc::unbounded();
-        tx.send(format!("{}: {}", addr, "* OK IMAP4rev1 Service Ready")).unwrap();
+        tx.send(format!("{}", "* OK IMAP4rev1 Service Ready")).unwrap();
         connections.borrow_mut().insert(addr, tx);
 
         // Define here what we do for the actual I/O. That is, read a bunch of
@@ -88,10 +88,10 @@ fn main() {
                         let identifier = identifier_iter.nth(0).unwrap();
                         for (y, tx) in iter {
                             if y == &addr {
-                                tx.send(format!("{}: {}", addr, "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED\r\n")).unwrap();
-                                tx.send(format!("{}: {}{}", addr, identifier, " OK CAPABILITY completed")).unwrap();
+                                tx.send(format!("{}", "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED\r\n")).unwrap();
+                                tx.send(format!("{}{}", identifier, " OK CAPABILITY completed")).unwrap();
                             }else {
-                                tx.send(format!("{}: {}", addr, "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED\r\n")).unwrap();
+                                tx.send(format!("{}", "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED\r\n")).unwrap();
                             }
                         }
                     } else if msg.contains("LOGOUT") {
@@ -105,10 +105,10 @@ fn main() {
                         let identifier = identifier_iter.nth(0).unwrap();
                         for (y, tx) in iter {
                             if y == &addr {
-                                tx.send(format!("{}: {}", addr, "* BYE IMAP4rev1 Server logging out\r\n")).unwrap();
-                                tx.send(format!("{}: {}{}", addr, identifier, " OK LOGOUT completed")).unwrap();
+                                tx.send(format!("{}", "* BYE IMAP4rev1 Server logging out\r\n")).unwrap();
+                                tx.send(format!("{}{}", identifier, " OK LOGOUT completed")).unwrap();
                             }else {
-                                tx.send(format!("{}: {}", addr, "* BYE IMAP4rev1 Server logging out\r\n")).unwrap();
+                                tx.send(format!("{}", "* BYE IMAP4rev1 Server logging out\r\n")).unwrap();
                             }
                         }
                     } else {
@@ -122,10 +122,10 @@ fn main() {
                         let identifier = identifier_iter.nth(0).unwrap();
                         for (y, tx) in iter {
                             if y == &addr {
-                                tx.send(format!("{}: {}", addr, "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED")).unwrap();
-                                tx.send(format!("{}: {}{}", addr, identifier, " OK CAPABILITY completed")).unwrap();
+                                tx.send(format!("{}", "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED")).unwrap();
+                                tx.send(format!("{}{}", identifier, " OK CAPABILITY completed")).unwrap();
                             }else {
-                                tx.send(format!("{}: {}", addr, "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED")).unwrap();
+                                tx.send(format!("{}","* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED")).unwrap();
                             }
                         }
                     }
