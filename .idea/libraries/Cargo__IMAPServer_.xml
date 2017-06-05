@@ -1,34 +1,34 @@
 <component name="libraryTable">
   <library name="Cargo &lt;IMAPServer&gt;">
     <CLASSES>
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/bytes-0.4.3" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/mio-0.6.7" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/libc-0.2.23" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-serialize-0.3.24" />
       <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/slab-0.3.0" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/toml-0.2.1" />
       <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/config-0.4.1" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-core-0.1.7" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/ole32-sys-0.2.0" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/kernel32-sys-0.2.2" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/nom-2.2.1" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/lazycell-0.4.0" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/ws2_32-sys-0.2.1" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/yaml-rust-0.3.5" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/cfg-if-0.1.0" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/byteorder-1.0.0" />
       <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-io-0.1.1" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/winapi-build-0.1.1" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/app_dirs-1.1.1" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/kernel32-sys-0.2.2" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/scoped-tls-0.1.0" />
       <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/net2-0.2.29" />
       <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/log-0.3.7" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/app_dirs-1.1.1" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/mio-0.6.7" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/iovec-0.1.0" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/bytes-0.4.3" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/miow-0.2.1" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/scoped-tls-0.1.0" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/toml-0.2.1" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-serialize-0.3.24" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-0.1.13" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/shell32-sys-0.1.1" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/byteorder-1.0.0" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/libc-0.2.23" />
       <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/winapi-0.2.8" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/lazycell-0.4.0" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/winapi-build-0.1.1" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/miow-0.2.1" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/yaml-rust-0.3.5" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-0.1.13" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/iovec-0.1.0" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-core-0.1.7" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/nom-2.2.1" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/ole32-sys-0.2.0" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/ws2_32-sys-0.2.1" />
+      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/shell32-sys-0.1.1" />
       <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/xdg-2.1.0" />
-      <root url="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/cfg-if-0.1.0" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
