@@ -84,6 +84,8 @@ fn main() {
                         commands::logout(conns, msg, &addr);
                     } else if msg.contains("LOGIN") {
                         commands::login(conns, msg, &addr);
+                    } else if msg.contains("NOOP") {
+                        commands::noop(conns, msg, &addr);
                     } else {
                         commands::capability(conns, msg, &addr);
                     }
