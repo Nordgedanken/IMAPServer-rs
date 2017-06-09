@@ -91,6 +91,8 @@ fn main() {
                         commands::select(conns, msg, &addr);
                     } else if msg.contains("select") {
                         commands::select(conns, msg, &addr);
+                    } else {
+                        commands::capability(conns, msg, &addr);
                     }
                 } else {
                     let tx = conns.get_mut(&addr).unwrap();
