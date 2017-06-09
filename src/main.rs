@@ -86,6 +86,8 @@ fn main() {
                         commands::login(conns, msg, &addr);
                     } else if msg.contains("NOOP") {
                         commands::noop(conns, msg, &addr);
+                    } else if msg.contains("SELECT") {
+                        commands::select(conns, msg, &addr);
                     }
                 } else {
                     let tx = conns.get_mut(&addr).unwrap();
