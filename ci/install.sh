@@ -22,6 +22,8 @@ main() {
            --git japaric/cross \
            --tag $tag \
            --target $target
+           
+   apt-get update && apt-get install libcurl4-openssl-dev libelf-dev libdw-dev cmake gcc binutils-dev
 }
 
 main
