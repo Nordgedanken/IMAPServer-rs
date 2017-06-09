@@ -44,6 +44,7 @@ fn main() {
         // data to us.
         let (tx, rx) = futures::sync::mpsc::unbounded();
         tx.send(format!("{}", "* OK IMAP4rev1 Service Ready")).unwrap();
+        println!("* OK IMAP4rev1 Service Ready");
         connections.borrow_mut().insert(addr, tx);
 
         // Define here what we do for the actual I/O. That is, read a bunch of
@@ -87,6 +88,8 @@ fn main() {
                     } else if msg.contains("NOOP") {
                         commands::noop(conns, msg, &addr);
                     } else if msg.contains("SELECT") {
+                        commands::select(conns, msg, &addr);
+                    } else if msg.contains("select") {
                         commands::select(conns, msg, &addr);
                     }
                 } else {
