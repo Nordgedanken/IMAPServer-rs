@@ -11,3 +11,4 @@ Cargo.lock
 old_stuff
 .idea/
 IMAPServer.iml
+/.gtm/

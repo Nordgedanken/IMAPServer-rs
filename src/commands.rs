@@ -14,8 +14,15 @@ pub fn capability<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap
         if y == addr {
             tx.send(format!("{}", "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED\r\n")).unwrap();
             tx.send(format!("{}{}", identifier, " OK CAPABILITY completed")).unwrap();
+
+            //Print to view for debug
+            println!("{}", "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED\r\n");
+            println!("{}{}", identifier, " OK CAPABILITY completed");
         } else {
             tx.send(format!("{}", "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED\r\n")).unwrap();
+
+            //Print to view for debug
+            println!("{}", "* CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN  LOGINDISABLED\r\n");
         }
     }
 }
@@ -33,8 +40,15 @@ pub fn logout<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
         if y == addr {
             tx.send(format!("{}", "* BYE IMAP4rev1 Server logging out\r\n")).unwrap();
             tx.send(format!("{}{}", identifier, " OK LOGOUT completed")).unwrap();
+
+            //Print to view for debug
+            println!("{}", "* BYE IMAP4rev1 Server logging out\r\n");
+            println!("{}{}", identifier, " OK LOGOUT completed");
         } else {
             tx.send(format!("{}", "* BYE IMAP4rev1 Server logging out\r\n")).unwrap();
+
+            //Print to view for debug
+            println!("{}", "* BYE IMAP4rev1 Server logging out\r\n");
         }
     }
 }
