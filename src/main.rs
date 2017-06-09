@@ -89,7 +89,7 @@ fn main() {
                     }
                 } else {
                     let tx = conns.get_mut(&addr).unwrap();
-                    println!("{}", message);
+                    println!("{:?}", message);
                     println!("Message by {} is not valid. dropping it.", addr);
                     // tx.send("You didn't send valid UTF-8.".to_string()).unwrap();
                 }
