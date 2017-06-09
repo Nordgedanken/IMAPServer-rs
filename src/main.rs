@@ -77,6 +77,7 @@ fn main() {
                 println!("{}: {:?}", addr, message);
                 let mut conns = connections.borrow_mut();
                 if let Ok(msg) = message {
+                    println!("{}", msg);
                     if msg.contains("CAPABILITY") {
                         commands::capability(conns, msg, &addr);
                     } else if msg.contains("LOGOUT") {
