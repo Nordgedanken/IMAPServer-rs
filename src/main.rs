@@ -3,6 +3,10 @@ extern crate config;
 extern crate futures;
 extern crate tokio_core;
 extern crate tokio_io;
+extern crate tokio_proto;
+extern crate tokio_service;
+extern crate bytes;
+extern crate base64;
 
 
 use std::collections::HashMap;
@@ -20,7 +24,6 @@ use tokio_io::AsyncRead;
 
 fn main() {
     let mut config = helper::get_config();
-    config.set_default("RFC", "3501").unwrap();
     config.set_default("address", "0.0.0.0:143").unwrap();
 
     let addr = config.get_str("address").unwrap().parse().unwrap();
@@ -75,7 +78,6 @@ fn main() {
             });
             let connections = connections_inner.clone();
             line.map(move |(reader, message)| {
-                println!("{}: {:?}", addr, message);
                 let mut conns = connections.borrow_mut();
                 if let Ok(msg) = message {
                     println!("{}", msg);
@@ -88,9 +90,9 @@ fn main() {
                     } else if msg.contains("SELECT") {
                         commands::select(conns, msg, &addr);
                     } else if msg.contains("AUTHENTICATE") {
-                        commands::authenticate(conns, msg, &addr);
+                        commands::authenticate::authenticate(conns, msg, &addr);
                     } else if msg.contains("authenticate") {
-                        commands::authenticate(conns, msg, &addr);
+                        commands::authenticate::authenticate(conns, msg, &addr);
                     } else {
                         println!("Command by {} is not known. dropping it.", addr);
 
@@ -98,10 +100,8 @@ fn main() {
                         tx.send(format!("{}", "* BAD Command not known\r\n")).unwrap();
                     }
                 } else {
-                    let tx = conns.get_mut(&addr).unwrap();
                     println!("{:?}", message);
                     println!("Message by {} is not valid. dropping it.", addr);
-                    // tx.send("You didn't send valid UTF-8.".to_string()).unwrap();
                 }
                 reader
             })
