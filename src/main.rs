@@ -43,7 +43,7 @@ fn main() {
         // send us messages. Then register our address with the stream to send
         // data to us.
         let (tx, rx) = futures::sync::mpsc::unbounded();
-        tx.send(format!("{}", "* OK IMAP4rev1 Service Ready")).unwrap();
+        tx.send(format!("{}", "* [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT] OK IMAP4rev1 Service Ready")).unwrap();
         println!("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT] IMAP4rev1 Service Ready");
         connections.borrow_mut().insert(addr, tx);
 
