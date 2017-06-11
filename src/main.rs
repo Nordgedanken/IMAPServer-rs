@@ -44,7 +44,7 @@ fn main() {
         // data to us.
         let (tx, rx) = futures::sync::mpsc::unbounded();
         tx.send(format!("{}", "* OK IMAP4rev1 Service Ready")).unwrap();
-        println!("* OK IMAP4rev1 Service Ready");
+        println!("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT] IMAP4rev1 Service Ready");
         connections.borrow_mut().insert(addr, tx);
 
         // Define here what we do for the actual I/O. That is, read a bunch of
