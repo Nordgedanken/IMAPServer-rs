@@ -92,7 +92,10 @@ fn main() {
                     } else if msg.contains("authenticate") {
                         commands::authenticate(conns, msg, &addr);
                     } else {
-                        commands::capability(conns, msg, &addr);
+                        println!("Command by {} is not known. dropping it.", addr);
+
+                        let tx = conns.get_mut(&addr).unwrap();
+                        tx.send(format!("{}", "* BAD Command not known\r\n")).unwrap();
                     }
                 } else {
                     let tx = conns.get_mut(&addr).unwrap();
