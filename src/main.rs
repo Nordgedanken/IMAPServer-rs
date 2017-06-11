@@ -89,6 +89,8 @@ fn main() {
                         commands::select(conns, msg, &addr);
                     } else if msg.contains("AUTHENTICATE") {
                         commands::authenticate(conns, msg, &addr);
+                    } else if msg.contains("authenticate") {
+                        commands::authenticate(conns, msg, &addr);
                     } else {
                         commands::capability(conns, msg, &addr);
                     }
