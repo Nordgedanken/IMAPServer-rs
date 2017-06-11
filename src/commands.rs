@@ -64,10 +64,10 @@ pub fn authenticate <'a>(mut conns: std::cell::RefMut<'a, std::collections::Hash
     let identifier = identifier_iter.nth(0).unwrap();
     for (y, tx) in iter {
         if y == addr {
-            tx.send(format!("{} {}", identifier, "OK PLAIN authentication successful")).unwrap();
+            tx.send(format!("{} {}", identifier, "OK PLAIN authentication successful\r\n")).unwrap();
 
             //Print to view for debug
-            println!("{} {}", identifier, "OK LOGIN completed");
+            println!("{} {}", identifier, "OK PLAIN authentication successful\r\n");
         }
     }
 }
