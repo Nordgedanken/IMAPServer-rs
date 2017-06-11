@@ -43,8 +43,8 @@ fn main() {
         // send us messages. Then register our address with the stream to send
         // data to us.
         let (tx, rx) = futures::sync::mpsc::unbounded();
-        tx.send(format!("{}", "* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT] IMAP4rev1 Service Ready\r\n")).unwrap();
-        println!("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT] IMAP4rev1 Service Ready\r\n");
+        tx.send(format!("{}", "* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n")).unwrap();
+        println!("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n");
         connections.borrow_mut().insert(addr, tx);
 
         // Define here what we do for the actual I/O. That is, read a bunch of
@@ -89,8 +89,8 @@ fn main() {
                         commands::noop(conns, msg, &addr);
                     } else if msg.contains("SELECT") {
                         commands::select(conns, msg, &addr);
-                    } else if msg.contains("select") {
-                        commands::select(conns, msg, &addr);
+                    } else if msg.contains("AUTHENTICATE") {
+                        commands::authenticate(conns, msg, &addr);
                     } else {
                         commands::capability(conns, msg, &addr);
                     }
