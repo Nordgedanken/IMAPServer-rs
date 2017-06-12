@@ -83,24 +83,26 @@ fn main() {
                     println!("{}", msg);
                     let msg_clone = &msg.clone();
                     let mut msg_split: Vec<&str> = msg_clone.split_whitespace().collect();
-                    let mut command = msg_split[1].to_lowercase();
-                    if command == "capability" {
-                        commands::capability(conns, msg, &addr);
-                    } else if command == "logout" {
-                        commands::logout(conns, msg, &addr);
-                    } else if command == "noop" {
-                        commands::noop(conns, msg, &addr);
-                    } else if command == "select" {
-                        commands::select(conns, msg, &addr);
-                    } else if command == "authenticate" {
-                        commands::authenticate::authenticate(conns, msg, &addr);
-                    } else if command == "list" {
-                        commands::list(conns, msg, &addr);
-                    } else {
-                        println!("Command by {} is not known. dropping it.", addr);
+                    if msg_split.len() > 1 {
+                        let mut command = msg_split[1].to_lowercase();
+                        if command == "capability" {
+                            commands::capability(conns, msg, &addr);
+                        } else if command == "logout" {
+                            commands::logout(conns, msg, &addr);
+                        } else if command == "noop" {
+                            commands::noop(conns, msg, &addr);
+                        } else if command == "select" {
+                            commands::select(conns, msg, &addr);
+                        } else if command == "authenticate" {
+                            commands::authenticate::authenticate(conns, msg, &addr);
+                        } else if command == "list" {
+                            commands::list(conns, msg, &addr);
+                        } else {
+                            println!("Command by {} is not known. dropping it.", addr);
 
-                        let tx = conns.get_mut(&addr).unwrap();
-                        tx.send(format!("{}", "* BAD Command not known\r\n")).unwrap();
+                            let tx = conns.get_mut(&addr).unwrap();
+                            tx.send(format!("{}", "* BAD Command not known\r\n")).unwrap();
+                        }
                     }
                 } else {
                     println!("{:?}", message);
