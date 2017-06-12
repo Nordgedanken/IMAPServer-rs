@@ -97,6 +97,8 @@ fn main() {
                             commands::authenticate::authenticate(conns, msg, &addr);
                         } else if command == "list" {
                             commands::list(conns, msg, &addr);
+                        } else if command == "uid" {
+                            commands::uid(conns, msg, &addr);
                         } else {
                             println!("Command by {} is not known. dropping it.", addr);
 
