@@ -10,6 +10,7 @@ extern crate tokio_proto;
 extern crate tokio_service;
 extern crate bytes;
 extern crate base64;
+extern crate mailparse;
 
 use std::collections::HashMap;
 use std::rc::Rc;
