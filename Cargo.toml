@@ -25,3 +25,7 @@ base64 = "0.6"
 [dependencies.config]
 version = "0.4.1"
 features = ["yaml"]
+
+[dependencies.mysql]
+version = "11.1"
+features = ["ssl"]

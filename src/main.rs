@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate mysql;
+
 extern crate app_dirs;
 extern crate config;
 extern crate futures;
@@ -7,7 +10,6 @@ extern crate tokio_proto;
 extern crate tokio_service;
 extern crate bytes;
 extern crate base64;
-
 
 use std::collections::HashMap;
 use std::rc::Rc;

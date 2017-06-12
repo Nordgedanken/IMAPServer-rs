@@ -2,6 +2,11 @@ use std;
 use config::Config;
 use std::path::Path;
 use std::io;
+use mysql as my;
+
+fn connect_to_db() {
+    unimplemented!();
+}
 
 // A simple implementation of `% touch path` (ignores existing files)
 // From http://rustbyexample.com/std_misc/fs.html

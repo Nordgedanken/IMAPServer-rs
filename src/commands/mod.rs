@@ -96,6 +96,26 @@ pub fn logout<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
 }
 pub mod authenticate;
 
+#[deprecated(since="0.0.1", note="please use `commands::authenticate::authenticate` instead")]
+pub fn login <'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>>>, msg: std::string::String, addr: &'a std::net::SocketAddr) {
+    // For each open connection except the sender, send the
+    // string via the channel.
+    let iter = conns
+        .iter_mut()
+        .map(|(y, v)| (y, v));
+
+    let mut identifier_iter = msg.split_whitespace();
+    let identifier = identifier_iter.nth(0).unwrap();
+    for (y, tx) in iter {
+        if y == addr {
+            tx.send(format!("{} {}", identifier, "OK LOGIN completed\r\n")).unwrap();
+
+            //Print to view for debug
+            println!("{} {}", identifier, "OK LOGIN completed\r\n");
+        }
+    }
+}
+
 pub fn noop<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>>>, msg: std::string::String, addr: &'a std::net::SocketAddr) {
     // For each open connection except the sender, send the
     // string via the channel.
@@ -129,7 +149,7 @@ pub fn select<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
             tx.send(format!("{}", "* 1 EXISTS\r\n")).unwrap();
             tx.send(format!("{}", "* 0 RECENT\r\n")).unwrap();
             tx.send(format!("{}", "* OK [UNSEEN 1] Message 1 is first unseen\r\n")).unwrap();
-            tx.send(format!("{}", "* OK [UIDNEXT 4392] Predicted next UID\r\n")).unwrap();
+            tx.send(format!("{}", "* OK [UIDNEXT 1] Predicted next UID\r\n")).unwrap();
             tx.send(format!("{}", "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n")).unwrap();
             tx.send(format!("{}", "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r\n")).unwrap();
             tx.send(format!("{} {}", identifier, "OK [READ-WRITE] SELECT completed\r\n")).unwrap();
@@ -139,3 +159,4 @@ pub fn select<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
         }
     }
 }
+
