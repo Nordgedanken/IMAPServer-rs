@@ -59,11 +59,11 @@ pub fn uid<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::n
     let identifier = identifier_iter.nth(0).unwrap();
     for (y, tx) in iter {
         if y == addr {
-            tx.send(format!("{}", "* 1 FETCH (FLAGS (\\Seen) UID 4827313)\r\n")).unwrap();
+            tx.send(format!("{}", "* 1 FETCH (FLAGS (\\Seen) UID 1)\r\n")).unwrap();
             tx.send(format!("{}{}", identifier, " OK UID FETCH completed\r\n")).unwrap();
 
             //Print to view for debug
-            println!("{}", "* 1 FETCH (FLAGS (\\Seen) UID 4827313)\r\n");
+            println!("{}", "* 1 FETCH (FLAGS (\\Seen) UID 1)\r\n");
             println!("{}{}", identifier, " OK UID FETCH completed\r\n");
         }
     }
@@ -126,8 +126,8 @@ pub fn select<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
     let identifier = identifier_iter.nth(0).unwrap();
     for (y, tx) in iter {
         if y == addr {
-            tx.send(format!("{}", "* 12 EXISTS\r\n")).unwrap();
-            tx.send(format!("{}", "* 1 RECENT\r\n")).unwrap();
+            tx.send(format!("{}", "* 1 EXISTS\r\n")).unwrap();
+            tx.send(format!("{}", "* 0 RECENT\r\n")).unwrap();
             tx.send(format!("{}", "* OK [UNSEEN 1] Message 1 is first unseen\r\n")).unwrap();
             tx.send(format!("{}", "* OK [UIDNEXT 4392] Predicted next UID\r\n")).unwrap();
             tx.send(format!("{}", "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n")).unwrap();
