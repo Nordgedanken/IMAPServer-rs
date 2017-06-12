@@ -39,7 +39,7 @@ pub fn list<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::
     for (y, tx) in iter {
         if y == addr {
             tx.send(format!("{}", "* LIST () \"/\" INBOX\r\n")).unwrap();
-            tx.send(format!("{}{}", identifier, "OK LIST Completed\r\n")).unwrap();
+            tx.send(format!("{}{}", identifier, " OK LIST Completed\r\n")).unwrap();
 
             //Print to view for debug
             println!("{}", "* LIST () \"/\" \"INBOX\"\r\n");
