@@ -104,6 +104,8 @@ fn main() {
                             commands::list(conns, args, &addr);
                         } else if command == "uid" {
                             commands::uid(conns, args, &addr);
+                        } else if command == "check" {
+                            commands::check(conns, args, &addr);
                         } else {
                             println!("Command by {} is not known. dropping it.", addr);
 

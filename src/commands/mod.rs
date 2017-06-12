@@ -17,11 +17,6 @@ pub fn capability<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap
             //Print to view for debug
             println!("{}", "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED\r\n");
             println!("{}{}", identifier, " OK CAPABILITY completed");
-        } else {
-            tx.send(format!("{}", "* CAPABILITY IMAP4rev1 UTF8=ACCEPT AUTH=PLAIN LOGINDISABLED\r\n")).unwrap();
-
-            //Print to view for debug
-            println!("{}", "* CAPABILITY IMAP4rev1 UTF8=ACCEPT AUTH=PLAIN LOGINDISABLED\r\n");
         }
     }
 }
@@ -82,11 +77,6 @@ pub fn logout<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
             //Print to view for debug
             println!("{}", "* BYE IMAP4rev1 Server logging out\r\n");
             println!("{}{}", identifier, " OK LOGOUT completed\r\n");
-        } else {
-            tx.send(format!("{}", "* BYE IMAP4rev1 Server logging out\r\n")).unwrap();
-
-            //Print to view for debug
-            println!("{}", "* BYE IMAP4rev1 Server logging out\r\n");
         }
     }
 }
@@ -153,3 +143,20 @@ pub fn select<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
     }
 }
 
+pub fn check<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>>>, args: Vec<&str>, addr: &'a std::net::SocketAddr) {
+    // For each open connection except the sender, send the
+    // string via the channel.
+    let iter = conns
+        .iter_mut()
+        .map(|(y, v)| (y, v));
+
+    let identifier = args[0];
+    for (y, tx) in iter {
+        if y == addr {
+            tx.send(format!("{} {}", identifier, "OK CHECK Completed\r\n")).unwrap();
+
+            //Print to view for debug
+            println!("{} {}", identifier, "OK CHECK Completed5");
+        }
+    }
+}
