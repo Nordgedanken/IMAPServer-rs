@@ -82,8 +82,8 @@ fn main() {
                 if let Ok(msg) = message {
                     println!("{}", msg);
                     let msg_clone = &msg.clone();
-                    let mut msg_split = msg_clone.splitn(1,' ');
-                    let mut command = msg_split.next().unwrap().to_lowercase();
+                    let mut msg_split = msg_clone.splitn(2,' ');
+                    let mut command = msg_split.nth(2).unwrap().to_lowercase();
                     if command == "capability" {
                         commands::capability(conns, msg, &addr);
                     } else if command == "logout" {
