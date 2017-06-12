@@ -81,23 +81,18 @@ fn main() {
                 let mut conns = connections.borrow_mut();
                 if let Ok(msg) = message {
                     println!("{}", msg);
-                    if msg.contains("CAPABILITY") {
+                    let command = &msg.splitn(1,' ').next().unwrap().to_lowercase();
+                    if command == "capability" {
                         commands::capability(conns, msg, &addr);
-                    } else if msg.contains("LOGOUT") {
+                    } else if command == "logout" {
                         commands::logout(conns, msg, &addr);
-                    } else if msg.contains("logout") {
-                        commands::logout(conns, msg, &addr);
-                    } else if msg.contains("NOOP") {
+                    } else if command == "noop" {
                         commands::noop(conns, msg, &addr);
-                    } else if msg.contains("SELECT") {
+                    } else if command == "select" {
                         commands::select(conns, msg, &addr);
-                    } else if msg.contains("select") {
-                        commands::select(conns, msg, &addr);
-                    } else if msg.contains("AUTHENTICATE") {
+                    } else if command == "authenticate" {
                         commands::authenticate::authenticate(conns, msg, &addr);
-                    } else if msg.contains("authenticate") {
-                        commands::authenticate::authenticate(conns, msg, &addr);
-                    } else if msg.contains("list") {
+                    } else if command == "list" {
                         commands::list(conns, msg, &addr);
                     } else {
                         println!("Command by {} is not known. dropping it.", addr);
