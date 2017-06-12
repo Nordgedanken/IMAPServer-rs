@@ -60,11 +60,11 @@ pub fn uid<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::n
     for (y, tx) in iter {
         if y == addr {
             tx.send(format!("{}", "* 1 FETCH (FLAGS (\\Seen) UID 4827313)\r\n")).unwrap();
-            tx.send(format!("{}{}", identifier, " OK UID FETCH completed")).unwrap();
+            tx.send(format!("{}{}", identifier, " OK UID FETCH completed\r\n")).unwrap();
 
             //Print to view for debug
             println!("{}", "* 1 FETCH (FLAGS (\\Seen) UID 4827313)\r\n");
-            println!("{}{}", identifier, " OK UID FETCH completed");
+            println!("{}{}", identifier, " OK UID FETCH completed\r\n");
         }
     }
 }
@@ -85,7 +85,7 @@ pub fn logout<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
 
             //Print to view for debug
             println!("{}", "* BYE IMAP4rev1 Server logging out\r\n");
-            println!("{}{}", identifier, " OK LOGOUT completed");
+            println!("{}{}", identifier, " OK LOGOUT completed\r\n");
         } else {
             tx.send(format!("{}", "* BYE IMAP4rev1 Server logging out\r\n")).unwrap();
 
