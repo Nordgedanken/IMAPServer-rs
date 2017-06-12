@@ -91,6 +91,8 @@ fn main() {
                         commands::noop(conns, msg, &addr);
                     } else if msg.contains("SELECT") {
                         commands::select(conns, msg, &addr);
+                    } else if msg.contains("select") {
+                        commands::select(conns, msg, &addr);
                     } else if msg.contains("AUTHENTICATE") {
                         commands::authenticate::authenticate(conns, msg, &addr);
                     } else if msg.contains("authenticate") {
