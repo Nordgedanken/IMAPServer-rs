@@ -89,6 +89,8 @@ fn main() {
                         let mut command = msg_split[1].to_lowercase();
                         if command == "capability" {
                             commands::capability(conns, msg, &addr);
+                        } else if command == "login" {
+                            commands::login(conns, msg, &addr);
                         } else if command == "logout" {
                             commands::logout(conns, msg, &addr);
                         } else if command == "noop" {
