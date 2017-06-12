@@ -63,8 +63,8 @@ pub fn uid<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::n
             tx.send(format!("{}{}", identifier, " OK UID FETCH completed")).unwrap();
 
             //Print to view for debug
-            println!("{}", "* BYE IMAP4rev1 Server logging out\r\n");
-            println!("{}{}", identifier, " OK LOGOUT completed");
+            println!("{}", "* 1 FETCH (FLAGS (\\Seen) UID 4827313)\r\n");
+            println!("{}{}", identifier, " OK UID FETCH completed");
         }
     }
 }
