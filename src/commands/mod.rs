@@ -105,7 +105,7 @@ pub fn select<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
     let identifier = identifier_iter.nth(0).unwrap();
     for (y, tx) in iter {
         if y == addr {
-            tx.send(format!("{}", "* 12 EXISTS\r\n")).unwrap();
+            // tx.send(format!("{}", "* 12 EXISTS\r\n")).unwrap();
             tx.send(format!("{}", "* 1 RECENT\r\n")).unwrap();
             tx.send(format!("{}", "* OK [UNSEEN 1] Message 1 is first unseen\r\n")).unwrap();
             tx.send(format!("{}", "* OK [UIDNEXT 4392] Predicted next UID\r\n")).unwrap();
