@@ -38,7 +38,7 @@ pub fn list<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::
     let identifier = identifier_iter.nth(0).unwrap();
     for (y, tx) in iter {
         if y == addr {
-            tx.send(format!("{}", "* LIST (\\Noselect) "/" ""\r\n")).unwrap();
+            tx.send(format!("{}", "* LIST (\\Noselect) \"/\" \"\"\r\n")).unwrap();
             tx.send(format!("{}{}", identifier, "OK LIST Completed\r\n")).unwrap();
 
             //Print to view for debug
