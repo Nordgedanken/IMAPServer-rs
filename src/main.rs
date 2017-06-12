@@ -85,25 +85,25 @@ fn main() {
                 if let Ok(msg) = message {
                     println!("{}", msg);
                     let msg_clone = &msg.clone();
-                    let mut msg_split: Vec<&str> = msg_clone.split_whitespace().collect();
-                    if msg_split.len() > 1 {
-                        let mut command = msg_split[1].to_lowercase();
+                    let mut args: Vec<&str> = msg_clone.split_whitespace().collect();
+                    if args.len() > 1 {
+                        let mut command = args[1].to_lowercase();
                         if command == "capability" {
-                            commands::capability(conns, msg, &addr);
+                            commands::capability(conns, args, &addr);
                         } else if command == "login" {
-                            commands::login(conns, msg, &addr);
+                            commands::login(conns, args, &addr);
                         } else if command == "logout" {
-                            commands::logout(conns, msg, &addr);
+                            commands::logout(conns, args, &addr);
                         } else if command == "noop" {
-                            commands::noop(conns, msg, &addr);
+                            commands::noop(conns, args, &addr);
                         } else if command == "select" {
-                            commands::select(conns, msg, &addr);
+                            commands::select(conns, args, &addr);
                         } else if command == "authenticate" {
-                            commands::authenticate::authenticate(conns, msg, &addr);
+                            commands::authenticate::authenticate(conns, args, &addr);
                         } else if command == "list" {
-                            commands::list(conns, msg, &addr);
+                            commands::list(conns, args, &addr);
                         } else if command == "uid" {
-                            commands::uid(conns, msg, &addr);
+                            commands::uid(conns, args, &addr);
                         } else {
                             println!("Command by {} is not known. dropping it.", addr);
 

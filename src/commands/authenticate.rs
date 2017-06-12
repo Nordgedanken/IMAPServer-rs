@@ -1,14 +1,13 @@
 use std;
 use futures;
-pub fn authenticate <'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>>>, msg: std::string::String, addr: &'a std::net::SocketAddr) {
+pub fn authenticate <'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>>>, args: Vec<&str>, addr: &'a std::net::SocketAddr) {
     // For each open connection except the sender, send the
     // string via the channel.
     let iter = conns
         .iter_mut()
         .map(|(y, v)| (y, v));
 
-    let mut identifier_iter = msg.split_whitespace();
-    let identifier = identifier_iter.nth(0).unwrap();
+    let identifier = args[0];
     for (y, tx) in iter {
         if y == addr {
             tx.send(format!("+\r\n")).unwrap();
