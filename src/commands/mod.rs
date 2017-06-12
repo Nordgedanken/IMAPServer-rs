@@ -42,13 +42,8 @@ pub fn list<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::
             tx.send(format!("{}{}", identifier, "OK LIST Completed\r\n")).unwrap();
 
             //Print to view for debug
-            println!("{}", "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED\r\n");
-            println!("{}{}", identifier, " OK CAPABILITY completed");
-        } else {
-            tx.send(format!("{}", "* CAPABILITY IMAP4rev1 UTF8=ACCEPT AUTH=PLAIN LOGINDISABLED\r\n")).unwrap();
-
-            //Print to view for debug
-            println!("{}", "* CAPABILITY IMAP4rev1 UTF8=ACCEPT AUTH=PLAIN LOGINDISABLED\r\n");
+            println!("{}", "* LIST (\\Noselect) \"/\" \"\"\r\n");
+            println!("{}{}", identifier, "OK LIST Completed\r\n");
         }
     }
 }
@@ -110,10 +105,9 @@ pub fn select<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
     let identifier = identifier_iter.nth(0).unwrap();
     for (y, tx) in iter {
         if y == addr {
-            tx.send(format!("{}", "* 1 EXISTS\r\n")).unwrap();
+            tx.send(format!("{}", "* 12 EXISTS\r\n")).unwrap();
             tx.send(format!("{}", "* 1 RECENT\r\n")).unwrap();
             tx.send(format!("{}", "* OK [UNSEEN 1] Message 1 is first unseen\r\n")).unwrap();
-            tx.send(format!("{}", "* OK [UIDVALIDITY 3857529045] UIDs valid\r\n")).unwrap();
             tx.send(format!("{}", "* OK [UIDNEXT 4392] Predicted next UID\r\n")).unwrap();
             tx.send(format!("{}", "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n")).unwrap();
             tx.send(format!("{}", "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r\n")).unwrap();
