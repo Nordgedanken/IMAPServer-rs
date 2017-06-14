@@ -17,8 +17,7 @@ impl Decoder for LineCodec {
             // Turn this data into a UTF string and return it in a Frame.
             match str::from_utf8(&line) {
                 Ok(s) => Ok(Some(s.to_string())),
-                Err(_) => Err(io::Error::new(io::ErrorKind::Other,
-                                             "invalid UTF-8")),
+                Err(_) => Err(io::Error::new(io::ErrorKind::Other, "invalid UTF-8")),
             }
         } else {
             Ok(None)

@@ -1,5 +1,7 @@
-#[macro_use]extern crate mysql;
-#[macro_use]extern crate log;
+#[macro_use]
+extern crate mysql;
+#[macro_use]
+extern crate log;
 extern crate simplelog;
 extern crate app_dirs;
 extern crate config;

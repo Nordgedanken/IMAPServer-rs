@@ -1,9 +1,14 @@
 language: rust
+cache: cargo
 
 rust:
   - stable
   - beta
   - nightly
+
+before_script:
+- export PATH="$PATH:$HOME/.cargo/bin"
+- which rustfmt || cargo install rustfmt
 
 matrix:
   allow_failures:
@@ -11,6 +16,11 @@ matrix:
 
 before_install:
   - sudo apt-get update
+
+script:
+- cargo fmt -- --write-mode=diff
+- cargo build --release
+- cargo test --release
 
 addons:
   apt:
