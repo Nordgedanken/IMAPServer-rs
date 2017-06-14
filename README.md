@@ -12,51 +12,32 @@ These instructions will get you a copy of the project up and running on your loc
 
 What things you need to install the software and how to install them
 
-```
-Give examples
-```
+1. You need to install cargo. Use [rustup](https://www.rustup.rs) to install it
+2. You need a installation of [MYSQL](https://www.mysql.com) or [MariaDB](https://mariadb.org)
 
 ### Installing
 
-A step by step series of examples that tell you have to get a development env running
+A step by step series of examples that tell you have to get the IMAP server running
 
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
+Install the binary
 
 ```
-until finished
+cargo install IMAPServer-rs
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
+Open the needed Ports
+
+```
+143
+```
 
 ## Running the tests
 
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
+After cloning this repository Cargo has a simple test command. You can simply use
 
 ```
-Give an example
+cargo test --release
 ```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
 
 ## Built With
 
@@ -73,13 +54,13 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **MTNord** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **MTRNord** - *Initial work* - [MTRNord](https://github.com/MTRNord)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/Nordgedanken/IMAPServer-rs/contributors) who participated in this project.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the GPL-3.0 License - see the [LICENSE.md](LICENSE.md) file for details
 
 <!--## Acknowledgments
 
