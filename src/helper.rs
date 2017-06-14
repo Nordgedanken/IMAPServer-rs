@@ -12,8 +12,8 @@ pub fn init_log() {
     config_dir.push("IMAP.log");
     CombinedLogger::init(
         vec![
-            TermLogger::new(LogLevelFilter::Warn, simplelog::Config::default()).unwrap(),
-            WriteLogger::new(LogLevelFilter::Info, simplelog::Config::default(), File::create(config_dir.to_str().unwrap()).unwrap()),
+            TermLogger::new(LogLevelFilter::Info, simplelog::Config::default()).unwrap(),
+            WriteLogger::new(LogLevelFilter::Debug, simplelog::Config::default(), File::create(config_dir.to_str().unwrap()).unwrap()),
         ]
     ).unwrap();
 }
