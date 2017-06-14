@@ -15,8 +15,8 @@ pub fn capability<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap
             tx.send(format!("{}{}", identifier, " OK CAPABILITY completed\r\n")).unwrap();
 
             //Print to view for debug
-            println!("{}", "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED\r\n");
-            println!("{}{}", identifier, " OK CAPABILITY completed");
+            debug!("{}", "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED\r\n");
+            debug!("{}{}", identifier, " OK CAPABILITY completed");
         }
     }
 }
@@ -35,8 +35,8 @@ pub fn list<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::
             tx.send(format!("{}{}", identifier, " OK LIST Completed\r\n")).unwrap();
 
             //Print to view for debug
-            println!("{}", "* LIST () \"/\" \"INBOX\"\r\n");
-            println!("{}{}", identifier, " OK LIST Completed\r\n");
+            debug!("{}", "* LIST () \"/\" \"INBOX\"\r\n");
+            debug!("{}{}", identifier, " OK LIST Completed\r\n");
         }
     }
 }
@@ -55,8 +55,8 @@ pub fn uid<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::n
             tx.send(format!("{}{}", identifier, " OK UID FETCH completed\r\n")).unwrap();
 
             //Print to view for debug
-            println!("{}", "* 1 FETCH (FLAGS (\\Seen) UID 1)\r\n");
-            println!("{}{}", identifier, " OK UID FETCH completed\r\n");
+            debug!("{}", "* 1 FETCH (FLAGS (\\Seen) UID 1)\r\n");
+            debug!("{}{}", identifier, " OK UID FETCH completed\r\n");
         }
     }
 }
@@ -75,8 +75,8 @@ pub fn logout<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
             tx.send(format!("{}{}", identifier, " OK LOGOUT completed")).unwrap();
 
             //Print to view for debug
-            println!("{}", "* BYE IMAP4rev1 Server logging out\r\n");
-            println!("{}{}", identifier, " OK LOGOUT completed\r\n");
+            debug!("{}", "* BYE IMAP4rev1 Server logging out\r\n");
+            debug!("{}{}", identifier, " OK LOGOUT completed\r\n");
         }
     }
 }
@@ -96,7 +96,7 @@ pub fn login <'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
             tx.send(format!("{} {}", identifier, "OK LOGIN completed\r\n")).unwrap();
 
             //Print to view for debug
-            println!("{} {}", identifier, "OK LOGIN completed\r\n");
+            debug!("{} {}", identifier, "OK LOGIN completed\r\n");
         }
     }
 }
@@ -114,7 +114,7 @@ pub fn noop<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::
             tx.send(format!("{} {}", identifier, "OK NOOP completed\r\n")).unwrap();
 
             //Print to view for debug
-            println!("{} {}", identifier, "OK NOOP completed");
+            debug!("{} {}", identifier, "OK NOOP completed");
         }
     }
 }
@@ -138,7 +138,7 @@ pub fn select<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
             tx.send(format!("{} {}", identifier, "OK [READ-WRITE] SELECT completed\r\n")).unwrap();
 
             //Print to view for debug
-            println!("{} {}", identifier, "OK [READ-WRITE] SELECT completed");
+            debug!("{} {}", identifier, "OK [READ-WRITE] SELECT completed");
         }
     }
 }
@@ -156,7 +156,7 @@ pub fn check<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std:
             tx.send(format!("{} {}", identifier, "OK CHECK Completed\r\n")).unwrap();
 
             //Print to view for debug
-            println!("{} {}", identifier, "OK CHECK Completed5");
+            debug!("{} {}", identifier, "OK CHECK Completed5");
         }
     }
 }

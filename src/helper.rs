@@ -3,6 +3,20 @@ use config::Config;
 use std::path::Path;
 use std::io;
 use mysql as my;
+use simplelog as simplelog;
+use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter};
+use std::fs::File;
+
+pub fn init_log() {
+    let mut config_dir = get_config_dir();
+    config_dir.push("IMAP.log");
+    CombinedLogger::init(
+        vec![
+            TermLogger::new(LogLevelFilter::Warn, simplelog::Config::default()).unwrap(),
+            WriteLogger::new(LogLevelFilter::Info, simplelog::Config::default(), File::create(config_dir.to_str().unwrap()).unwrap()),
+        ]
+    ).unwrap();
+}
 
 fn connect_to_db() {
     unimplemented!();

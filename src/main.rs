@@ -1,6 +1,6 @@
-#[macro_use]
-extern crate mysql;
-
+#[macro_use]extern crate mysql;
+#[macro_use]extern crate log;
+extern crate simplelog;
 extern crate app_dirs;
 extern crate config;
 extern crate futures;
@@ -31,18 +31,19 @@ fn main() {
 
     let addr = config.get_str("address").unwrap().parse().unwrap();
 
+    helper::init_log();
     // Create the event loop and TCP listener we'll accept connections on.
     let mut core = Core::new().unwrap();
     let handle = core.handle();
     let socket = TcpListener::bind(&addr, &handle).unwrap();
-    println!("Listening on: {}", addr);
+    info!("Listening on: {}", addr);
 
     // This is a single-threaded server, so we can just use Rc and RefCell to
     // store the map of all connections we know about.
     let connections = Rc::new(RefCell::new(HashMap::new()));
 
     let srv = socket.incoming().for_each(move |(stream, addr)| {
-        println!("New Connection: {}", addr);
+        info!("New Connection: {}", addr);
         let (reader, writer) = stream.split();
 
         // Create a channel for our stream, which other sockets will use to
@@ -50,7 +51,7 @@ fn main() {
         // data to us.
         let (tx, rx) = futures::sync::mpsc::unbounded();
         tx.send(format!("{}", "* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n")).unwrap();
-        println!("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n");
+        debug!("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n");
         connections.borrow_mut().insert(addr, tx);
 
         // Define here what we do for the actual I/O. That is, read a bunch of
@@ -83,7 +84,7 @@ fn main() {
             line.map(move |(reader, message)| {
                 let mut conns = connections.borrow_mut();
                 if let Ok(msg) = message {
-                    println!("{}", msg);
+                    debug!("{}", msg);
                     let msg_clone = &msg.clone();
                     let mut args: Vec<&str> = msg_clone.split_whitespace().collect();
                     if args.len() > 1 {
@@ -107,15 +108,15 @@ fn main() {
                         } else if command == "check" {
                             commands::check(conns, args, &addr);
                         } else {
-                            println!("Command by {} is not known. dropping it.", addr);
+                            error!("Command by {} is not known. dropping it.", addr);
 
                             let tx = conns.get_mut(&addr).unwrap();
                             tx.send(format!("{}", "* BAD Command not known\r\n")).unwrap();
                         }
                     }
                 } else {
-                    println!("{:?}", message);
-                    println!("Message by {} is not valid. dropping it.", addr);
+                    error!("{:?}", message);
+                    error!("Message by {} is not valid. dropping it.", addr);
                 }
                 reader
             })
@@ -137,7 +138,7 @@ fn main() {
         let connection = socket_reader.map(|_| ()).select(socket_writer.map(|_| ()));
         handle.spawn(connection.then(move |_| {
             connections.borrow_mut().remove(&addr);
-            println!("Connection {} closed.", addr);
+            info!("Connection {} closed.", addr);
             Ok(())
         }));
 

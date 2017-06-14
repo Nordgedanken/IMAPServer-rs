@@ -14,7 +14,7 @@ pub fn authenticate <'a>(mut conns: std::cell::RefMut<'a, std::collections::Hash
             tx.send(format!("{} {}", identifier, "OK PLAIN authentication successful\r\n")).unwrap();
 
             //Print to view for debug
-            println!("{} {}", identifier, "OK PLAIN authentication successful\r\n");
+            debug!("{} {}", identifier, "OK PLAIN authentication successful\r\n");
         }
     }
 }
