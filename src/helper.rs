@@ -4,7 +4,7 @@ use std::path::Path;
 use std::io;
 use mysql as my;
 use simplelog;
-use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter};
+use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter, SimpleLogger};
 use std::fs::File;
 
 pub fn init_log() {
