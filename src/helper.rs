@@ -10,8 +10,7 @@ use std::fs::File;
 pub fn init_log() {
     let mut config_dir = get_config_dir();
     config_dir.push("IMAP.log");
-    CombinedLogger::init(vec![TermLogger::new(LogLevelFilter::Info, simplelog::Config::default())
-                                  .unwrap(),
+    CombinedLogger::init(vec![TermLogger::new(LogLevelFilter::Info, simplelog::Config::default()).or_else(|| SimpleLogger::new(LogLevelFilter::Info, simplelog::Config::default())).unwrap(),
                               WriteLogger::new(LogLevelFilter::Debug,
                                                simplelog::Config::default(),
                                                File::create(config_dir.to_str().unwrap())
@@ -19,8 +18,9 @@ pub fn init_log() {
         .unwrap();
 }
 
-fn connect_to_db() {
-    unimplemented!();
+fn connect_to_db() -> my::Pool {
+    let pool = my::Pool::new("mysql://root:password@localhost:3307").unwrap();
+    pool
 }
 
 // A simple implementation of `% touch path` (ignores existing files)
