@@ -1,0 +1,25 @@
+# This is a .service file for systemd(8)
+#
+# If you are using systemd as a system daemon manager, you may use this file
+# (with your own local modifications) as a reference.
+#
+# This file may be copied to /etc/systemd/system/ and modified with your own
+# local changes, such as the user to run the daemon as, and where the daemon
+# is located
+
+[Unit]
+Description=Rust Imap Server
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/IMAPServer
+User=root
+Group=root
+
+Environment=RUST_BACKTRACE=1
+
+Restart=on-failure
+SyslogIdentifier=IMAPServer
+
+[Install]
+WantedBy=multi-user.target
