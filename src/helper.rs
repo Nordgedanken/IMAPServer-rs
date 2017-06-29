@@ -4,18 +4,19 @@ use std::path::Path;
 use std::io;
 use mysql as my;
 use simplelog;
-use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter, SimpleLogger};
+use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter, SimpleLogger, SharedLogger};
 use std::fs::File;
 
 pub fn init_log() {
     let mut config_dir = get_config_dir();
     config_dir.push("IMAP.log");
-    CombinedLogger::init(vec![TermLogger::new(LogLevelFilter::Info, simplelog::Config::default()).or_else(|| SimpleLogger::new(LogLevelFilter::Info, simplelog::Config::default())).unwrap(),
-                              WriteLogger::new(LogLevelFilter::Debug,
-                                               simplelog::Config::default(),
-                                               File::create(config_dir.to_str().unwrap())
-                                                   .unwrap())])
-        .unwrap();
+    let mut logger: Vec<Box<SharedLogger>> = vec![];
+    logger.push(match TermLogger::new(LogLevelFilter::Info, simplelog::Config::default()) {
+        Some(termlogger) => termlogger,
+        None => SimpleLogger::new(LogLevelFilter::Info, simplelog::Config::default()),
+    });
+    logger.push(WriteLogger::new(LogLevelFilter::Debug, simplelog::Config::default(), File::create(config_dir.to_str().unwrap()).expect("Could not create logfile")));
+    CombinedLogger::init(logger).expect("Could not initialize logger");
 }
 
 fn connect_to_db() -> my::Pool {
