@@ -29,3 +29,17 @@ simplelog = "0.4"
 [dependencies.config]
 version = "0.4.1"
 features = ["yaml"]
+
+[package.metadata.deb]
+maintainer = "Marcel Radzio <info@nordgedanken.de>"
+copyright = "2017, Marcel Radzio <info@nordgedanken.de>"
+license_file = ["LICENSE", "4"]
+extended_description = """\
+A IMAP Server written in Rust."""
+depends = "$auto"
+section = "mail"
+priority = "optional"
+assets = [
+    ["target/release/IMAPServer", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/IMAPServer/README", "644"],
+]
