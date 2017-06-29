@@ -159,7 +159,7 @@ pub fn check<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std:
                 .unwrap();
 
             //Print to view for debug
-            debug!("{} {}", identifier, "OK CHECK Completed5");
+            debug!("{} {}", identifier, "OK CHECK Completed");
         }
     }
 }
