@@ -20,7 +20,6 @@ tokio-io = "0.1"
 tokio-proto = "0.1"
 tokio-service = "0.1"
 bytes = "0.4"
-base64 = "0.6"
 mailparse = "0.5"
 mysql = "11.1"
 log = "0.3"
@@ -36,7 +35,7 @@ copyright = "2017, Marcel Radzio <info@nordgedanken.de>"
 license_file = ["LICENSE", "4"]
 extended_description = """\
 A IMAP Server written in Rust."""
-depends = "$auto"
+depends = "mysql"
 section = "mail"
 priority = "optional"
 assets = [

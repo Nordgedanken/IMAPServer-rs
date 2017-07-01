@@ -1,7 +1,5 @@
-#[macro_use]
-extern crate mysql;
-#[macro_use]
-extern crate log;
+#[macro_use] extern crate mysql;
+#[macro_use] extern crate log;
 extern crate simplelog;
 extern crate app_dirs;
 extern crate config;
@@ -11,8 +9,9 @@ extern crate tokio_io;
 extern crate tokio_proto;
 extern crate tokio_service;
 extern crate bytes;
-extern crate base64;
 extern crate mailparse;
+
+#[macro_use] mod macros;
 
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -37,7 +36,13 @@ fn main() {
     // Create the event loop and TCP listener we'll accept connections on.
     let mut core = Core::new().unwrap();
     let handle = core.handle();
-    let socket = TcpListener::bind(&addr, &handle).unwrap();
+    let socket = TcpListener::bind(&addr, &handle);
+    let socket = match socket {
+        Ok(socket) => socket,
+        Err(error) => {
+            panic!("Are you sure that you are allowed to use Port 143? Error: {:?}", error)
+        },
+    };
     info!("Listening on: {}", addr);
 
     // This is a single-threaded server, so we can just use Rc and RefCell to
