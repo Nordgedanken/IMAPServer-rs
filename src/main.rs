@@ -10,6 +10,7 @@ extern crate tokio_proto;
 extern crate tokio_service;
 extern crate bytes;
 extern crate mailparse;
+extern crate pwhash;
 
 #[macro_use] mod macros;
 

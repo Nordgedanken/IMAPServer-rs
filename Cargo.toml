@@ -24,6 +24,7 @@ mailparse = "0.5"
 mysql = "11.1"
 log = "0.3"
 simplelog = "0.4"
+pwhash = "0.1"
 
 [dependencies.config]
 version = "0.4.1"
