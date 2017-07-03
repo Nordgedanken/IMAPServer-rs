@@ -158,7 +158,7 @@ fn main() {
     core.run(srv).unwrap();
 }
 
-mod config;
+pub mod config;
 mod helper;
 mod commands;
 mod server;
