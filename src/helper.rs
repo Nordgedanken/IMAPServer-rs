@@ -4,7 +4,6 @@ use std::io;
 use mysql as my;
 use simplelog;
 use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter, SharedLogger, SimpleLogger};
-use std::fs::File;
 
 pub fn init_log() {
     let mut config_dir = get_config_dir();
@@ -45,6 +44,8 @@ pub fn get_config_dir() -> std::path::PathBuf {
 
 pub fn get_config() -> super::config::Config {
     use toml;
+    use std::fs::File;
+    use std::io::prelude::*;
 
     let mut config_dir = get_config_dir();
     config_dir.push("Main.yml");
@@ -58,10 +59,7 @@ pub fn get_config() -> super::config::Config {
     }else {
         use std::process;
         touch(config_dir.as_path()).expect("The Server wasn't able to save the default config. Is the dir writeable?");
-        let mut f = match File::open_mode(&config_dir, Open, Write) {
-            Ok(f) => f,
-            Err(e) => fail!("file error: {}", e),
-        };
+        let mut f = File::create(&config_dir)?;
         f.write_line("ip = '127.0.0.1'");
         f.write_line("[db]'");
         f.write_line("ip = '127.0.0.1'");
