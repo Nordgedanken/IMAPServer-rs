@@ -33,7 +33,7 @@ fn main() {
     let config = helper::get_config();
     let ip = config.ip;
     println!("{}", ip);
-    let addr = ip.parse().unwrap();
+    let addr = ip.parse().expect("your ip isn't valid");
 
     helper::init_log();
     // Create the event loop and TCP listener we'll accept connections on.
