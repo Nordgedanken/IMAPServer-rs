@@ -1,10 +1,10 @@
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct Config {
     ip: String,
     db: DB,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct DB {
     ip: String,
     port: Option<u16>,
