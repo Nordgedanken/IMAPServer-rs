@@ -1,13 +1,13 @@
 #[derive(Serialize, Deserialize)]
 pub struct Config {
-    ip: String,
-    db: DB,
+    pub ip: String,
+    pub db: DB,
 }
 
 #[derive(Serialize, Deserialize)]
-struct DB {
-    ip: String,
-    port: Option<u16>,
-    username: String,
-    password: String,
+pub struct DB {
+    pub ip: String,
+    pub port: Option<u16>,
+    pub username: String,
+    pub password: String,
 }
