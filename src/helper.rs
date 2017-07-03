@@ -4,6 +4,7 @@ use std::io;
 use mysql as my;
 use simplelog;
 use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter, SharedLogger, SimpleLogger};
+use std::fs::File;
 
 pub fn init_log() {
     let mut config_dir = get_config_dir();
@@ -44,7 +45,6 @@ pub fn get_config_dir() -> std::path::PathBuf {
 
 pub fn get_config() -> super::config::Config {
     use toml;
-    use std::fs::File;
     use std::io::prelude::*;
 
     let mut config_dir = get_config_dir();
