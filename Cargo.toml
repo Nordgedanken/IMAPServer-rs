@@ -25,6 +25,7 @@ mysql = "11.1"
 log = "0.3"
 simplelog = "0.4"
 pwhash = "0.1"
+serde = "1.0"
 serde_derive = "1"
 toml = "0.2"
 

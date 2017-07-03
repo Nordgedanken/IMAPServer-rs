@@ -1,6 +1,7 @@
 #[macro_use] extern crate mysql;
 #[macro_use] extern crate log;
 #[macro_use] extern crate serde_derive;
+extern crate serde;
 extern crate toml;
 extern crate simplelog;
 extern crate app_dirs;
