@@ -33,7 +33,6 @@ fn main() {
     let config = helper::get_config();
     let ip = config.ip;
     let ip_port = format!("{}:143", ip);
-    println!("{}", ip_port);
     let addr = ip_port.parse().expect("your ip isn't valid");
 
     helper::init_log();
