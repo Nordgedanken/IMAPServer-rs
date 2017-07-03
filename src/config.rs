@@ -1,5 +1,5 @@
 #[derive(Serialize, Deserialize)]
-struct Config {
+pub struct Config {
     ip: String,
     db: DB,
 }
