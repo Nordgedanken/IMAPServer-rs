@@ -32,7 +32,7 @@ use tokio_io::AsyncRead;
 fn main() {
     let config = helper::get_config();
     let ip = config.ip;
-    println!(ip);
+    println!("{}", ip);
     let addr = ip.parse().unwrap();
 
     helper::init_log();
