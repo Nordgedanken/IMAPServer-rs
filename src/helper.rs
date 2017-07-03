@@ -48,7 +48,7 @@ pub fn get_config() -> super::config::Config {
     use std::io::prelude::*;
 
     let mut config_dir = get_config_dir();
-    config_dir.push("Main.yml");
+    config_dir.push("Main.toml");
     let config: super::config::Config;
 
     if config_dir.exists() {
