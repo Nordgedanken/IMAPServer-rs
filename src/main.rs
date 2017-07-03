@@ -4,7 +4,6 @@
 extern crate toml;
 extern crate simplelog;
 extern crate app_dirs;
-extern crate config;
 extern crate futures;
 extern crate tokio_core;
 extern crate tokio_io;

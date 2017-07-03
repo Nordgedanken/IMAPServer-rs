@@ -28,10 +28,6 @@ pwhash = "0.1"
 serde_derive = "1"
 toml = "0.2"
 
-[dependencies.config]
-version = "0.4.1"
-features = ["yaml"]
-
 [package.metadata.deb]
 maintainer = "Marcel Radzio <info@nordgedanken.de>"
 copyright = "2017, Marcel Radzio <info@nordgedanken.de>"
