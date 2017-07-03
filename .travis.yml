@@ -10,9 +10,6 @@ matrix:
   allow_failures:
     - rust: nightly
 
-before_install:
-  - sudo apt-get update
-
 addons:
   apt:
     packages:
