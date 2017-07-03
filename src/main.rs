@@ -32,8 +32,9 @@ use tokio_io::AsyncRead;
 fn main() {
     let config = helper::get_config();
     let ip = config.ip;
-    println!("{}", ip);
-    let addr = ip.parse().expect("your ip isn't valid");
+    let ip_port = format!("{}:143", ip);
+    println!("{}", ip_port);
+    let addr = ip_port.parse().expect("your ip isn't valid");
 
     helper::init_log();
     // Create the event loop and TCP listener we'll accept connections on.
