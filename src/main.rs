@@ -14,6 +14,8 @@ extern crate bytes;
 extern crate mailparse;
 extern crate pwhash;
 
+#[cfg(target_os = "linux")] extern crate dbus;
+
 #[macro_use] mod macros;
 
 use std::collections::HashMap;
@@ -165,3 +167,4 @@ mod commands;
 mod server;
 mod ssl_server;
 mod database;
+#[cfg(target_os = "linux")] mod linux_low;
