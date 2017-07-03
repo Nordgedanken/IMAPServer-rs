@@ -65,7 +65,7 @@ pub fn get_config() -> super::config::Config {
         f.write_all(b"ip = '127.0.0.1'").unwrap();
         f.write_all(b"username = 'root'").unwrap();
         f.write_all(b"password = 'yyyyyyyyyyyyyyyyy'").unwrap();
-        log!("Default config saved please edit it and restart the server");
+        info!("Default config saved please edit it and restart the server");
         process::abort();
     }
     config
