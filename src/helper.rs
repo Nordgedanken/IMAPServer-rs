@@ -60,11 +60,12 @@ pub fn get_config() -> super::config::Config {
         use std::process;
         touch(config_dir.as_path()).expect("The Server wasn't able to save the default config. Is the dir writeable?");
         let mut f = File::create(&config_dir).expect("The Server wasn't able to save the default config. Is the dir writeable?");
-        f.write_all(b"ip = '127.0.0.1'");
-        f.write_all(b"[db]'");
-        f.write_all(b"ip = '127.0.0.1'");
-        f.write_all(b"username = 'root'");
-        f.write_all(b"password = 'yyyyyyyyyyyyyyyyy'");
+        f.write_all(b"ip = '127.0.0.1'").unwrap();
+        f.write_all(b"[db]'").unwrap();
+        f.write_all(b"ip = '127.0.0.1'").unwrap();
+        f.write_all(b"username = 'root'").unwrap();
+        f.write_all(b"password = 'yyyyyyyyyyyyyyyyy'").unwrap();
+        log!("Default config saved please edit it and restart the server");
         process::abort();
     }
     config
