@@ -30,7 +30,7 @@ use tokio_io::io;
 use tokio_io::AsyncRead;
 
 fn main() {
-    let mut config = helper::get_config();
+    let config = helper::get_config();
 
     let addr = config.ip.parse().unwrap();
 
@@ -95,9 +95,9 @@ fn main() {
                 if let Ok(msg) = message {
                     debug!("{}", msg);
                     let msg_clone = &msg.clone();
-                    let mut args: Vec<&str> = msg_clone.split_whitespace().collect();
+                    let args: Vec<&str> = msg_clone.split_whitespace().collect();
                     if args.len() > 1 {
-                        let mut command = args[1].to_lowercase();
+                        let command = args[1].to_lowercase();
                         if command == "capability" {
                             commands::capability(conns, args, &addr);
                         } else if command == "login" {
