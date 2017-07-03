@@ -1,10 +1,9 @@
 use std;
-use config::Config;
 use std::path::Path;
 use std::io;
 use mysql as my;
 use simplelog;
-use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter, SimpleLogger, SharedLogger};
+use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter};
 use std::fs::File;
 
 pub fn init_log() {
@@ -44,14 +43,34 @@ pub fn get_config_dir() -> std::path::PathBuf {
     config_root
 }
 
-pub fn get_config() -> Config {
-    use config::{File, FileFormat};
+pub fn get_config() -> super::config::Config {
+    use std::fs::PathExt;
+
     let mut config_dir = get_config_dir();
     config_dir.push("Main.yml");
-    touch(config_dir.as_path());
-    let mut c = Config::new();
+
+    if config_dir.exists {
+        let mut file = File::open(config_dir).expect("Unable to open the file");
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).expect("Unable to read the file");
+        let config: super::config::Config = toml::from_str(contents).unwrap();
+    }else {
+        use std::process;
+        touch(config_dir.as_path()).expect("The Server wasn't able to save the default config. Is the dir writeable?");
+        let mut f = match File::open_mode(&config_dir, Open, Write) {
+            Ok(f) => f,
+            Err(e) => fail!("file error: {}", e),
+        };
+        f.write_line("ip = '127.0.0.1'");
+        f.write_line("[db]'");
+        f.write_line("ip = '127.0.0.1'");
+        f.write_line("username = 'root'");
+        f.write_line("password = 'yyyyyyyyyyyyyyyyy'");
+        process::abort();
+    }
+
     // Add 'Main.yaml'
-    c.merge(File::new(config_dir.to_str().unwrap(), FileFormat::Yaml).required(true))
-        .unwrap();
-    c
+    //c.merge(File::new(config_dir.to_str().unwrap(), FileFormat::Yaml).required(true))
+    //    .unwrap()
+    config
 }

@@ -1,5 +1,7 @@
 #[macro_use] extern crate mysql;
 #[macro_use] extern crate log;
+#[macro_use] extern crate serde_derive;
+extern crate toml;
 extern crate simplelog;
 extern crate app_dirs;
 extern crate config;
@@ -29,9 +31,8 @@ use tokio_io::AsyncRead;
 
 fn main() {
     let mut config = helper::get_config();
-    config.set_default("address", "0.0.0.0:143").unwrap();
 
-    let addr = config.get_str("address").unwrap().parse().unwrap();
+    let addr = config.ip.parse().unwrap();
 
     helper::init_log();
     // Create the event loop and TCP listener we'll accept connections on.
@@ -157,6 +158,7 @@ fn main() {
     core.run(srv).unwrap();
 }
 
+mod config;
 mod helper;
 mod commands;
 mod server;
