@@ -51,7 +51,7 @@ pub fn get_config() -> super::config::Config {
     config_dir.push("Main.yml");
     let config: super::config::Config;
 
-    if config_dir.exists {
+    if config_dir.exists() {
         let mut file = File::open(config_dir).expect("Unable to open the file");
         let mut contents = String::new();
         file.read_to_string(&mut contents).expect("Unable to read the file");
