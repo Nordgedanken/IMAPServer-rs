@@ -3,7 +3,7 @@ use std::path::Path;
 use std::io;
 use mysql as my;
 use simplelog;
-use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter};
+use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter, SharedLogger, SimpleLogger};
 use std::fs::File;
 
 pub fn init_log() {
@@ -44,16 +44,17 @@ pub fn get_config_dir() -> std::path::PathBuf {
 }
 
 pub fn get_config() -> super::config::Config {
-    use std::fs::PathExt;
+    use toml;
 
     let mut config_dir = get_config_dir();
     config_dir.push("Main.yml");
+    let config: super::config::Config;
 
     if config_dir.exists {
         let mut file = File::open(config_dir).expect("Unable to open the file");
         let mut contents = String::new();
         file.read_to_string(&mut contents).expect("Unable to read the file");
-        let config: super::config::Config = toml::from_str(contents).unwrap();
+        config = toml::from_str(contents).unwrap();
     }else {
         use std::process;
         touch(config_dir.as_path()).expect("The Server wasn't able to save the default config. Is the dir writeable?");
@@ -68,9 +69,5 @@ pub fn get_config() -> super::config::Config {
         f.write_line("password = 'yyyyyyyyyyyyyyyyy'");
         process::abort();
     }
-
-    // Add 'Main.yaml'
-    //c.merge(File::new(config_dir.to_str().unwrap(), FileFormat::Yaml).required(true))
-    //    .unwrap()
     config
 }
