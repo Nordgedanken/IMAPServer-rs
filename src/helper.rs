@@ -55,7 +55,7 @@ pub fn get_config() -> super::config::Config {
         let mut file = File::open(config_dir).expect("Unable to open the file");
         let mut contents = String::new();
         file.read_to_string(&mut contents).expect("Unable to read the file");
-        config = toml::from_str(contents).unwrap();
+        config = toml::from_str(contents.as_str()).unwrap();
     }else {
         use std::process;
         touch(config_dir.as_path()).expect("The Server wasn't able to save the default config. Is the dir writeable?");
