@@ -5,9 +5,8 @@ use tokio_proto::TcpServer;
 
 pub fn main() {
     let mut config = super::helper::get_config();
-    config.set_default("address", "0.0.0.0:143").unwrap();
 
-    let addr = config.get_str("address").unwrap().parse().unwrap();
+    let addr = config.ip.parse().unwrap();
 
     // The builder requires a protocol and an address
     let server = TcpServer::new(proto::LineProto, addr);
