@@ -1,6 +1,9 @@
-#[macro_use] extern crate mysql;
-#[macro_use] extern crate log;
-#[macro_use] extern crate serde_derive;
+#[macro_use]
+extern crate mysql;
+#[macro_use]
+extern crate log;
+#[macro_use]
+extern crate serde_derive;
 extern crate serde;
 extern crate toml;
 extern crate simplelog;
@@ -15,9 +18,11 @@ extern crate mailparse;
 extern crate pwhash;
 extern crate base64;
 
-#[cfg(target_os = "linux")] extern crate dbus;
+#[cfg(target_os = "linux")]
+extern crate dbus;
 
-#[macro_use] mod macros;
+#[macro_use]
+mod macros;
 
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -46,8 +51,11 @@ fn main() {
     let socket = match socket {
         Ok(socket) => socket,
         Err(error) => {
-            panic!("Are you sure that you are allowed to use Port 143? Error: {:?}", error)
-        },
+            panic!(
+                "Are you sure that you are allowed to use Port 143? Error: {:?}",
+                error
+            )
+        }
     };
     info!("Listening on: {}", addr);
 
@@ -80,19 +88,15 @@ fn main() {
         let socket_reader = iter.fold(reader, move |reader, _| {
             // Read a line off the socket, failing if we're at EOF
             let line = io::read_until(reader, b'\n', Vec::new());
-            let line = line.and_then(|(reader, vec)| {
-                if vec.len() == 0 {
-                    Err(Error::new(ErrorKind::BrokenPipe, "broken pipe"))
-                } else {
-                    Ok((reader, vec))
-                }
+            let line = line.and_then(|(reader, vec)| if vec.len() == 0 {
+                Err(Error::new(ErrorKind::BrokenPipe, "broken pipe"))
+            } else {
+                Ok((reader, vec))
             });
 
             // Convert the bytes we read into a string, and then send that
             // string to all other connected clients.
-            let line = line.map(|(reader, vec)| {
-                (reader, String::from_utf8(vec))
-            });
+            let line = line.map(|(reader, vec)| (reader, String::from_utf8(vec)));
             let connections = connections_inner.clone();
             line.map(move |(reader, message)| {
                 let mut conns = connections.borrow_mut();
@@ -124,7 +128,8 @@ fn main() {
                             error!("Command by {} is not known. dropping it.", addr);
 
                             let tx = conns.get_mut(&addr).unwrap();
-                            tx.send(format!("{}", "* BAD Command not known\r\n")).unwrap();
+                            tx.send(format!("{}", "* BAD Command not known\r\n"))
+                                .unwrap();
                         }
                     }
                 } else {
@@ -168,4 +173,5 @@ mod commands;
 mod server;
 mod ssl_server;
 mod database;
-#[cfg(target_os = "linux")] mod linux_low;
+#[cfg(target_os = "linux")]
+mod linux_low;

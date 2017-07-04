@@ -1,7 +1,13 @@
 use std;
 use futures;
 
-pub fn capability<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>>>, args: Vec<&str>, addr: &'a std::net::SocketAddr){
+pub fn capability<'a>(
+    mut conns: std::cell::RefMut<'a,
+        std::collections::HashMap<std::net::SocketAddr,
+            futures::sync::mpsc::UnboundedSender<std::string::String>>>,
+    args: Vec<&str>,
+    addr: &'a std::net::SocketAddr
+){
     // For each open connection except the sender, send the
     // string via the channel.
     let iter = conns.iter_mut().map(|(y, v)| (y, v));
@@ -9,21 +15,30 @@ pub fn capability<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap
     let identifier = args[0];
     for (y, tx) in iter {
         if y == addr {
-            tx.send(format!("{}",
-                            "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED\r\n"))
-                .unwrap();
+            tx.send(format!(
+                "{}",
+                "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED\r\n"
+            )).unwrap();
             tx.send(format!("{}{}", identifier, " OK CAPABILITY completed\r\n"))
                 .unwrap();
 
             //Print to view for debug
-            debug!("{}",
-                   "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED\r\n");
+            debug!(
+                "{}",
+                "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED\r\n"
+            );
             debug!("{}{}", identifier, " OK CAPABILITY completed");
         }
     }
 }
 
-pub fn list<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>>>, args: Vec<&str>, addr: &'a std::net::SocketAddr){
+pub fn list<'a>(
+    mut conns: std::cell::RefMut<'a,
+        std::collections::HashMap<std::net::SocketAddr,
+        futures::sync::mpsc::UnboundedSender<std::string::String>>>,
+    args: Vec<&str>,
+    addr: &'a std::net::SocketAddr
+){
     // For each open connection except the sender, send the
     // string via the channel.
     let iter = conns.iter_mut().map(|(y, v)| (y, v));
@@ -42,7 +57,13 @@ pub fn list<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::
     }
 }
 
-pub fn uid<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>>>, args: Vec<&str>, addr: &'a std::net::SocketAddr){
+pub fn uid<'a>(
+    mut conns: std::cell::RefMut<'a,
+        std::collections::HashMap<std::net::SocketAddr,
+        futures::sync::mpsc::UnboundedSender<std::string::String>>>,
+    args: Vec<&str>,
+    addr: &'a std::net::SocketAddr
+){
     // For each open connection except the sender, send the
     // string via the channel.
     let iter = conns.iter_mut().map(|(y, v)| (y, v));
@@ -62,7 +83,13 @@ pub fn uid<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::n
     }
 }
 
-pub fn logout<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>>>, args: Vec<&str>, addr: &'a std::net::SocketAddr){
+pub fn logout<'a>(
+    mut conns: std::cell::RefMut<'a,
+        std::collections::HashMap<std::net::SocketAddr,
+        futures::sync::mpsc::UnboundedSender<std::string::String>>>,
+    args: Vec<&str>,
+    addr: &'a std::net::SocketAddr
+){
     // For each open connection except the sender, send the
     // string via the channel.
     let iter = conns.iter_mut().map(|(y, v)| (y, v));
@@ -84,7 +111,13 @@ pub fn logout<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
 pub mod authenticate;
 
 #[deprecated(since = "0.0.1", note = "please use `commands::authenticate::authenticate` instead")]
-pub fn login <'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>>>, args: Vec<&str>, addr: &'a std::net::SocketAddr){
+pub fn login <'a>(
+    mut conns: std::cell::RefMut<'a,
+        std::collections::HashMap<std::net::SocketAddr,
+        futures::sync::mpsc::UnboundedSender<std::string::String>>>,
+    args: Vec<&str>,
+    addr: &'a std::net::SocketAddr
+){
     // For each open connection except the sender, send the
     // string via the channel.
     let iter = conns.iter_mut().map(|(y, v)| (y, v));
@@ -101,7 +134,13 @@ pub fn login <'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
     }
 }
 
-pub fn noop<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>>>, args: Vec<&str>, addr: &'a std::net::SocketAddr){
+pub fn noop<'a>(
+    mut conns: std::cell::RefMut<'a,
+        std::collections::HashMap<std::net::SocketAddr,
+        futures::sync::mpsc::UnboundedSender<std::string::String>>>,
+    args: Vec<&str>,
+    addr: &'a std::net::SocketAddr
+){
     // For each open connection except the sender, send the
     // string via the channel.
     let iter = conns.iter_mut().map(|(y, v)| (y, v));
@@ -118,7 +157,13 @@ pub fn noop<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::
     }
 }
 
-pub fn select<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>>>, args: Vec<&str>, addr: &'a std::net::SocketAddr){
+pub fn select<'a>(
+    mut conns: std::cell::RefMut<'a,
+        std::collections::HashMap<std::net::SocketAddr,
+        futures::sync::mpsc::UnboundedSender<std::string::String>>>,
+    args: Vec<&str>,
+    addr: &'a std::net::SocketAddr
+){
     // For each open connection except the sender, send the
     // string via the channel.
     let iter = conns.iter_mut().map(|(y, v)| (y, v));
@@ -128,18 +173,25 @@ pub fn select<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
         if y == addr {
             tx.send(format!("{}", "* 1 EXISTS\r\n")).unwrap();
             tx.send(format!("{}", "* 0 RECENT\r\n")).unwrap();
-            tx.send(format!("{}", "* OK [UNSEEN 1] Message 1 is first unseen\r\n"))
-                .unwrap();
+            tx.send(format!(
+                "{}",
+                "* OK [UNSEEN 1] Message 1 is first unseen\r\n"
+            )).unwrap();
             tx.send(format!("{}", "* OK [UIDNEXT 1] Predicted next UID\r\n"))
                 .unwrap();
-            tx.send(format!("{}",
-                            "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n"))
-                .unwrap();
-            tx.send(format!("{}",
-                            "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r\n"))
-                .unwrap();
-            tx.send(format!("{} {}", identifier, "OK [READ-WRITE] SELECT completed\r\n"))
-                .unwrap();
+            tx.send(format!(
+                "{}",
+                "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n"
+            )).unwrap();
+            tx.send(format!(
+                "{}",
+                "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r\n"
+            )).unwrap();
+            tx.send(format!(
+                "{} {}",
+                identifier,
+                "OK [READ-WRITE] SELECT completed\r\n"
+            )).unwrap();
 
             //Print to view for debug
             debug!("{} {}", identifier, "OK [READ-WRITE] SELECT completed");
@@ -147,7 +199,13 @@ pub fn select<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std
     }
 }
 
-pub fn check<'a>(mut conns: std::cell::RefMut<'a, std::collections::HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>>>, args: Vec<&str>, addr: &'a std::net::SocketAddr){
+pub fn check<'a>(
+    mut conns: std::cell::RefMut<'a,
+        std::collections::HashMap<std::net::SocketAddr,
+        futures::sync::mpsc::UnboundedSender<std::string::String>>>,
+    args: Vec<&str>,
+    addr: &'a std::net::SocketAddr
+){
     // For each open connection except the sender, send the
     // string via the channel.
     let iter = conns.iter_mut().map(|(y, v)| (y, v));

@@ -3,18 +3,28 @@ use std::path::Path;
 use std::io;
 use mysql as my;
 use simplelog;
-use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter, SharedLogger, SimpleLogger};
+use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter, SharedLogger,
+                SimpleLogger};
 use std::fs::File;
 
 pub fn init_log() {
     let mut config_dir = get_config_dir();
     config_dir.push("IMAP.log");
     let mut logger: Vec<Box<SharedLogger>> = vec![];
-    logger.push(match TermLogger::new(LogLevelFilter::Info, simplelog::Config::default()) {
+    logger.push(match TermLogger::new(
+        LogLevelFilter::Info,
+        simplelog::Config::default(),
+    ) {
         Some(termlogger) => termlogger,
         None => SimpleLogger::new(LogLevelFilter::Info, simplelog::Config::default()),
     });
-    logger.push(WriteLogger::new(LogLevelFilter::Debug, simplelog::Config::default(), File::create(config_dir.to_str().unwrap()).expect("Could not create logfile")));
+    logger.push(WriteLogger::new(
+        LogLevelFilter::Debug,
+        simplelog::Config::default(),
+        File::create(config_dir.to_str().unwrap()).expect(
+            "Could not create logfile",
+        ),
+    ));
     CombinedLogger::init(logger).expect("Could not initialize logger");
 }
 
@@ -54,12 +64,18 @@ pub fn get_config() -> super::config::Config {
     if config_dir.exists() {
         let mut file = File::open(config_dir).expect("Unable to open the file");
         let mut contents = String::new();
-        file.read_to_string(&mut contents).expect("Unable to read the file");
+        file.read_to_string(&mut contents).expect(
+            "Unable to read the file",
+        );
         config = toml::from_str(contents.as_str()).unwrap();
-    }else {
+    } else {
         use std::process;
-        touch(config_dir.as_path()).expect("The Server wasn't able to save the default config. Is the dir writeable?");
-        let mut f = File::create(&config_dir).expect("The Server wasn't able to save the default config. Is the dir writeable?");
+        touch(config_dir.as_path()).expect(
+            "The Server wasn't able to save the default config. Is the dir writeable?",
+        );
+        let mut f = File::create(&config_dir).expect(
+            "The Server wasn't able to save the default config. Is the dir writeable?",
+        );
         f.write_all(b"ip = '0.0.0.0'\n\n").unwrap();
         f.write_all(b"[db]\n").unwrap();
         f.write_all(b"ip = '127.0.0.1'\n").unwrap();
