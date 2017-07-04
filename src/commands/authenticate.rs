@@ -8,6 +8,14 @@ pub fn authenticate <'a>(mut conns: std::cell::RefMut<'a, std::collections::Hash
     let identifier = args[0];
     for (y, tx) in iter {
         if y == addr {
+            println!("{}", args[2]);
+            let bytes = base64::decode(args[2]).unwrap();
+            let s = match str::from_utf8(bytes) {
+                Ok(v) => v,
+                Err(e) => error!("Invalid UTF-8 sequence: {}", e),
+            };
+
+            println!("{}", s);
             tx.send(format!("+\r\n")).unwrap();
             tx.send(format!("{} {}",
                             identifier,

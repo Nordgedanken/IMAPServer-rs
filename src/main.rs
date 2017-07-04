@@ -13,6 +13,7 @@ extern crate tokio_service;
 extern crate bytes;
 extern crate mailparse;
 extern crate pwhash;
+extern crate base64;
 
 #[cfg(target_os = "linux")] extern crate dbus;
 
