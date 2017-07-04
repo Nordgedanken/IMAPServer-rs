@@ -131,6 +131,8 @@ fn main() {
                             tx.send(format!("{}", "* BAD Command not known\r\n"))
                                 .unwrap();
                         }
+                    } else if args.len() = 1 {
+                        println!("parse base64");
                     }
                 } else {
                     error!("{:?}", message);
