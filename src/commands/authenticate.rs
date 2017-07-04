@@ -43,8 +43,7 @@ pub fn parse_login_data <'a>(
     use base64::decode;
     let bytes = decode(args[0]).unwrap();
     let string = match String::from_utf8(bytes){
-        Ok(v) => v,
-        _ => error!("failed to parse base64")
+        Ok(v) => v
     };
     println!("{}", string);
 }

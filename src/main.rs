@@ -131,7 +131,7 @@ fn main() {
                             tx.send(format!("{}", "* BAD Command not known\r\n"))
                                 .unwrap();
                         }
-                    } else if args.len() = 1 {
+                    } else if args.len() == 1 {
                         commands::authenticate::parse_login_data(conns, args, &addr);
                     }
                 } else {
