@@ -17,7 +17,7 @@ pub fn authenticate <'a>(
     for (y, tx) in iter {
         if y == addr {
             println!("{}", args[2]);
-            let bytes = base64::decode(args[2]).unwrap().as_slice();
+            let bytes = base64::decode(args[2]).unwrap();
             let s = match String::from_utf8(bytes) {
                 Ok(v) => v,
                 Err(e) => error!("Invalid UTF-8 sequence: {}", e),
