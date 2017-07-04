@@ -43,7 +43,8 @@ pub fn parse_login_data <'a>(
     use base64::decode;
     let bytes = decode(args[0]).unwrap();
     let string = match String::from_utf8(bytes){
-        Ok(v) => v
+        Ok(v) => v,
+        Err(e) => Err(format!("Invalid UTF-8 sequence: {}", e)),
     };
     println!("{}", string);
 }
