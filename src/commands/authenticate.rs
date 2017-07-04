@@ -1,5 +1,8 @@
 use std;
 use futures;
+use base64;
+use std::str;
+
 pub fn authenticate <'a>(
     mut conns: std::cell::RefMut<'a,
         std::collections::HashMap<std::net::SocketAddr,
