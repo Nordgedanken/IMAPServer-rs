@@ -125,14 +125,14 @@ fn main() {
                         } else if command == "check" {
                             commands::check(conns, args, &addr);
                         } else {
-                            error!("Command by {} is not known. dropping it.", addr);
+                            error!("Command {} by {} is not known. dropping it.", command, addr);
 
                             let tx = conns.get_mut(&addr).unwrap();
                             tx.send(format!("{}", "* BAD Command not known\r\n"))
                                 .unwrap();
                         }
                     } else if args.len() = 1 {
-                        println!("parse base64");
+                        commands::authenticate::parse_login_data(conns, args, &addr);
                     }
                 } else {
                     error!("{:?}", message);

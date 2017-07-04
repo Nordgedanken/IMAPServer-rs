@@ -33,4 +33,18 @@ pub fn authenticate <'a>(
     }
 }
 
-pub fn parse_login_data() {}
+pub fn parse_login_data <'a>(
+    mut conns: std::cell::RefMut<'a,
+        std::collections::HashMap<std::net::SocketAddr,
+            futures::sync::mpsc::UnboundedSender<std::string::String>>>,
+    args: Vec<&str>,
+    addr: &'a std::net::SocketAddr
+){
+    use base64::decode;
+    let bytes = decode(args[0]);
+    let string = match String::as_bytes(bytes){
+        Ok(v) => v,
+        Some(_) => error!("failed to parse base64")
+    };
+    println!("{}", string);
+}
