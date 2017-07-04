@@ -21,7 +21,7 @@ pub fn authenticate <'a>(
                 Err(e) => error!("Invalid UTF-8 sequence: {}", e),
             };
 
-            println!("{}", s);
+            println!("{:?}", s);
             tx.send(format!("+\r\n")).unwrap();
             tx.send(format!(
                 "{} {}",
