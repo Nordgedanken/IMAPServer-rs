@@ -16,8 +16,8 @@ pub fn authenticate <'a>(
     let identifier = args[0];
     for (y, tx) in iter {
         if y == addr {
-            println!("{}", args[2]);
-            let bytes = base64::decode(args[2]).unwrap();
+            println!("{}", args[3]);
+            let bytes = base64::decode(args[3]).unwrap();
             let s = String::from_utf8(bytes);
 
             println!("{:?}", s);
