@@ -41,8 +41,8 @@ pub fn parse_login_data <'a>(
     addr: &'a std::net::SocketAddr
 ){
     use base64::decode;
-    let bytes = decode(args[0]);
-    let string = match String::as_bytes(bytes){
+    let bytes = decode(args[0]).unwrap().as_slice();
+    let string = match String::from_utf8(bytes){
         Ok(v) => v,
         Some(_) => error!("failed to parse base64")
     };
