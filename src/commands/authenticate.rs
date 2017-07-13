@@ -46,5 +46,7 @@ pub fn parse_login_data <'a>(
         Ok(v) => v,
         Err(e) => format!("Invalid UTF-8 sequence: {}", e),
     };
-    println!("{}", string);
+    let string_str = &string;
+    let up: Vec<&str> = string_str.split("\u{0000}").collect();
+    println!("user: {} \r\n password: {}", up[0], up[1]);
 }
