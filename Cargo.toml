@@ -15,25 +15,25 @@ exclude = [
 ]
 
 [dependencies]
-app_dirs = "1.1.1"
-futures = "0.1"
-tokio-core = "0.1"
-tokio-io = "0.1"
-tokio-proto = "0.1"
-tokio-service = "0.1"
-bytes = "0.4"
-mailparse = "0.5"
-mysql = "11.1"
-log = "0.3"
-simplelog = "0.4"
-pwhash = "0.1"
-serde = "1.0"
-serde_derive = "1.0"
-toml = "0.4"
-base64 = "0.6.0"
+app_dirs = "^1.1.1"
+futures = "^0.1"
+tokio-core = "^0.1"
+tokio-io = "^0.1"
+tokio-proto = "^0.1"
+tokio-service = "^0.1"
+bytes = "^0.4"
+mailparse = "^0.5"
+mysql = "^11.1"
+log = "^0.3"
+simplelog = "^0.4"
+pwhash = "^0.1"
+serde = "^1.0"
+serde_derive = "^1.0"
+toml = "^0.4"
+base64 = "^0.6.0"
 
 [target.'cfg(unix)'.dependencies]
-dbus = "0.5"
+dbus = "^0.5"
 
 [package.metadata.deb]
 maintainer = "Marcel Radzio <info@nordgedanken.de>"
