@@ -48,5 +48,5 @@ pub fn parse_login_data <'a>(
     };
     let string_str = &string;
     let up: Vec<&str> = string_str.split("\u{0000}").collect();
-    println!("user: {} \r\n password: {}", up[0], up[1]);
+    println!("user: {} \r\n password: {}", up[1], up[2]);
 }
