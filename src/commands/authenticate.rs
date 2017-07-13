@@ -9,7 +9,7 @@ pub fn authenticate <'a>(
     args: Vec<&str>,
     addr: &'a std::net::SocketAddr
 ){
-    // Dummy function
+    println!("{}", args[1]);
 }
 
 pub fn parse_login_data <'a>(
