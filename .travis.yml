@@ -33,7 +33,8 @@ after_success: |
   cd kcov/build &&
   cmake .. &&
   make &&
-  for file in target/debug/IMAPServer-*[^\.d]; do mkdir -p "target/cov/$(basename $file)"; src/kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done &&
+  cd ../.. &&
+  for file in target/debug/IMAPServer-*[^\.d]; do mkdir -p "target/cov/$(basename $file)"; kcov/build/src/kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done &&
   bash <(curl -s https://codecov.io/bash) &&
   echo "Uploaded code coverage"
 
