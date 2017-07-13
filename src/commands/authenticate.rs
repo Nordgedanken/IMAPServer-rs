@@ -9,7 +9,28 @@ pub fn authenticate <'a>(
     args: Vec<&str>,
     addr: &'a std::net::SocketAddr
 ){
-    println!("{}", args[1]);
+    // For each open connection except the sender, send the
+    // string via the channel.
+    let iter = conns.iter_mut().map(|(y, v)| (y, v));
+
+    let identifier = args[0];
+    for (y, tx) in iter {
+        if y == addr {
+            tx.send(format!("+\r\n")).unwrap();
+            tx.send(format!(
+                "{} {}",
+                identifier,
+                "+\r\n"
+            )).unwrap();
+
+            //Print to view for debug
+            debug!(
+            "{} {}",
+            identifier,
+            "+\r\n"
+            );
+        }
+    }
 }
 
 pub fn parse_login_data <'a>(
