@@ -9,28 +9,7 @@ pub fn authenticate <'a>(
     args: Vec<&str>,
     addr: &'a std::net::SocketAddr
 ){
-    // For each open connection except the sender, send the
-    // string via the channel.
-    let iter = conns.iter_mut().map(|(y, v)| (y, v));
-
-    let identifier = args[0];
-    for (y, tx) in iter {
-        if y == addr {
-            tx.send(format!("+\r\n")).unwrap();
-            tx.send(format!(
-                "{} {}",
-                identifier,
-                "OK PLAIN authentication successful\r\n"
-            )).unwrap();
-
-            //Print to view for debug
-            debug!(
-                "{} {}",
-                identifier,
-                "OK PLAIN authentication successful\r\n"
-            );
-        }
-    }
+    // Dummy function
 }
 
 pub fn parse_login_data <'a>(
@@ -48,5 +27,48 @@ pub fn parse_login_data <'a>(
     };
     let string_str = &string;
     let up: Vec<&str> = string_str.split("\u{0000}").collect();
+
+    // For each open connection except the sender, send the
+    // string via the channel.
+    let iter = conns.iter_mut().map(|(y, v)| (y, v));
+
+    let identifier = args[0];
+    if up[1].contains("@riot.nordgedanken.de") {
+        for (y, tx) in iter {
+            if y == addr {
+                tx.send(format!("+\r\n")).unwrap();
+                tx.send(format!(
+                    "{} {}",
+                    identifier,
+                    "OK PLAIN authentication successful\r\n"
+                )).unwrap();
+
+                //Print to view for debug
+                debug!(
+                "{} {}",
+                identifier,
+                "OK PLAIN authentication successful\r\n"
+                );
+            }
+        }
+    }else {
+        for (y, tx) in iter {
+            if y == addr {
+                tx.send(format!("+\r\n")).unwrap();
+                tx.send(format!(
+                    "{} {}",
+                    identifier,
+                    "NO credentials rejected\r\n"
+                )).unwrap();
+
+                //Print to view for debug
+                debug!(
+                "{} {}",
+                identifier,
+                "NO credentials rejected\r\n"
+                );
+            }
+        }
+    }
     println!("user: {} \r\n password: {}", up[1], up[2]);
 }
