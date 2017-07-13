@@ -15,11 +15,25 @@ matrix:
 addons:
   apt:
     packages:
-      - kcov
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
+      - cmake
+      - gcc
+      - binutils-dev
+      - libiberty-dev
+      - zlib1g-dev
       - libdbus-glib-1-dev
 
 after_success: |
-  for file in target/debug/IMAPServer-*[^\.d]; do mkdir -p "target/cov/$(basename $file)"; kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done &&
+  wget https://github.com/SimonKagstrom/kcov/archive/master.zip &&
+  unzip master.zip &&
+  mv kcov-master kcov &&
+  mkdir kcov/build &&
+  cd kcov/build &&
+  cmake .. &&
+  make &&
+  for file in target/debug/IMAPServer-*[^\.d]; do mkdir -p "target/cov/$(basename $file)"; kcov/build/src/kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done &&
   bash <(curl -s https://codecov.io/bash) &&
   echo "Uploaded code coverage"
 
