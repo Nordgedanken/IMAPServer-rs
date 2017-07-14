@@ -41,6 +41,9 @@ pub fn parse_login_data <'a>(
     addr: &'a std::net::SocketAddr
 ){
     use base64::decode;
+    use database::User;
+    use helper::connect_to_db;
+
     let bytes = decode(args[0]).unwrap();
     let string = match String::from_utf8(bytes){
         Ok(v) => v,
@@ -48,6 +51,9 @@ pub fn parse_login_data <'a>(
     };
     let string_str = &string;
     let up: Vec<&str> = string_str.split("\u{0000}").collect();
+
+    let user = User { name: up[1], passwd: up[2] };
+    let pool = connect_to_db();
 
     // For each open connection except the sender, send the
     // string via the channel.

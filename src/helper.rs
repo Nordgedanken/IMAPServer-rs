@@ -29,7 +29,9 @@ pub fn init_log() {
 }
 
 fn connect_to_db() -> my::Pool {
-    let pool = my::Pool::new("mysql://root:password@localhost:3307").unwrap();
+    let config = helper::get_config();
+    let pool = my::Pool::new(format!("mysql://{}:{}@{}:3307", config.db.username, config.db.password, config.db.ip)).unwrap();
+    pool.prep_exec(r"CREATE DATABASE IF NOT EXISTS IMAPServer-rs", ()).unwrap();
     pool
 }
 
@@ -80,7 +82,7 @@ pub fn get_config() -> super::config::Config {
         f.write_all(b"[db]\n").unwrap();
         f.write_all(b"ip = '127.0.0.1'\n").unwrap();
         f.write_all(b"username = 'root'\n").unwrap();
-        f.write_all(b"password = 'yyyyyyyyyyyyyyyyy'\n").unwrap();
+        f.write_all(b"password = ''\n").unwrap();
         println!("Default config saved please edit it and restart the server");
         process::abort();
     }

@@ -1,8 +1,7 @@
 #[derive(Debug, PartialEq, Eq)]
 struct User {
     name: String,
-    passwd: String,
-    mailbox: i32,
+    passwd: String
 }
 
 #[derive(Debug, PartialEq, Eq)]

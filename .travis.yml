@@ -12,6 +12,9 @@ matrix:
   allow_failures:
     - rust: nightly
 
+services:
+  - mysql
+
 addons:
   apt:
     packages:
