@@ -1,13 +1,13 @@
 #[derive(Debug, PartialEq, Eq)]
-struct User {
-    name: String,
-    passwd: String
+pub struct User {
+    pub name: String,
+    pub passwd: String
 }
 
 #[derive(Debug, PartialEq, Eq)]
-struct Mailbox {
-    id: i32,
-    name: String,
-    unread: i32,
-    messeages: i32,
+pub struct Mailbox {
+    pub id: i32,
+    pub name: String,
+    pub unread: i32,
+    pub messeages: i32,
 }

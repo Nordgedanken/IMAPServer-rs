@@ -28,8 +28,8 @@ pub fn init_log() {
     CombinedLogger::init(logger).expect("Could not initialize logger");
 }
 
-fn connect_to_db() -> my::Pool {
-    let config = helper::get_config();
+pub fn connect_to_db() -> my::Pool {
+    let config = get_config();
     let pool = my::Pool::new(format!("mysql://{}:{}@{}:3307", config.db.username, config.db.password, config.db.ip)).unwrap();
     pool.prep_exec(r"CREATE DATABASE IF NOT EXISTS IMAPServer-rs", ()).unwrap();
     pool
