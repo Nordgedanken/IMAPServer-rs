@@ -52,7 +52,7 @@ pub fn parse_login_data <'a>(
     let string_str = &string;
     let up: Vec<&str> = string_str.split("\u{0000}").collect();
 
-    let user = User { name: up[1], passwd: up[2] };
+    let user = User { name: String::from(up[1]), passwd: String::from(up[2]) };
     let pool = connect_to_db();
 
     // For each open connection except the sender, send the
