@@ -12,8 +12,8 @@ matrix:
   allow_failures:
     - rust: nightly
 
-services:
-  - mysql
+addons:
+  mariadb: '10.0'
 
 addons:
   apt:
