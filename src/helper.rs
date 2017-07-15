@@ -57,6 +57,10 @@ pub fn get_config_dir() -> std::path::PathBuf {
     config_root
 }
 
+extern {
+    fn abort();
+}
+
 pub fn get_config() -> super::config::Config {
     use toml;
     use std::io::prelude::*;
@@ -73,7 +77,6 @@ pub fn get_config() -> super::config::Config {
         );
         config = toml::from_str(contents.as_str()).unwrap();
     } else {
-        use std::process;
         touch(config_dir.as_path()).expect(
             "The Server wasn't able to save the default config. Is the dir writeable?",
         );
@@ -86,7 +89,7 @@ pub fn get_config() -> super::config::Config {
         f.write_all(b"username = 'root'\n").unwrap();
         f.write_all(b"password = ''\n").unwrap();
         println!("Default config saved please edit it and restart the server");
-        process::abort();
+        unsafe { abort(); }
     }
     config
 }
