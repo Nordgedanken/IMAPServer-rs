@@ -17,6 +17,7 @@ extern crate bytes;
 extern crate mailparse;
 extern crate pwhash;
 extern crate base64;
+extern crate url;
 
 #[cfg(target_os = "linux")]
 extern crate dbus;
@@ -101,7 +102,7 @@ fn main() {
             line.map(move |(reader, message)| {
                 let mut conns = connections.borrow_mut();
                 if let Ok(msg) = message {
-                    debug!("{}", msg);
+                    println!("{}", msg);
                     let msg_clone = &msg.clone();
                     let args: Vec<&str> = msg_clone.split_whitespace().collect();
                     if args.len() > 1 {
