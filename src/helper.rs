@@ -33,6 +33,7 @@ pub fn connect_to_db() -> my::Pool {
     let opts = my::Opts::from(format!("mysql://{}:{}@{}:3307", config.db.username, config.db.password, config.db.ip));
     let pool = my::Pool::new(opts).unwrap();
     pool.prep_exec(r"CREATE DATABASE IF NOT EXISTS IMAPServer_rs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", ()).unwrap();
+    pool.prep_exec(r"CREATE TABLE IF NOT EXISTS User", ()).unwrap();
     pool
 }
 
