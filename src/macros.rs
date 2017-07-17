@@ -1,5 +1,5 @@
 macro_rules! mail {
-    ($msg:expr) => {{
+    ($msg:expr) => ({
         println!("log({}): {}", state, $msg);
-    }};
+    })
 }
