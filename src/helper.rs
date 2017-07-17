@@ -30,10 +30,16 @@ pub fn init_log() {
 
 pub fn connect_to_db() -> my::Pool {
     let config = get_config().expect("Unable to access config");
-    let opts = my::Opts::from(format!("mysql://{}:{}@{}", config.db.username, config.db.password, config.db.ip));
+    let opts = my::Opts::from(format!(
+        "mysql://{}:{}@{}",
+        config.db.username,
+        config.db.password,
+        config.db.ip
+    ));
     let pool = my::Pool::new(opts).unwrap();
     pool.prep_exec(r"CREATE DATABASE IF NOT EXISTS IMAPServer_rs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", ()).unwrap();
-    pool.prep_exec(r"CREATE TABLE IF NOT EXISTS User", ()).unwrap();
+    pool.prep_exec(r"CREATE TABLE IF NOT EXISTS User", ())
+        .unwrap();
     pool
 }
 
@@ -57,7 +63,7 @@ pub fn get_config_dir() -> std::path::PathBuf {
     config_root
 }
 
-extern {
+extern "C" {
     fn abort();
 }
 
@@ -90,7 +96,9 @@ pub fn get_config() -> Result<super::config::Config, &'static str> {
         f.write_all(b"username = 'root'\n").unwrap();
         f.write_all(b"password = ''\n").unwrap();
         println!("Default config saved please edit it and restart the server");
-        unsafe { abort(); };
+        unsafe {
+            abort();
+        };
         Err("Config didn't yet exist")
     }
 }

@@ -16,18 +16,10 @@ pub fn authenticate <'a>(
     for (y, tx) in iter {
         if y == addr {
             tx.send(format!("+\r\n")).unwrap();
-            tx.send(format!(
-                "{} {}",
-                identifier,
-                "+\r\n"
-            )).unwrap();
+            tx.send(format!("{} {}", identifier, "+\r\n")).unwrap();
 
             //Print to view for debug
-            debug!(
-            "{} {}",
-            identifier,
-            "+\r\n"
-            );
+            debug!("{} {}", identifier, "+\r\n");
         }
     }
 }
@@ -44,14 +36,17 @@ pub fn parse_login_data <'a>(
     use helper::connect_to_db;
 
     let bytes = decode(args[0]).unwrap();
-    let string = match String::from_utf8(bytes){
+    let string = match String::from_utf8(bytes) {
         Ok(v) => v,
         Err(e) => format!("Invalid UTF-8 sequence: {}", e),
     };
     let string_str = &string;
     let up: Vec<&str> = string_str.split("\u{0000}").collect();
 
-    let user = User { name: String::from(up[1]), passwd: String::from(up[2]) };
+    let user = User {
+        name: String::from(up[1]),
+        passwd: String::from(up[2]),
+    };
     let pool = connect_to_db();
 
     // For each open connection except the sender, send the
@@ -71,28 +66,21 @@ pub fn parse_login_data <'a>(
 
                 //Print to view for debug
                 debug!(
-                "{} {}",
-                identifier,
-                "OK PLAIN authentication successful\r\n"
+                    "{} {}",
+                    identifier,
+                    "OK PLAIN authentication successful\r\n"
                 );
             }
         }
-    }else {
+    } else {
         for (y, tx) in iter {
             if y == addr {
                 tx.send(format!("+\r\n")).unwrap();
-                tx.send(format!(
-                    "{} {}",
-                    identifier,
-                    "NO credentials rejected\r\n"
-                )).unwrap();
+                tx.send(format!("{} {}", identifier, "NO credentials rejected\r\n"))
+                    .unwrap();
 
                 //Print to view for debug
-                debug!(
-                "{} {}",
-                identifier,
-                "NO credentials rejected\r\n"
-                );
+                debug!("{} {}", identifier, "NO credentials rejected\r\n");
             }
         }
     }

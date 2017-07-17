@@ -1,7 +1,7 @@
 #[derive(Debug, PartialEq, Eq)]
 pub struct User {
     pub name: String,
-    pub passwd: String
+    pub passwd: String,
 }
 
 #[derive(Debug, PartialEq, Eq)]
