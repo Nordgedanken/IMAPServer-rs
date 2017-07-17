@@ -39,8 +39,7 @@ pub fn connect_to_db() -> my::Pool {
     ));
     let pool = my::Pool::new(opts).unwrap();
     pool.prep_exec(r"CREATE DATABASE IF NOT EXISTS IMAPServer_rs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", ()).unwrap();
-    pool.prep_exec(r"USE IMAPServer_rs; CREATE TABLE IF NOT EXISTS User;", ())
-        .unwrap();
+    pool.prep_exec(r"USE IMAPServer_rs; CREATE TABLE IF NOT EXISTS User(id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(30) NOT NULL, passwd VARCHAR(300) NOT NULL, email VARCHAR(50)) CHARSET=utf8;", ()).unwrap();
     pool
 }
 
