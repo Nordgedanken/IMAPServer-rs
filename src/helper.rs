@@ -75,7 +75,7 @@ pub fn get_config() -> Result<super::config::Config, &'static str> {
             "Unable to read the file",
         );
         config = toml::from_str(contents.as_str()).unwrap();
-        OK(config)
+        Ok(config)
     } else {
         touch(config_dir.as_path()).expect(
             "The Server wasn't able to save the default config. Is the dir writeable?",
