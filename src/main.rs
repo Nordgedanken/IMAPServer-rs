@@ -17,7 +17,7 @@ extern crate bytes;
 extern crate mailparse;
 extern crate pwhash;
 extern crate base64;
-extern crate url;
+extern crate urlencoding;
 
 #[cfg(target_os = "linux")]
 extern crate dbus;

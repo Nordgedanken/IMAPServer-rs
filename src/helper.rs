@@ -29,11 +29,12 @@ pub fn init_log() {
 }
 
 pub fn connect_to_db() -> my::Pool {
+    use urlencoding::encode;
     let config = get_config().expect("Unable to access config");
     let opts = my::Opts::from(format!(
-        "mysql://{}:{}@{}",
-        config.db.username,
-        config.db.password,
+        "mysql://{}:{}@{}/",
+        encode(&config.db.username),
+        encode(&config.db.password),
         config.db.ip
     ));
     let pool = my::Pool::new(opts).unwrap();
