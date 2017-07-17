@@ -1,6 +1,5 @@
 use std;
 use futures;
-use base64;
 
 pub fn authenticate <'a>(
     mut conns: std::cell::RefMut<'a,
