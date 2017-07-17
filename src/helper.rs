@@ -6,7 +6,6 @@ use simplelog;
 use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter, SharedLogger,
                 SimpleLogger};
 use std::fs::File;
-use url::Url;
 
 pub fn init_log() {
     let mut config_dir = get_config_dir();
@@ -31,8 +30,8 @@ pub fn init_log() {
 
 pub fn connect_to_db() -> my::Pool {
     let config = get_config();
-    let url = format!("mysql://{}:{}@{}:3307", config.db.username, config.db.password, config.db.ip);
-    let pool = my::Pool::new(Url::parse(&url).unwrap()).unwrap();
+    let opts = my::Opts::from(format!("mysql://{}:{}@{}:3307", config.db.username, config.db.password, config.db.ip));
+    let pool = my::Pool::new(opts).unwrap();
     pool.prep_exec(r"CREATE DATABASE IF NOT EXISTS IMAPServer-rs", ()).unwrap();
     pool
 }
