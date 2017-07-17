@@ -32,7 +32,7 @@ pub fn parse_login_data <'a>(
     addr: &'a std::net::SocketAddr
 ){
     use base64::decode;
-    use database::User;
+    use database::Users;
     use helper::connect_to_db;
 
     let bytes = decode(args[0]).unwrap();
@@ -43,7 +43,7 @@ pub fn parse_login_data <'a>(
     let string_str = &string;
     let up: Vec<&str> = string_str.split("\u{0000}").collect();
 
-    let user = User {
+    let user = Users {
         name: String::from(up[1]),
         passwd: String::from(up[2]),
     };
