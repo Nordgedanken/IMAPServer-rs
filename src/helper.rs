@@ -29,7 +29,7 @@ pub fn init_log() {
 }
 
 pub fn connect_to_db() -> my::Pool {
-    let config = get_config();
+    let config = get_config().expect("Unable to access config");
     let opts = my::Opts::from(format!("mysql://{}:{}@{}:3307", config.db.username, config.db.password, config.db.ip));
     let pool = my::Pool::new(opts).unwrap();
     pool.prep_exec(r"CREATE DATABASE IF NOT EXISTS IMAPServer-rs", ()).unwrap();
@@ -60,7 +60,7 @@ extern {
     fn abort();
 }
 
-pub fn get_config() -> super::config::Config {
+pub fn get_config() -> Result<super::config::Config, &'static str> {
     use toml;
     use std::io::prelude::*;
 
@@ -75,6 +75,7 @@ pub fn get_config() -> super::config::Config {
             "Unable to read the file",
         );
         config = toml::from_str(contents.as_str()).unwrap();
+        OK(config)
     } else {
         touch(config_dir.as_path()).expect(
             "The Server wasn't able to save the default config. Is the dir writeable?",
@@ -88,7 +89,7 @@ pub fn get_config() -> super::config::Config {
         f.write_all(b"username = 'root'\n").unwrap();
         f.write_all(b"password = ''\n").unwrap();
         println!("Default config saved please edit it and restart the server");
-        unsafe { abort(); }
+        unsafe { abort(); };
+        Err("Config didn't yet exist")
     }
-    config
 }

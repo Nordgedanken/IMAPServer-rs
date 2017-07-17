@@ -4,7 +4,7 @@ mod service;
 use tokio_proto::TcpServer;
 
 pub fn main() {
-    let config = super::helper::get_config();
+    let config = super::helper::get_config().expect("Unable to access config");
 
     let addr = config.ip.parse().unwrap();
 

@@ -39,7 +39,7 @@ use tokio_io::io;
 use tokio_io::AsyncRead;
 
 fn main() {
-    let config = helper::get_config();
+    let config = helper::get_config().expect("Unable to access config");
     let ip = config.ip;
     let ip_port = format!("{}:143", ip);
     let addr = ip_port.parse().expect("your ip isn't valid");
