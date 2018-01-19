@@ -29,17 +29,18 @@ pub fn init_log() {
 }
 
 pub fn connect_to_db() -> my::Pool {
+    use urlencoding::encode;
     let config = get_config().expect("Unable to access config");
     let opts = my::Opts::from(format!(
-        "mysql://{}:{}@{}",
-        config.db.username,
-        config.db.password,
+        "mysql://{}:{}@{}/",
+        encode(&config.db.username),
+        encode(&config.db.password),
         config.db.ip
     ));
     let pool = my::Pool::new(opts).unwrap();
     pool.prep_exec(r"CREATE DATABASE IF NOT EXISTS IMAPServer_rs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", ()).unwrap();
-    pool.prep_exec(r"CREATE TABLE IF NOT EXISTS User", ())
-        .unwrap();
+    pool.prep_exec(r"USE IMAPServer_rs;", ()).unwrap();
+    pool.prep_exec(r"CREATE TABLE IF NOT EXISTS Users (id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(30) NOT NULL, passwd VARCHAR(300) NOT NULL) CHARSET=utf8;", ()).unwrap();
     pool
 }
 

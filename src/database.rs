@@ -1,5 +1,5 @@
 #[derive(Debug, PartialEq, Eq)]
-pub struct User {
+pub struct Users {
     pub name: String,
     pub passwd: String,
 }
