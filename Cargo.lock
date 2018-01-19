@@ -19,9 +19,7 @@ dependencies = [
  "tokio-proto 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio-service 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "toml 0.4.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "url 1.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "urlencoding 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
-
 ]
 
 [[package]]
