@@ -19,10 +19,17 @@ What things you need to install the software and how to install them
 
 A step by step series of examples that tell you have to get the IMAP server running
 
-Install the binary
+Clone the repository
 
 ```
-cargo install IMAPServer-rs
+git clone https://github.com/Nordgedanken/IMAPServer-rs.git
+```
+
+Build the binary
+
+```
+cd IMAPServer-rs
+cargo build
 ```
 
 Open the needed Ports
