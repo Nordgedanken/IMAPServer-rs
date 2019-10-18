@@ -18,15 +18,15 @@ extern crate tokio_proto;
 extern crate tokio_service;
 
 use std::{io, iter};
-use std::cell::RefCell;
+
 use std::collections::HashMap;
 use std::io::{BufReader, ErrorKind};
 use std::io::Error;
-use std::rc::Rc;
+
 use std::result::Result::*;
 use std::sync::{Arc, Mutex};
 
-use futures::{Future, MapErr, Stream, stream};
+use futures::{Future, Stream, stream};
 use tokio::io::{read_until, write_all};
 use tokio::io::AsyncRead;
 use tokio::net::{TcpListener, TcpStream};
@@ -56,7 +56,7 @@ fn main() {
     let connections = Arc::new(Mutex::new(HashMap::new()));
     let connections2 = Arc::clone(&connections);
 
-    let srv = socket.incoming().map_err(|e| eprintln!("failed to accept socket; error = {:?}", e)).for_each(|stream: TcpStream| {
+    let srv = socket.incoming().map_err(|e| eprintln!("failed to accept socket; error = {:?}", e)).for_each(move |stream: TcpStream| {
         info!("New Connection: {}", addr);
         let (reader, writer) = stream.split();
 
@@ -77,6 +77,8 @@ fn main() {
         // iterator to each line off the socket. This "loop" is then
         // terminated with an error once we hit EOF on the socket.
         let iter = stream::iter_ok(iter::repeat(()).map(Ok::<(), io::Error>));
+
+        let connections3 = Arc::clone(&connections2);
         let socket_reader = iter.fold(reader, move |reader, _| {
             // Read a line off the socket, failing if we're at EOF
             let line = read_until(reader, b'\n', Vec::new());
@@ -89,8 +91,9 @@ fn main() {
             // Convert the bytes we read into a string, and then send that
             // string to all other connected clients.
             let line = line.map(|(reader, vec)| (reader, String::from_utf8(vec)));
+            let connections4 = Arc::clone(&connections3);
             line.map(move |(reader, message)| {
-                let mut conns = Arc::clone(&connections2);
+                let conns = Arc::clone(&connections4);
                 if let Ok(msg) = message {
                     println!("{}", msg);
                     let msg_clone = &msg.clone();
@@ -118,7 +121,8 @@ fn main() {
                         } else {
                             error!("Command {} by {} is not known. dropping it.", command, addr);
 
-                            let tx = (*(conns.lock().unwrap())).get_mut(&addr).unwrap();
+                            let mut conns_locked = conns.lock().unwrap();
+                            let tx = (*conns_locked).get_mut(&addr).unwrap();
                             tx.unbounded_send(format!("{}", "* BAD Command not known\r\n"))
                                 .unwrap();
                         }
@@ -144,12 +148,13 @@ fn main() {
         // Now that we've got futures representing each half of the socket, we
         // use the `select` combinator to wait for either half to be done to
         // tear down the other. Then we spawn off the result.
-        let connections3 = Arc::clone(&connections2);
-        let connections: HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>> = *(connections3.lock().unwrap());
         let socket_reader = socket_reader.map_err(|e: io::Error| { println!("{}", e); });
         let connection = socket_reader.map(|_| ()).select(socket_writer.map(|_| ()));
+        let connections3 = Arc::clone(&connections2);
         tokio::spawn(connection.then(move |_| {
-            connections.remove(&addr);
+            let connections4 = Arc::clone(&connections3);
+            let mut connections = connections4.lock().unwrap();
+            (*connections).remove(&addr);
             info!("Connection {} closed.", addr);
             Ok(())
         }));

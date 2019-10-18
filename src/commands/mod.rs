@@ -5,10 +5,10 @@ use std::sync::{Arc, Mutex};
 use futures::sync::mpsc::UnboundedSender;
 
 pub fn capability(
-    mut conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
+    conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
     args: Vec<&str>,
-    addr: &std::net::SocketAddr
-){
+    addr: &std::net::SocketAddr,
+) {
     // For each open connection except the sender, send the
     // string via the channel.
     let mut conns = conns.lock().unwrap();
@@ -35,10 +35,10 @@ pub fn capability(
 }
 
 pub fn list(
-    mut conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
+    conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
     args: Vec<&str>,
-    addr: &std::net::SocketAddr
-){
+    addr: &std::net::SocketAddr,
+) {
     // For each open connection except the sender, send the
     // string via the channel.
     let mut conns = conns.lock().unwrap();
@@ -59,10 +59,10 @@ pub fn list(
 }
 
 pub fn uid(
-    mut conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
+    conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
     args: Vec<&str>,
-    addr: &std::net::SocketAddr
-){
+    addr: &std::net::SocketAddr,
+) {
     // For each open connection except the sender, send the
     // string via the channel.
     let mut conns = conns.lock().unwrap();
@@ -84,10 +84,10 @@ pub fn uid(
 }
 
 pub fn logout(
-    mut conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
+    conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
     args: Vec<&str>,
-    addr: &std::net::SocketAddr
-){
+    addr: &std::net::SocketAddr,
+) {
     // For each open connection except the sender, send the
     // string via the channel.
     let mut conns = conns.lock().unwrap();
@@ -107,14 +107,15 @@ pub fn logout(
         }
     }
 }
+
 pub mod authenticate;
 
 #[deprecated(since = "0.0.1", note = "please use `commands::authenticate::authenticate` instead")]
 pub fn login(
-    mut conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
+    conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
     args: Vec<&str>,
-    addr: &std::net::SocketAddr
-){
+    addr: &std::net::SocketAddr,
+) {
     // For each open connection except the sender, send the
     // string via the channel.
     let mut conns = conns.lock().unwrap();
@@ -133,10 +134,10 @@ pub fn login(
 }
 
 pub fn noop(
-    mut conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
+    conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
     args: Vec<&str>,
-    addr: &std::net::SocketAddr
-){
+    addr: &std::net::SocketAddr,
+) {
     // For each open connection except the sender, send the
     // string via the channel.
     let mut conns = conns.lock().unwrap();
@@ -155,10 +156,10 @@ pub fn noop(
 }
 
 pub fn select(
-    mut conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
+    conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
     args: Vec<&str>,
-    addr: &std::net::SocketAddr
-){
+    addr: &std::net::SocketAddr,
+) {
     // For each open connection except the sender, send the
     // string via the channel.
     let mut conns = conns.lock().unwrap();
@@ -196,10 +197,10 @@ pub fn select(
 }
 
 pub fn check(
-    mut conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
+    conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
     args: Vec<&str>,
-    addr: &std::net::SocketAddr
-){
+    addr: &std::net::SocketAddr,
+) {
     // For each open connection except the sender, send the
     // string via the channel.
     let mut conns = conns.lock().unwrap();

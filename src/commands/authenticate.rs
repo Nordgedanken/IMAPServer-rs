@@ -10,13 +10,14 @@ use crate::database::Users;
 use crate::helper::connect_to_db;
 
 pub fn authenticate(
-    mut conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
+    conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
     args: Vec<&str>,
     addr: &std::net::SocketAddr
 ){
     // For each open connection except the sender, send the
     // string via the channel.
-    let iter = (*(conns.lock().unwrap())).iter_mut().map(|(y, v)| (y, v));
+    let mut conns_locked = conns.lock().unwrap();
+    let iter = (*conns_locked).iter_mut().map(|(y, v)| (y, v));
 
     let identifier = args[0];
     for (y, tx) in iter {
@@ -31,7 +32,7 @@ pub fn authenticate(
 }
 
 pub fn parse_login_data(
-    mut conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
+    conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
     args: Vec<&str>,
     addr: &std::net::SocketAddr
 ){
@@ -43,15 +44,16 @@ pub fn parse_login_data(
     let string_str = &string;
     let up: Vec<&str> = string_str.split("\u{0000}").collect();
 
-    let user = Users {
+    let _user = Users {
         name: String::from(up[1]),
         passwd: String::from(up[2]),
     };
-    let pool = connect_to_db();
+    let _pool = connect_to_db();
 
     // For each open connection except the sender, send the
     // string via the channel.
-    let iter = (*(conns.lock().unwrap())).iter_mut().map(|(y, v)| (y, v));
+    let mut conns_locked = conns.lock().unwrap();
+    let iter = (*conns_locked).iter_mut().map(|(y, v)| (y, v));
 
     let identifier = args[0];
     if up[1].contains("@riot.nordgedanken.de") {
