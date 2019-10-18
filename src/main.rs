@@ -18,6 +18,7 @@ use futures::{Future, Stream, stream};
 use tokio::io::{read_until, write_all};
 use tokio::io::AsyncRead;
 use tokio::net::{TcpListener, TcpStream};
+use futures_util::{TryStreamExt, StreamExt};
 
 fn main() {
     let config = helper::get_config().expect("Unable to access config");
@@ -44,7 +45,7 @@ fn main() {
     let connections = Arc::new(Mutex::new(HashMap::new()));
     let connections2 = Arc::clone(&connections);
 
-    let srv = socket.incoming().map_err(|e| eprintln!("failed to accept socket; error = {:?}", e)).for_each(move |stream: TcpStream| {
+    let srv = socket.incoming().map_err(|e| eprintln!("failed to accept socket; error = {:?}", e)).for_each(move |mut stream: TcpStream| {
         info!("New Connection: {}", addr);
         let (reader, writer) = stream.split();
 

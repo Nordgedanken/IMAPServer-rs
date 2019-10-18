@@ -8,6 +8,8 @@ use futures::sync::mpsc::UnboundedSender;
 
 use crate::database::Users;
 use crate::helper::connect_to_db;
+use tokio::sync::mpsc::UnboundedSender;
+use futures_util::{AsyncReadExt, StreamExt};
 
 pub fn authenticate(
     conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,

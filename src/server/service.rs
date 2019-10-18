@@ -1,7 +1,5 @@
-use std::boxed::Box;
-use std::result::Result::Ok;
-
-use futures::{Async, Future, future, Poll};
+use futures_core::Poll;
+use futures_util::task::Context;
 use tower_service::Service;
 
 #[derive(Serialize, Deserialize)]
@@ -56,16 +54,15 @@ impl Service<Request> for Echo {
     type Error = ();
 
     // The future for computing the response; box it for simplicity.
-    type Future = future::FutureResult<Self::Response, Self::Error>;
+    type Future = futures_util::future::Ready<Result<Self::Response, Self::Error>>;
 
-
-    fn poll_ready(&mut self) -> Poll<(), Self::Error> {
-        Ok(Async::Ready(()))
+    fn poll_ready(&mut self, _: &mut Context) -> Poll<Result<(), Self::Error>> {
+        Poll::Ready(Ok(()))
     }
 
     // Produce a future for computing a response from a request.
     fn call(&mut self, req: Request) -> Self::Future {
         // In this case, the response is immediate.
-        future::ok(Response::from(req))
+        futures_util::future::ok(Response::from(req))
     }
 }

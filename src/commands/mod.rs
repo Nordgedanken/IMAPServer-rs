@@ -3,6 +3,7 @@ use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 
 use futures::sync::mpsc::UnboundedSender;
+use tokio::sync::mpsc::UnboundedSender;
 
 pub fn capability(
     conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,

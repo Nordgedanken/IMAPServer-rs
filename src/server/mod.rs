@@ -9,7 +9,6 @@ use tokio_proto::TcpServer;
 use tokio_tower::pipeline::Server;
 use tower::{builder::ServiceBuilder};
 
-mod proto;
 mod codec;
 mod service;
 

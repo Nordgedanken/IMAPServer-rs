@@ -1,4 +1,4 @@
-use simplelog::{SharedLogger, TermLogger, SimpleLogger, WriteLogger, CombinedLogger};
+use simplelog::{SharedLogger, TermLogger, SimpleLogger, WriteLogger, CombinedLogger, TerminalMode};
 use log::LogLevelFilter;
 use std::option::Option::Some;
 use std::path::Path;
@@ -16,6 +16,7 @@ pub fn init_log() {
     logger.push(match TermLogger::new(
         LogLevelFilter::Info,
         simplelog::Config::default(),
+        TerminalMode::Mixed,
     ) {
         Some(termlogger) => termlogger,
         None => SimpleLogger::new(LogLevelFilter::Info, simplelog::Config::default()),
