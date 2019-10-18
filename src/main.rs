@@ -144,11 +144,12 @@ fn main() {
         // Now that we've got futures representing each half of the socket, we
         // use the `select` combinator to wait for either half to be done to
         // tear down the other. Then we spawn off the result.
-        let connections = Arc::clone(&connections2);
+        let connections3 = Arc::clone(&connections2);
+        let connections: HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>> = connections3.lock().unwrap();
         let socket_reader = socket_reader.map_err(|_| ());
         let connection = socket_reader.map(|_| ()).select(socket_writer.map(|_| ()));
         tokio::spawn(connection.then(move |_| {
-            connections.lock().unwrap().borrow_mut().remove(&addr);
+            connectionsborrow_mut().remove(&addr);
             info!("Connection {} closed.", addr);
             Ok(())
         }));
