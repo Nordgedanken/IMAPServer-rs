@@ -6,7 +6,6 @@ use std::result::Result;
 use std::result::Result::{Ok, Err};
 use std::io;
 use base64::encode;
-use app_dirs::AppInfo;
 use std::fs::File;
 use mysql::{Pool,Opts};
 

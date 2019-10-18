@@ -1,35 +1,35 @@
+extern crate alloc;
 extern crate app_dirs;
 extern crate base64;
+extern crate bytes;
 #[cfg(target_os = "linux")]
 extern crate dbus;
 extern crate futures;
 #[macro_use]
 extern crate log;
 extern crate mysql;
+extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde;
 extern crate simplelog;
-extern crate tokio_core;
+extern crate tokio;
+extern crate tokio_codec;
 extern crate tokio_proto;
 extern crate tokio_service;
-extern crate tokio_codec;
-extern crate tokio_io;
-extern crate bytes;
 
-use std::{fmt, iter, error};
+use std::{io, iter};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::io::Error;
 use std::io::{BufReader, ErrorKind};
+use std::io::Error;
 use std::rc::Rc;
 use std::result::Result::*;
+use std::sync::{Arc, Mutex};
 
 use futures::{Future, Stream, stream};
-use tokio_core::net::TcpListener;
-use tokio_core::reactor::Core;
-
-use tokio_io::io::{read_until, write_all};
+use tokio::io::{read_until, write_all};
+use tokio::io::AsyncRead;
+use tokio::net::{TcpListener, TcpStream};
 
 fn main() {
     let config = helper::get_config().expect("Unable to access config");
@@ -39,10 +39,8 @@ fn main() {
 
     helper::init_log();
     // Create the event loop and TCP listener we'll accept connections on.
-    let mut core = Core::new().unwrap();
-    let handle = core.handle();
-    let socket = TcpListener::bind(&addr, &handle);
-    let socket = match socket {
+    let socket = TcpListener::bind(&addr);
+    let socket: TcpListener = match socket {
         Ok(socket) => socket,
         Err(error) => {
             panic!(
@@ -55,9 +53,10 @@ fn main() {
 
     // This is a single-threaded server, so we can just use Rc and RefCell to
     // store the map of all connections we know about.
-    let connections = Rc::new(RefCell::new(HashMap::new()));
+    let connections = Arc::new(Mutex::new(HashMap::new()));
+    let connections2 = Arc::clone(&connections);
 
-    let srv = socket.incoming().for_each(move |(stream, addr)| {
+    let srv = socket.incoming().map_err(|e| eprintln!("failed to accept socket; error = {:?}", e)).for_each(|stream: TcpStream| {
         info!("New Connection: {}", addr);
         let (reader, writer) = stream.split();
 
@@ -72,13 +71,12 @@ fn main() {
         // Define here what we do for the actual I/O. That is, read a bunch of
         // lines from the socket and dispatch them while we also write any lines
         // from other sockets.
-        let connections_inner = connections.clone();
         let reader = BufReader::new(reader);
 
         // Model the read portion of this socket by mapping an infinite
         // iterator to each line off the socket. This "loop" is then
         // terminated with an error once we hit EOF on the socket.
-        let iter = stream::iter_ok(iter::repeat(()).map(Ok::<(), dyn error::Error>));
+        let iter = stream::iter_ok(iter::repeat(()).map(Ok::<(), io::Error>));
         let socket_reader = iter.fold(reader, move |reader, _| {
             // Read a line off the socket, failing if we're at EOF
             let line = read_until(reader, b'\n', Vec::new());
@@ -91,9 +89,8 @@ fn main() {
             // Convert the bytes we read into a string, and then send that
             // string to all other connected clients.
             let line = line.map(|(reader, vec)| (reader, String::from_utf8(vec)));
-            let connections = connections_inner.clone();
             line.map(move |(reader, message)| {
-                let mut conns = connections.borrow_mut();
+                let mut conns = Arc::clone(&connections2);
                 if let Ok(msg) = message {
                     println!("{}", msg);
                     let msg_clone = &msg.clone();
@@ -147,11 +144,11 @@ fn main() {
         // Now that we've got futures representing each half of the socket, we
         // use the `select` combinator to wait for either half to be done to
         // tear down the other. Then we spawn off the result.
-        let connections = connections.clone();
+        let connections = Arc::clone(&connections2);
         let socket_reader = socket_reader.map_err(|_| ());
         let connection = socket_reader.map(|_| ()).select(socket_writer.map(|_| ()));
-        handle.spawn(connection.then(move |_| {
-            connections.borrow_mut().remove(&addr);
+        tokio::spawn(connection.then(move |_| {
+            connections.lock().unwrap().borrow_mut().remove(&addr);
             info!("Connection {} closed.", addr);
             Ok(())
         }));
@@ -160,7 +157,7 @@ fn main() {
     });
 
     // execute server
-    core.run(srv).unwrap();
+    tokio::run(srv);
 }
 
 pub mod config;

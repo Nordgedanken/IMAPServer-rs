@@ -15,10 +15,10 @@ impl Decoder for LineCodec {
     fn decode(&mut self, buf: &mut BytesMut) -> io::Result<Option<String>> {
         if let Some(i) = buf.iter().position(|&b| b == b'\n') {
             // remove the serialized frame from the buffer.
-            let line = buf.split_to(i);
+            let line = buf.split_at(i);
 
             // Turn this data into a UTF string and return it in a Frame.
-            match str::from_utf8(&line) {
+            match str::from_utf8(&line.0) {
                 Ok(s) => Ok(Some(s.to_string())),
                 Err(_) => Err(io::Error::new(io::ErrorKind::Other, "invalid UTF-8")),
             }

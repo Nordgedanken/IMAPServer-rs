@@ -1,4 +1,4 @@
-use tokio_io::{AsyncRead, AsyncWrite};
+use tokio::io::{AsyncRead, AsyncWrite};
 use tokio_proto::pipeline::ServerProto;
 use tokio_codec::Framed;
 use std::io;
