@@ -11,7 +11,8 @@ pub fn capability(
 ){
     // For each open connection except the sender, send the
     // string via the channel.
-    let iter = conns.lock().unwrap().iter_mut().map(|(y, v)| (y, v));
+    let mut conns = conns.lock().unwrap();
+    let iter = (*conns).iter_mut().map(|(y, v)| (y, v));
 
     let identifier = args[0];
     for (y, tx) in iter {
@@ -40,7 +41,8 @@ pub fn list(
 ){
     // For each open connection except the sender, send the
     // string via the channel.
-    let iter = conns.lock().unwrap().iter_mut().map(|(y, v)| (y, v));
+    let mut conns = conns.lock().unwrap();
+    let iter = (*conns).iter_mut().map(|(y, v)| (y, v));
 
     let identifier = args[0];
     for (y, tx) in iter {
@@ -63,7 +65,8 @@ pub fn uid(
 ){
     // For each open connection except the sender, send the
     // string via the channel.
-    let iter = conns.lock().unwrap().iter_mut().map(|(y, v)| (y, v));
+    let mut conns = conns.lock().unwrap();
+    let iter = (*conns).iter_mut().map(|(y, v)| (y, v));
 
     let identifier = args[0];
     for (y, tx) in iter {
@@ -87,7 +90,8 @@ pub fn logout(
 ){
     // For each open connection except the sender, send the
     // string via the channel.
-    let iter = conns.lock().unwrap().iter_mut().map(|(y, v)| (y, v));
+    let mut conns = conns.lock().unwrap();
+    let iter = (*conns).iter_mut().map(|(y, v)| (y, v));
 
     let identifier = args[0];
     for (y, tx) in iter {
@@ -113,7 +117,8 @@ pub fn login(
 ){
     // For each open connection except the sender, send the
     // string via the channel.
-    let iter = conns.lock().unwrap().iter_mut().map(|(y, v)| (y, v));
+    let mut conns = conns.lock().unwrap();
+    let iter = (*conns).iter_mut().map(|(y, v)| (y, v));
 
     let identifier = args[0];
     for (y, tx) in iter {
@@ -134,7 +139,8 @@ pub fn noop(
 ){
     // For each open connection except the sender, send the
     // string via the channel.
-    let iter = conns.lock().unwrap().iter_mut().map(|(y, v)| (y, v));
+    let mut conns = conns.lock().unwrap();
+    let iter = (*conns).iter_mut().map(|(y, v)| (y, v));
 
     let identifier = args[0];
     for (y, tx) in iter {
@@ -155,7 +161,8 @@ pub fn select(
 ){
     // For each open connection except the sender, send the
     // string via the channel.
-    let iter = conns.lock().unwrap().iter_mut().map(|(y, v)| (y, v));
+    let mut conns = conns.lock().unwrap();
+    let iter = (*conns).iter_mut().map(|(y, v)| (y, v));
 
     let identifier = args[0];
     for (y, tx) in iter {
@@ -195,7 +202,8 @@ pub fn check(
 ){
     // For each open connection except the sender, send the
     // string via the channel.
-    let iter = conns.lock().unwrap().iter_mut().map(|(y, v)| (y, v));
+    let mut conns = conns.lock().unwrap();
+    let iter = (*conns).iter_mut().map(|(y, v)| (y, v));
 
     let identifier = args[0];
     for (y, tx) in iter {

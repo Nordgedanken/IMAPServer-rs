@@ -26,7 +26,7 @@ use std::rc::Rc;
 use std::result::Result::*;
 use std::sync::{Arc, Mutex};
 
-use futures::{Future, Stream, stream};
+use futures::{Future, MapErr, Stream, stream};
 use tokio::io::{read_until, write_all};
 use tokio::io::AsyncRead;
 use tokio::net::{TcpListener, TcpStream};
@@ -66,7 +66,7 @@ fn main() {
         let (tx, rx) = futures::sync::mpsc::unbounded();
         tx.unbounded_send(format!("{}", "* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n")).unwrap();
         debug!("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n");
-        connections.borrow_mut().insert(addr, tx);
+        (*(connections2.lock().unwrap())).insert(addr, tx);
 
         // Define here what we do for the actual I/O. That is, read a bunch of
         // lines from the socket and dispatch them while we also write any lines
@@ -118,7 +118,7 @@ fn main() {
                         } else {
                             error!("Command {} by {} is not known. dropping it.", command, addr);
 
-                            let tx = conns.get_mut(&addr).unwrap();
+                            let tx = (*(conns.lock().unwrap())).get_mut(&addr).unwrap();
                             tx.unbounded_send(format!("{}", "* BAD Command not known\r\n"))
                                 .unwrap();
                         }
@@ -145,11 +145,11 @@ fn main() {
         // use the `select` combinator to wait for either half to be done to
         // tear down the other. Then we spawn off the result.
         let connections3 = Arc::clone(&connections2);
-        let connections: HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>> = connections3.lock().unwrap();
-        let socket_reader = socket_reader.map_err(|_| ());
+        let connections: HashMap<std::net::SocketAddr, futures::sync::mpsc::UnboundedSender<std::string::String>> = *(connections3.lock().unwrap());
+        let socket_reader = socket_reader.map_err(|e: io::Error| { println!("{}", e); });
         let connection = socket_reader.map(|_| ()).select(socket_writer.map(|_| ()));
         tokio::spawn(connection.then(move |_| {
-            connectionsborrow_mut().remove(&addr);
+            connections.remove(&addr);
             info!("Connection {} closed.", addr);
             Ok(())
         }));

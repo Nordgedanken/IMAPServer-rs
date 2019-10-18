@@ -1,20 +1,22 @@
+use std::collections::HashMap;
+use std::net::SocketAddr;
 use std::result::Result::{Err, Ok};
+use std::sync::{Arc, Mutex};
 
 use base64::decode;
+use futures::sync::mpsc::UnboundedSender;
 
 use crate::database::Users;
 use crate::helper::connect_to_db;
 
-pub fn authenticate <'a>(
-    mut conns: std::cell::RefMut<'a,
-        std::collections::HashMap<std::net::SocketAddr,
-            futures::sync::mpsc::UnboundedSender<std::string::String>>>,
+pub fn authenticate(
+    mut conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
     args: Vec<&str>,
-    addr: &'a std::net::SocketAddr
+    addr: &std::net::SocketAddr
 ){
     // For each open connection except the sender, send the
     // string via the channel.
-    let iter = conns.iter_mut().map(|(y, v)| (y, v));
+    let iter = (*(conns.lock().unwrap())).iter_mut().map(|(y, v)| (y, v));
 
     let identifier = args[0];
     for (y, tx) in iter {
@@ -28,12 +30,10 @@ pub fn authenticate <'a>(
     }
 }
 
-pub fn parse_login_data <'a>(
-    mut conns: std::cell::RefMut<'a,
-        std::collections::HashMap<std::net::SocketAddr,
-            futures::sync::mpsc::UnboundedSender<std::string::String>>>,
+pub fn parse_login_data(
+    mut conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
     args: Vec<&str>,
-    addr: &'a std::net::SocketAddr
+    addr: &std::net::SocketAddr
 ){
     let bytes = decode(args[0]).unwrap();
     let string = match String::from_utf8(bytes) {
@@ -51,7 +51,7 @@ pub fn parse_login_data <'a>(
 
     // For each open connection except the sender, send the
     // string via the channel.
-    let iter = conns.iter_mut().map(|(y, v)| (y, v));
+    let iter = (*(conns.lock().unwrap())).iter_mut().map(|(y, v)| (y, v));
 
     let identifier = args[0];
     if up[1].contains("@riot.nordgedanken.de") {
