@@ -1,5 +1,9 @@
-use std;
-use futures;
+use std::result::Result::{Err, Ok};
+
+use base64::decode;
+
+use crate::database::Users;
+use crate::helper::connect_to_db;
 
 pub fn authenticate <'a>(
     mut conns: std::cell::RefMut<'a,
@@ -15,8 +19,8 @@ pub fn authenticate <'a>(
     let identifier = args[0];
     for (y, tx) in iter {
         if y == addr {
-            tx.send(format!("+\r\n")).unwrap();
-            tx.send(format!("{} {}", identifier, "+\r\n")).unwrap();
+            tx.unbounded_send(format!("+\r\n")).unwrap();
+            tx.unbounded_send(format!("{} {}", identifier, "+\r\n")).unwrap();
 
             //Print to view for debug
             debug!("{} {}", identifier, "+\r\n");
@@ -31,10 +35,6 @@ pub fn parse_login_data <'a>(
     args: Vec<&str>,
     addr: &'a std::net::SocketAddr
 ){
-    use base64::decode;
-    use database::Users;
-    use helper::connect_to_db;
-
     let bytes = decode(args[0]).unwrap();
     let string = match String::from_utf8(bytes) {
         Ok(v) => v,
@@ -57,8 +57,8 @@ pub fn parse_login_data <'a>(
     if up[1].contains("@riot.nordgedanken.de") {
         for (y, tx) in iter {
             if y == addr {
-                tx.send(format!("+\r\n")).unwrap();
-                tx.send(format!(
+                tx.unbounded_send(format!("+\r\n")).unwrap();
+                tx.unbounded_send(format!(
                     "{} {}",
                     identifier,
                     "OK PLAIN authentication successful\r\n"
@@ -75,8 +75,8 @@ pub fn parse_login_data <'a>(
     } else {
         for (y, tx) in iter {
             if y == addr {
-                tx.send(format!("+\r\n")).unwrap();
-                tx.send(format!("{} {}", identifier, "NO credentials rejected\r\n"))
+                tx.unbounded_send(format!("+\r\n")).unwrap();
+                tx.unbounded_send(format!("{} {}", identifier, "NO credentials rejected\r\n"))
                     .unwrap();
 
                 //Print to view for debug

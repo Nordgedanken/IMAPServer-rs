@@ -1,6 +1,7 @@
-use tokio_service::Service;
-use futures::{future, Future, BoxFuture};
 use std::io;
+use tokio_service::Service;
+use futures::future::{BoxFuture, self};
+use std::boxed::Box;
 
 pub struct Echo;
 
@@ -18,6 +19,6 @@ impl Service for Echo {
     // Produce a future for computing a response from a request.
     fn call(&self, req: Self::Request) -> Self::Future {
         // In this case, the response is immediate.
-        future::ok(req).boxed()
+        Box::new(future::ok(req))
     }
 }

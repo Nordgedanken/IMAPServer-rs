@@ -1,16 +1,19 @@
-use std;
+use simplelog::{SharedLogger, TermLogger, SimpleLogger, WriteLogger, CombinedLogger};
+use log::LogLevelFilter;
+use std::option::Option::Some;
 use std::path::Path;
+use std::result::Result;
+use std::result::Result::{Ok, Err};
 use std::io;
-use mysql as my;
-use simplelog;
-use simplelog::{TermLogger, WriteLogger, CombinedLogger, LogLevelFilter, SharedLogger,
-                SimpleLogger};
+use base64::encode;
+use app_dirs::AppInfo;
 use std::fs::File;
+use mysql::{Pool,Opts};
 
 pub fn init_log() {
     let mut config_dir = get_config_dir();
     config_dir.push("IMAP.log");
-    let mut logger: Vec<Box<SharedLogger>> = vec![];
+    let mut logger: Vec<Box<dyn SharedLogger>> = vec![];
     logger.push(match TermLogger::new(
         LogLevelFilter::Info,
         simplelog::Config::default(),
@@ -28,16 +31,15 @@ pub fn init_log() {
     CombinedLogger::init(logger).expect("Could not initialize logger");
 }
 
-pub fn connect_to_db() -> my::Pool {
-    use urlencoding::encode;
+pub fn connect_to_db() -> Pool {
     let config = get_config().expect("Unable to access config");
-    let opts = my::Opts::from(format!(
+    let opts = Opts::from(format!(
         "mysql://{}:{}@{}/",
         encode(&config.db.username),
         encode(&config.db.password),
         config.db.ip
     ));
-    let pool = my::Pool::new(opts).unwrap();
+    let pool = Pool::new(opts).unwrap();
     pool.prep_exec(r"CREATE DATABASE IF NOT EXISTS IMAPServer_rs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", ()).unwrap();
     pool.prep_exec(r"USE IMAPServer_rs;", ()).unwrap();
     pool.prep_exec(r"CREATE TABLE IF NOT EXISTS Users (id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(30) NOT NULL, passwd VARCHAR(300) NOT NULL) CHARSET=utf8;", ()).unwrap();
@@ -69,7 +71,6 @@ extern "C" {
 }
 
 pub fn get_config() -> Result<super::config::Config, &'static str> {
-    use toml;
     use std::io::prelude::*;
 
     let mut config_dir = get_config_dir();

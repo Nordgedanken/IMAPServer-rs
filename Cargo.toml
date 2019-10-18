@@ -1,6 +1,6 @@
 [package]
 name = "IMAPServer"
-version = "0.0.0"
+version = "0.1.0"
 authors = ["MTRNord <mtrnord1@gmail.com>"]
 description = "A Basic IMAP Server written in Rust (WIP)"
 repository = "https://github.com/Nordgedanken/IMAPServer-rs.git"
@@ -13,12 +13,14 @@ exclude = [
     ".idea/*",
     ".gitignore"
 ]
+#edition = "2018"
 
 [dependencies]
 app_dirs = "^1.1.1"
 futures = "^0.1"
 tokio-core = "^0.1"
 tokio-io = "^0.1"
+tokio-codec = "^0.1"
 tokio-proto = "^0.1"
 tokio-service = "^0.1"
 bytes = "^0.4"

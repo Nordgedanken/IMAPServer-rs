@@ -1,42 +1,35 @@
-#[macro_use]
-extern crate mysql;
+extern crate app_dirs;
+extern crate base64;
+#[cfg(target_os = "linux")]
+extern crate dbus;
+extern crate futures;
 #[macro_use]
 extern crate log;
+extern crate mysql;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde;
-extern crate toml;
 extern crate simplelog;
-extern crate app_dirs;
-extern crate futures;
 extern crate tokio_core;
-extern crate tokio_io;
 extern crate tokio_proto;
 extern crate tokio_service;
+extern crate tokio_codec;
+extern crate tokio_io;
 extern crate bytes;
-extern crate mailparse;
-extern crate pwhash;
-extern crate base64;
-extern crate urlencoding;
 
-#[cfg(target_os = "linux")]
-extern crate dbus;
-
-#[macro_use]
-mod macros;
-
-use std::collections::HashMap;
-use std::rc::Rc;
+use std::{fmt, iter, error};
 use std::cell::RefCell;
-use std::iter;
-use std::io::{Error, ErrorKind, BufReader};
+use std::collections::HashMap;
+use std::io::Error;
+use std::io::{BufReader, ErrorKind};
+use std::rc::Rc;
+use std::result::Result::*;
 
-use futures::Future;
-use futures::stream::{self, Stream};
+use futures::{Future, Stream, stream};
 use tokio_core::net::TcpListener;
 use tokio_core::reactor::Core;
-use tokio_io::io;
-use tokio_io::AsyncRead;
+
+use tokio_io::io::{read_until, write_all};
 
 fn main() {
     let config = helper::get_config().expect("Unable to access config");
@@ -72,7 +65,7 @@ fn main() {
         // send us messages. Then register our address with the stream to send
         // data to us.
         let (tx, rx) = futures::sync::mpsc::unbounded();
-        tx.send(format!("{}", "* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n")).unwrap();
+        tx.unbounded_send(format!("{}", "* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n")).unwrap();
         debug!("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n");
         connections.borrow_mut().insert(addr, tx);
 
@@ -85,10 +78,10 @@ fn main() {
         // Model the read portion of this socket by mapping an infinite
         // iterator to each line off the socket. This "loop" is then
         // terminated with an error once we hit EOF on the socket.
-        let iter = stream::iter(iter::repeat(()).map(Ok::<(), Error>));
+        let iter = stream::iter_ok(iter::repeat(()).map(Ok::<(), dyn error::Error>));
         let socket_reader = iter.fold(reader, move |reader, _| {
             // Read a line off the socket, failing if we're at EOF
-            let line = io::read_until(reader, b'\n', Vec::new());
+            let line = read_until(reader, b'\n', Vec::new());
             let line = line.and_then(|(reader, vec)| if vec.len() == 0 {
                 Err(Error::new(ErrorKind::BrokenPipe, "broken pipe"))
             } else {
@@ -129,7 +122,7 @@ fn main() {
                             error!("Command {} by {} is not known. dropping it.", command, addr);
 
                             let tx = conns.get_mut(&addr).unwrap();
-                            tx.send(format!("{}", "* BAD Command not known\r\n"))
+                            tx.unbounded_send(format!("{}", "* BAD Command not known\r\n"))
                                 .unwrap();
                         }
                     } else if args.len() == 1 {
@@ -146,7 +139,7 @@ fn main() {
         // Whenever we receive a string on the Receiver, we write it to
         // `WriteHalf<TcpStream>`.
         let socket_writer = rx.fold(writer, |writer, msg| {
-            let amt = io::write_all(writer, msg.into_bytes());
+            let amt = write_all(writer, msg.into_bytes());
             let amt = amt.map(|(writer, _)| writer);
             amt.map_err(|_| ())
         });

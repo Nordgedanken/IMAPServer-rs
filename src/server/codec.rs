@@ -1,7 +1,10 @@
 use std::io;
+use std::option::Option::{self, None, Some};
+use std::result::Result::{Err, Ok};
 use std::str;
-use bytes::BytesMut;
-use tokio_io::codec::{Encoder, Decoder};
+
+use bytes::{Buf, BytesMut};
+use tokio_codec::{Decoder, Encoder};
 
 pub struct LineCodec;
 
