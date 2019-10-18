@@ -1,6 +1,6 @@
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio_proto::pipeline::ServerProto;
-use tokio_codec::Framed;
+use tokio::codec::Framed;
 use std::io;
 use std::result::Result;
 use std::result::Result::Ok;

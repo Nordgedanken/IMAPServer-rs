@@ -1,21 +1,9 @@
-extern crate alloc;
-extern crate app_dirs;
-extern crate base64;
-extern crate bytes;
 #[cfg(target_os = "linux")]
 extern crate dbus;
-extern crate futures;
 #[macro_use]
 extern crate log;
-extern crate mysql;
-extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-extern crate simplelog;
-extern crate tokio;
-extern crate tokio_codec;
-extern crate tokio_proto;
-extern crate tokio_service;
 
 use std::{io, iter};
 

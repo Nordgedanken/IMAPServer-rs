@@ -4,7 +4,7 @@ use std::result::Result::{Err, Ok};
 use std::str;
 
 use bytes::{Buf, BytesMut};
-use tokio_codec::{Decoder, Encoder};
+use tokio::codec::{Decoder, Encoder};
 
 pub struct LineCodec;
 
