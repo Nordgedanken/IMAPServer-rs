@@ -1,5 +1,3 @@
-use std::option::Option;
-
 #[derive(Serialize, Deserialize)]
 pub struct Config {
     pub ip: String,

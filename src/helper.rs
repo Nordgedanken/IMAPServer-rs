@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io;
+use std::{io, process};
 use std::option::Option::Some;
 use std::path::Path;
 use std::result::Result;
@@ -66,10 +66,6 @@ pub fn get_config_dir() -> std::path::PathBuf {
     config_root
 }
 
-extern "C" {
-    fn abort();
-}
-
 pub fn get_config() -> Result<super::config::Config, &'static str> {
     use std::io::prelude::*;
 
@@ -98,9 +94,7 @@ pub fn get_config() -> Result<super::config::Config, &'static str> {
         f.write_all(b"username = 'root'\n").unwrap();
         f.write_all(b"password = ''\n").unwrap();
         println!("Default config saved please edit it and restart the server");
-        unsafe {
-            abort();
-        };
+        process::exit(5000); // Custom error
         Err("Config didn't yet exist")
     }
 }
