@@ -1,43 +1,31 @@
-use std::collections::HashMap;
-use std::net::SocketAddr;
 use std::result::Result::{Err, Ok};
-use std::sync::{Arc, Mutex};
 
 use base64::decode;
-use futures::sync::mpsc::UnboundedSender;
+use tokio::io::AsyncWriteExt;
+use tokio::net::tcp::split::WriteHalf;
 
 use crate::database::Users;
 use crate::helper::connect_to_db;
-use tokio::sync::mpsc::UnboundedSender;
-use futures_util::{AsyncReadExt, StreamExt};
 
-pub fn authenticate(
-    conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
+pub async fn authenticate(
     args: Vec<&str>,
-    addr: &std::net::SocketAddr
-){
-    // For each open connection except the sender, send the
-    // string via the channel.
-    let mut conns_locked = conns.lock().unwrap();
-    let iter = (*conns_locked).iter_mut().map(|(y, v)| (y, v));
-
+    write: &mut WriteHalf<'_>,
+) {
     let identifier = args[0];
-    for (y, tx) in iter {
-        if y == addr {
-            tx.unbounded_send(format!("+\r\n")).unwrap();
-            tx.unbounded_send(format!("{} {}", identifier, "+\r\n")).unwrap();
 
-            //Print to view for debug
-            debug!("{} {}", identifier, "+\r\n");
-        }
-    }
+    write.write_all(b"+\r\n").await
+        .expect("failed to write data to socket");
+    write.write_all(format!("{} {}", identifier, "+\r\n").as_ref()).await
+        .expect("failed to write data to socket");
+
+    //Print to view for debug
+    debug!("{} {}", identifier, "+\r\n");
 }
 
-pub fn parse_login_data(
-    conns: Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>,
+pub async fn parse_login_data(
     args: Vec<&str>,
-    addr: &std::net::SocketAddr
-){
+    write: &mut WriteHalf<'_>,
+) {
     let bytes = decode(args[0]).unwrap();
     let string = match String::from_utf8(bytes) {
         Ok(v) => v,
@@ -52,41 +40,32 @@ pub fn parse_login_data(
     };
     let _pool = connect_to_db();
 
-    // For each open connection except the sender, send the
-    // string via the channel.
-    let mut conns_locked = conns.lock().unwrap();
-    let iter = (*conns_locked).iter_mut().map(|(y, v)| (y, v));
-
     let identifier = args[0];
     if up[1].contains("@riot.nordgedanken.de") {
-        for (y, tx) in iter {
-            if y == addr {
-                tx.unbounded_send(format!("+\r\n")).unwrap();
-                tx.unbounded_send(format!(
-                    "{} {}",
-                    identifier,
-                    "OK PLAIN authentication successful\r\n"
-                )).unwrap();
+        write.write_all(b"+\r\n").await
+            .expect("failed to write data to socket");
+        write.write_all(format!(
+            "{} {}",
+            identifier,
+            "OK PLAIN authentication successful\r\n"
+        ).as_ref()).await
+            .expect("failed to write data to socket");
 
-                //Print to view for debug
-                debug!(
-                    "{} {}",
-                    identifier,
-                    "OK PLAIN authentication successful\r\n"
-                );
-            }
-        }
+        //Print to view for debug
+        debug!(
+            "{} {}",
+            identifier,
+            "OK PLAIN authentication successful\r\n"
+        );
     } else {
-        for (y, tx) in iter {
-            if y == addr {
-                tx.unbounded_send(format!("+\r\n")).unwrap();
-                tx.unbounded_send(format!("{} {}", identifier, "NO credentials rejected\r\n"))
-                    .unwrap();
+        write.write_all(b"+\r\n").await
+            .expect("failed to write data to socket");
+        write.write_all(format!("{} {}", identifier, "NO credentials rejected\r\n").as_ref())
+            .await
+            .expect("failed to write data to socket");
 
-                //Print to view for debug
-                debug!("{} {}", identifier, "NO credentials rejected\r\n");
-            }
-        }
+        //Print to view for debug
+        debug!("{} {}", identifier, "NO credentials rejected\r\n");
     }
     println!("user: {} \r\n password: {}", up[1], up[2]);
 }

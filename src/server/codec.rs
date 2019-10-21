@@ -3,7 +3,7 @@ use std::option::Option::{self, None, Some};
 use std::result::Result::{Err, Ok};
 use std::str;
 
-use bytes::{Buf, BytesMut};
+use bytes::BytesMut;
 use tokio::codec::{Decoder, Encoder};
 
 pub struct LineCodec;

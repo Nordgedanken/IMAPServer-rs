@@ -1,28 +1,28 @@
-use simplelog::{SharedLogger, TermLogger, SimpleLogger, WriteLogger, CombinedLogger, TerminalMode};
-use log::LogLevelFilter;
+use std::fs::File;
+use std::io;
 use std::option::Option::Some;
 use std::path::Path;
 use std::result::Result;
-use std::result::Result::{Ok, Err};
-use std::io;
+use std::result::Result::{Err, Ok};
+
 use base64::encode;
-use std::fs::File;
-use mysql::{Pool,Opts};
+use mysql::{Opts, Pool};
+use simplelog::{CombinedLogger, LevelFilter, SharedLogger, SimpleLogger, TerminalMode, TermLogger, WriteLogger};
 
 pub fn init_log() {
     let mut config_dir = get_config_dir();
     config_dir.push("IMAP.log");
     let mut logger: Vec<Box<dyn SharedLogger>> = vec![];
     logger.push(match TermLogger::new(
-        LogLevelFilter::Info,
+        LevelFilter::Info,
         simplelog::Config::default(),
         TerminalMode::Mixed,
     ) {
         Some(termlogger) => termlogger,
-        None => SimpleLogger::new(LogLevelFilter::Info, simplelog::Config::default()),
+        None => SimpleLogger::new(LevelFilter::Info, simplelog::Config::default()),
     });
     logger.push(WriteLogger::new(
-        LogLevelFilter::Debug,
+        LevelFilter::Debug,
         simplelog::Config::default(),
         File::create(config_dir.to_str().unwrap()).expect(
             "Could not create logfile",
