@@ -18,40 +18,12 @@ include = [
 
 [dependencies]
 app_dirs = "1.2.1"
-futures-core-preview = "=0.3.0-alpha.19"
-futures-sink-preview = "=0.3.0-alpha.19"
-futures-util-preview = { version = "=0.3.0-alpha.19", features = ["sink"] }
+futures-preview = "=0.3.0-alpha.19"
 tokio = "0.2.0-alpha.6"
 tokio-io = "0.2.0-alpha.6"
-tokio-tower = "0.2.0-alpha.2a"
-tower = "0.3.0-alpha.2"
-bytes = "0.4.12"
 mailparse = "0.8.2"
-mysql = "16.1.0"
-log = "0.4.8"
-simplelog = "0.7.4"
 pwhash = "0.3.0"
-serde = "1.0.101"
-serde_derive = "1.0.101"
-toml = "0.5.3"
 base64 = "0.10.1"
-urlencoding = "^1.0.0"
-tower-service = "0.3.0-alpha.2"
-async-bincode = "0.4.9"
-
-[target.'cfg(unix)'.dependencies]
-dbus = "0.7.1"
-
-[package.metadata.deb]
-maintainer = "Marcel Radzio <info@nordgedanken.de>"
-copyright = "2017, Marcel Radzio <info@nordgedanken.de>"
-license_file = ["LICENSE", "4"]
-extended_description = """\
-A IMAP Server written in Rust."""
-depends = "mysql"
-section = "mail"
-priority = "optional"
-assets = [
-    ["target/release/IMAPServer", "usr/bin/", "755"],
-    ["README.md", "usr/share/doc/IMAPServer/README", "644"],
-]
+log = "0.4"
+fern = "0.5"
+chrono = "0.4"

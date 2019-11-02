@@ -1,31 +1,27 @@
 use std::result::Result::{Err, Ok};
 
 use base64::decode;
+use log::debug;
 use tokio::io::AsyncWriteExt;
 use tokio::net::tcp::split::WriteHalf;
 
-use crate::database::Users;
-use crate::helper::connect_to_db;
-
-pub async fn authenticate(
-    args: Vec<&str>,
-    write: &mut WriteHalf<'_>,
-) {
+pub async fn authenticate(args: Vec<&str>, write: &mut WriteHalf<'_>) {
     let identifier = args[0];
 
-    write.write_all(b"+\r\n").await
+    write
+        .write_all(b"+\r\n")
+        .await
         .expect("failed to write data to socket");
-    write.write_all(format!("{} {}", identifier, "+\r\n").as_ref()).await
+    write
+        .write_all(format!("{} {}", identifier, "+\r\n").as_ref())
+        .await
         .expect("failed to write data to socket");
 
     //Print to view for debug
     debug!("{} {}", identifier, "+\r\n");
 }
 
-pub async fn parse_login_data(
-    args: Vec<&str>,
-    write: &mut WriteHalf<'_>,
-) {
+pub async fn parse_login_data(args: Vec<&str>, write: &mut WriteHalf<'_>) {
     let bytes = decode(args[0]).unwrap();
     let string = match String::from_utf8(bytes) {
         Ok(v) => v,
@@ -34,33 +30,35 @@ pub async fn parse_login_data(
     let string_str = &string;
     let up: Vec<&str> = string_str.split("\u{0000}").collect();
 
-    let _user = Users {
-        name: String::from(up[1]),
-        passwd: String::from(up[2]),
-    };
-    let _pool = connect_to_db();
-
     let identifier = args[0];
     if up[1].contains("@riot.nordgedanken.de") {
-        write.write_all(b"+\r\n").await
+        write
+            .write_all(b"+\r\n")
+            .await
             .expect("failed to write data to socket");
-        write.write_all(format!(
-            "{} {}",
-            identifier,
-            "OK PLAIN authentication successful\r\n"
-        ).as_ref()).await
+        write
+            .write_all(
+                format!(
+                    "{} {}",
+                    identifier, "OK PLAIN authentication successful\r\n"
+                )
+                .as_ref(),
+            )
+            .await
             .expect("failed to write data to socket");
 
         //Print to view for debug
         debug!(
             "{} {}",
-            identifier,
-            "OK PLAIN authentication successful\r\n"
+            identifier, "OK PLAIN authentication successful\r\n"
         );
     } else {
-        write.write_all(b"+\r\n").await
+        write
+            .write_all(b"+\r\n")
+            .await
             .expect("failed to write data to socket");
-        write.write_all(format!("{} {}", identifier, "NO credentials rejected\r\n").as_ref())
+        write
+            .write_all(format!("{} {}", identifier, "NO credentials rejected\r\n").as_ref())
             .await
             .expect("failed to write data to socket");
 

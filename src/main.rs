@@ -1,233 +1,228 @@
-#![feature(async_await)]
-#![feature(async_closure)]
-#![warn(missing_debug_implementations, missing_docs)]
+#![warn(missing_debug_implementations)]
 
-//#[cfg(target_os = "linux")]
-//extern crate dbus;
-#[macro_use]
-extern crate log;
-#[macro_use]
-extern crate serde_derive;
-
+use std::error::Error;
 use std::net::SocketAddr;
+use std::pin::Pin;
 
-use futures_util::StreamExt;
-use tokio::io::BufReader;
-use tokio::net::TcpListener;
+use futures::task::Context;
+use futures::Poll;
+use futures::StreamExt;
+use log::{debug, error, info};
+use std::collections::HashMap;
+use std::sync::Arc;
+use tokio::codec::{Framed, LinesCodec, LinesCodecError};
+use tokio::io;
+use tokio::net::{TcpListener, TcpStream};
 use tokio::prelude::*;
+use tokio::sync::{mpsc, Mutex};
+
+mod commands;
+mod log_helper;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let config = helper::get_config().expect("Unable to access config");
-    let ip = config.ip;
-    let ip_port = format!("{}:143", ip);
-    let addr: SocketAddr = ip_port.parse().expect("your ip isn't valid");
+async fn main() -> Result<(), Box<dyn Error>> {
+    log_helper::setup_logger().expect("Unable to start logger.");
 
-    helper::init_log();
-    // Create the event loop and TCP listener we'll accept connections on.
+    // Create the shared state. This is how all the peers communicate.
+    //
+    // The server task will hold a handle to this. For every new client, the
+    // `state` handle is cloned and passed into the task that processes the
+    // client connection.
+    let state = Arc::new(Mutex::new(Shared::new()));
+
+    let addr: SocketAddr = "127.0.0.1:143".parse()?;
     let mut listener = TcpListener::bind(&addr).await?;
     info!("Listening on: {}", addr);
 
     loop {
         // Asynchronously wait for an inbound socket.
-        let (mut socket, _) = listener.accept().await?;
+        let (stream, addr) = listener.accept().await?;
 
+        // Clone a handle to the `Shared` state for the new connection.
+        let state = Arc::clone(&state);
 
-        // And this is where much of the magic of this server happens. We
-        // crucially want all clients to make progress concurrently, rather than
-        // blocking one on completion of another. To achieve this we use the
-        // `tokio::spawn` function to execute the work in the background.
-        //
-        // Essentially here we're executing a new task to run concurrently,
-        // which will allow all of our clients to be processed concurrently.
-
+        // Spawn our handler to be run asynchronously.
         tokio::spawn(async move {
-            let (read, mut write) = socket.split();
-            let mut reader = BufReader::new(read);
-            // In a loop, read data from the socket and write the data back.
-            loop {
-                // Imap Logic
-
-                // Tell the client that the server is ready to listen
-                write.write_all(b"* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n")
-                    .await
-                    .expect("failed to write data to socket");
-                debug!("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n");
-
-                let mut full_req = String::new();
-                reader.get_mut().read_to_string(&mut full_req).await.expect("failes to read");
-
-                let lines: Vec<&str> = full_req.lines().collect();
-
-                for line in lines.iter() {
-                    println!("{}", line);
-                    // let msg_clone = &line.clone();
-                    let args: Vec<&str> = line.split_whitespace().collect();
-                    if args.len() > 1 {
-                        let command = args[1].to_lowercase();
-                        if command == "capability" {
-                            commands::capability(args, &mut write);
-                        } else if command == "login" {
-                            commands::login(args, &mut write);
-                        } else if command == "logout" {
-                            commands::logout(args, &mut write);;
-                        } else if command == "noop" {
-                            commands::noop(args, &mut write);
-                        } else if command == "select" {
-                            commands::select(args, &mut write);
-                        } else if command == "authenticate" {
-                            commands::authenticate::authenticate(args, &mut write);
-                        } else if command == "list" {
-                            commands::list(args, &mut write);
-                        } else if command == "uid" {
-                            commands::uid(args, &mut write);
-                        } else if command == "check" {
-                            commands::check(args, &mut write);
-                        } else {
-                            error!("Command {} by {} is not known. dropping it.", command, addr);
-
-                            write.write_all(b"* BAD Command not known\r\n").await.expect("Unable to write");
-                        }
-                    } else if args.len() == 1 {
-                       commands::authenticate::parse_login_data(args, &mut write);
-                    }
-                    //future::ready(())
-                }
+            info!("{} connected", addr);
+            if let Err(e) = process(state, stream, addr).await {
+                error!("an error occurred; error = {:?}", e);
             }
-            // future::ready(())
         });
     }
-
-
-    /*// This is a single-threaded server, so we can just use Rc and RefCell to
-    // store the map of all connections we know about.
-    let connections = Arc::new(Mutex::new(HashMap::new()));
-    let connections2 = Arc::clone(&connections);
-
-    // Listen for incoming connections.
-    // This is similar to the iterator of incoming connections that
-    // .incoming() from std::net::TcpListener, produces, except that
-    // it is an asynchronous Stream of tokio::net::TcpStream instead
-    // of an Iterator of std::net::TcpStream.
-    let incoming = socket.incoming();
-
-    let srv = incoming.map_err(|e| eprintln!("failed to accept socket; error = {:?}", e)).for_each(|stream: io::Result<TcpStream>| {
-        info!("New Connection: {}", addr);
-        let (reader, writer) = stream.unwrap().split();
-
-        // Create a channel for our stream, which other sockets will use to
-        // send us messages. Then register our address with the stream to send
-        // data to us.
-        let (mut tx, rx) = mpsc::unbounded_channel();
-        tx.try_send(format!("{}", "* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n")).unwrap();
-        debug!("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n");
-        (*(connections2.lock().unwrap())).insert(addr, tx);
-
-        // Define here what we do for the actual I/O. That is, read a bunch of
-        // lines from the socket and dispatch them while we also write any lines
-        // from other sockets.
-        //let reader = BufReader::new(reader);
-
-        // Model the read portion of this socket by mapping an infinite
-        // iterator to each line off the socket. This "loop" is then
-        // terminated with an error once we hit EOF on the socket.
-        // Fixme maybe?
-        let iter = futures_util::stream::iter(iter::repeat(()).map(Ok::<(), io::Error>));
-
-        let connections3 = Arc::clone(&connections2);
-        let socket_reader = iter.fold(reader, move |mut reader: ReadHalf<TcpStream>, _| {
-            // Read a line off the socket, failing if we're at EOF
-            let line = reader.read_until(b'\n', Vec::new());
-            let line = line.and_then(|(reader, vec)| if vec.len() == 0 {
-                Err(Error::new(ErrorKind::BrokenPipe, "broken pipe"))
-            } else {
-                Ok((reader, vec))
-            });
-
-            // Convert the bytes we read into a string, and then send that
-            // string to all other connected clients.
-            let line = line.map(|(reader, vec)| (reader, String::from_utf8(vec)));
-            let connections4 = Arc::clone(&connections3);
-            line.map(move |(reader, message)| {
-                let conns = Arc::clone(&connections4);
-                if let Ok(msg) = message {
-                    println!("{}", msg);
-                    let msg_clone = &msg.clone();
-                    let args: Vec<&str> = msg_clone.split_whitespace().collect();
-                    if args.len() > 1 {
-                        let command = args[1].to_lowercase();
-                        if command == "capability" {
-                            commands::capability(conns, args, &addr);
-                        } else if command == "login" {
-                            commands::login(conns, args, &addr);
-                        } else if command == "logout" {
-                            commands::logout(conns, args, &addr);
-                        } else if command == "noop" {
-                            commands::noop(conns, args, &addr);
-                        } else if command == "select" {
-                            commands::select(conns, args, &addr);
-                        } else if command == "authenticate" {
-                            commands::authenticate::authenticate(conns, args, &addr);
-                        } else if command == "list" {
-                            commands::list(conns, args, &addr);
-                        } else if command == "uid" {
-                            commands::uid(conns, args, &addr);
-                        } else if command == "check" {
-                            commands::check(conns, args, &addr);
-                        } else {
-                            error!("Command {} by {} is not known. dropping it.", command, addr);
-
-                            let mut conns_locked = conns.lock().unwrap();
-                            let tx = (*conns_locked).get_mut(&addr).unwrap();
-                            tx.try_send(format!("{}", "* BAD Command not known\r\n"))
-                                .unwrap();
-                        }
-                    } else if args.len() == 1 {
-                        commands::authenticate::parse_login_data(conns, args, &addr);
-                    }
-                } else {
-                    error!("{:?}", message);
-                    error!("Message by {} is not valid. dropping it.", addr);
-                }
-                reader
-            })
-        });
-
-        // Whenever we receive a string on the Receiver, we write it to
-        // `WriteHalf<TcpStream>`.
-        let socket_writer = rx.fold(writer, |mut writer: WriteHalf<TcpStream>, msg| {
-            // FIXME probably need to get a full future now
-            let amt = writer.write_all(msg.into_bytes());
-            let amt = amt.map(|(writer, _)| writer);
-            amt.map_err(|_| ())
-        });
-
-        // Now that we've got futures representing each half of the socket, we
-        // use the `select` combinator to wait for either half to be done to
-        // tear down the other. Then we spawn off the result.
-        let socket_reader = socket_reader.map_err(|e: io::Error| { println!("{}", e); });
-        let connection = socket_reader.map(|_| ()).select(socket_writer.map(|_| ()));
-        let connections3 = Arc::clone(&connections2);
-        tokio::spawn(connection.then(move |_| {
-            let connections4 = Arc::clone(&connections3);
-            let mut connections = connections4.lock().unwrap();
-            (*connections).remove(&addr);
-            info!("Connection {} closed.", addr);
-            Ok(())
-        }));
-    });
-
-    // execute server
-    srv.await;*/
-
-    //Ok(())
 }
 
-pub mod config;
-mod helper;
-mod commands;
-//mod server;
-//mod ssl_server;
-mod database;
-//#[cfg(target_os = "linux")]
-//mod linux_low;
+/// Shorthand for the transmit half of the message channel.
+type Tx = mpsc::UnboundedSender<String>;
+
+/// Shorthand for the receive half of the message channel.
+type Rx = mpsc::UnboundedReceiver<String>;
+
+/// Data that is shared between all peers in the chat server.
+///
+/// This is the set of `Tx` handles for all connected clients. Whenever a
+/// message is received from a client, it is broadcasted to all peers by
+/// iterating over the `peers` entries and sending a copy of the message on each
+/// `Tx`.
+struct Shared {
+    peers: HashMap<SocketAddr, Tx>,
+}
+
+/// The state for each connected client.
+struct Peer {
+    /// The TCP socket wrapped with the `Lines` codec, defined below.
+    ///
+    /// This handles sending and receiving data on the socket. When using
+    /// `Lines`, we can work at the line level instead of having to manage the
+    /// raw byte operations.
+    lines: Framed<TcpStream, LinesCodec>,
+
+    /// Receive half of the message channel.
+    ///
+    /// This is used to receive messages from peers. When a message is received
+    /// off of this `Rx`, it will be written to the socket.
+    rx: Rx,
+}
+
+impl Shared {
+    /// Create a new, empty, instance of `Shared`.
+    fn new() -> Self {
+        Shared {
+            peers: HashMap::new(),
+        }
+    }
+
+    /// Send a `LineCodec` encoded message to every peer, except
+    /// for the sender.
+    async fn respond(
+        &mut self,
+        sender: SocketAddr,
+        message: &str,
+    ) -> Result<(), mpsc::error::UnboundedSendError> {
+        for peer in self.peers.iter_mut() {
+            if *peer.0 == sender {
+                peer.1.send(message.into()).await?;
+                break;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl Peer {
+    /// Create a new instance of `Peer`.
+    async fn new(
+        state: Arc<Mutex<Shared>>,
+        lines: Framed<TcpStream, LinesCodec>,
+    ) -> io::Result<Peer> {
+        // Get the client socket address
+        let addr = lines.get_ref().peer_addr()?;
+
+        // Create a channel for this peer
+        let (tx, rx) = mpsc::unbounded_channel();
+
+        // Add an entry for this `Peer` in the shared state map.
+        state.lock().await.peers.insert(addr, tx);
+
+        Ok(Peer { lines, rx })
+    }
+}
+
+#[derive(Debug)]
+enum Message {
+    // Response from the server
+    Response(String),
+
+    /// A message that contains a command
+    Command(String),
+}
+
+// Peer implements `Stream` in a way that polls both the `Rx`, and `Framed` types.
+// A message is produced whenever an event is ready until the `Framed` stream returns `None`.
+impl Stream for Peer {
+    type Item = Result<Message, LinesCodecError>;
+
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        // First poll the `UnboundedReceiver`.
+
+        if let Poll::Ready(Some(v)) = self.rx.poll_next_unpin(cx) {
+            return Poll::Ready(Some(Ok(Message::Response(v))));
+        }
+
+        // Secondly poll the `Framed` stream.
+        let result: Option<_> = futures::ready!(self.lines.poll_next_unpin(cx));
+
+        Poll::Ready(match result {
+            // We've received a message we should broadcast to others.
+            Some(Ok(message)) => Some(Ok(Message::Command(message))),
+
+            // An error occurred.
+            Some(Err(e)) => Some(Err(e)),
+
+            // The stream has been exhausted.
+            None => None,
+        })
+    }
+}
+
+/// Process an individual imap connection
+async fn process(
+    state: Arc<Mutex<Shared>>,
+    stream: TcpStream,
+    addr: SocketAddr,
+) -> Result<(), Box<dyn Error>> {
+    let mut lines = Framed::new(stream, LinesCodec::new());
+
+    // Send Capabilities
+    lines
+        .send(String::from("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n"))
+        .await?;
+
+    // Register our peer with state which internally sets up some channels.
+    let mut peer = Peer::new(state.clone(), lines).await?;
+
+    // Process incoming messages until our stream is exhausted by a disconnect.
+    while let Some(result) = peer.next().await {
+        match result {
+            // A message was received from the current user, we should
+            // treat it as a command
+            Ok(Message::Command(msg)) => {
+                debug!("Message raw: {}", msg);
+                let args: Vec<&str> = msg.split_whitespace().collect();
+                if args.len() > 1 {
+                    let command = args[1].to_lowercase();
+
+                    if command == "capability" {
+                        commands::Commands::capability(args, addr, state.clone()).await?;
+                    } else {
+                        error!("Command {} by {} is not known. dropping it.", command, addr);
+
+                        let mut state = state.lock().await;
+                        state.respond(addr, "* BAD Command not known\r\n")
+                            .await
+                            .expect("Unable to write");
+                    }
+                } else if args.len() == 1 {
+                    //commands::authenticate::parse_login_data(args, &mut write);
+                }
+            }
+
+            Err(e) => {
+                error!(
+                    "an error occured while processing messages for {}; error = {:?}",
+                    addr, e
+                );
+            }
+            Ok(Message::Response(msg)) => {
+                peer.lines.send(msg).await?;
+            }
+        }
+    }
+
+    // If this section is reached it means that the client was disconnected!
+    {
+        info!("{} disconnected", addr);
+    }
+
+    Ok(())
+}
