@@ -57,6 +57,16 @@ type Tx = mpsc::UnboundedSender<String>;
 /// Shorthand for the receive half of the message channel.
 type Rx = mpsc::UnboundedReceiver<String>;
 
+enum State {
+    LoggedOut,
+    LoggedIn,
+}
+
+struct Connection {
+    state: State,
+    tx: Tx,
+}
+
 /// Data that is shared between all peers in the chat server.
 ///
 /// This is the set of `Tx` handles for all connected clients. Whenever a
@@ -64,7 +74,7 @@ type Rx = mpsc::UnboundedReceiver<String>;
 /// iterating over the `peers` entries and sending a copy of the message on each
 /// `Tx`.
 struct Shared {
-    peers: HashMap<SocketAddr, Tx>,
+    peers: HashMap<SocketAddr, Connection>,
 }
 
 /// The state for each connected client.
@@ -100,7 +110,7 @@ impl Shared {
     ) -> Result<(), mpsc::error::UnboundedSendError> {
         for peer in self.peers.iter_mut() {
             if *peer.0 == sender {
-                peer.1.send(message.into()).await?;
+                peer.1.tx.send(message.into()).await?;
                 break;
             }
         }
@@ -122,7 +132,11 @@ impl Peer {
         let (tx, rx) = mpsc::unbounded_channel();
 
         // Add an entry for this `Peer` in the shared state map.
-        state.lock().await.peers.insert(addr, tx);
+        let connection = Connection {
+            state: State::LoggedOut,
+            tx,
+        };
+        state.lock().await.peers.insert(addr, connection);
 
         Ok(Peer { lines, rx })
     }
@@ -175,7 +189,7 @@ async fn process(
 
     // Send Capabilities
     lines
-        .send(String::from("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r\n"))
+        .send(String::from("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ONLY LOGINDISABLED] IMAP4rev1 Service Ready\r\n"))
         .await?;
 
     // Register our peer with state which internally sets up some channels.
@@ -194,16 +208,31 @@ async fn process(
 
                     if command == "capability" {
                         commands::Commands::capability(args, addr, state.clone()).await?;
+                    } else if command == "logout" {
+                        commands::Commands::logout(args, addr, state.clone()).await?;
+                    } else if command == "authenticate" {
+                        commands::authenticate::Authentication::authenticate(
+                            args,
+                            addr,
+                            state.clone(),
+                        )
+                            .await?;
                     } else {
                         error!("Command {} by {} is not known. dropping it.", command, addr);
 
                         let mut state = state.lock().await;
-                        state.respond(addr, "* BAD Command not known\r\n")
+                        state
+                            .respond(addr, "* BAD Command not known\r\n")
                             .await
                             .expect("Unable to write");
                     }
                 } else if args.len() == 1 {
-                    //commands::authenticate::parse_login_data(args, &mut write);
+                    commands::authenticate::Authentication::parse_login_data(
+                        args,
+                        addr,
+                        state.clone(),
+                    )
+                        .await?;
                 }
             }
 
@@ -221,6 +250,9 @@ async fn process(
 
     // If this section is reached it means that the client was disconnected!
     {
+        let mut state = state.lock().await;
+        state.peers.remove(&addr);
+
         info!("{} disconnected", addr);
     }
 

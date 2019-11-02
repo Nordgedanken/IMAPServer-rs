@@ -17,23 +17,18 @@ impl Commands {
         state: Arc<Mutex<Shared>>,
     ) -> Result<(), mpsc::error::UnboundedSendError> {
         let identifier = args[0];
-        debug!("{}", identifier);
+
         let mut state = state.lock().await;
 
         state
             .respond(
                 addr,
-                "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED\r\n",
+                "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ONLY LOGINDISABLED\r\n",
             )
             .await?;
 
         let response = format!("{}{}", identifier, " OK CAPABILITY completed\r\n");
-        state
-            .respond(
-                addr,
-                &response,
-            )
-            .await?;
+        state.respond(addr, &response).await?;
 
         //Print to view for debug
         debug!(
@@ -41,6 +36,28 @@ impl Commands {
             "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED\r\n"
         );
         debug!("Responded: {}{}", identifier, " OK CAPABILITY completed");
+        Ok(())
+    }
+
+    pub async fn logout(
+        args: Vec<&str>,
+        addr: SocketAddr,
+        state: Arc<Mutex<Shared>>,
+    ) -> Result<(), mpsc::error::UnboundedSendError> {
+        let identifier = args[0];
+
+        let mut state = state.lock().await;
+
+        state
+            .respond(addr, "* BYE IMAP4rev1 Server logging out\r\n")
+            .await?;
+
+        let response = format!("{}{}", identifier, " OK LOGOUT completed");
+        state.respond(addr, &response).await?;
+
+        //Print to view for debug
+        debug!("Responded: {}", "* BYE IMAP4rev1 Server logging out\r\n");
+        debug!("Responded: {}{}", identifier, " OK LOGOUT completed\r\n");
         Ok(())
     }
 }
@@ -79,28 +96,11 @@ pub async fn uid(args: Vec<&str>, write: &mut WriteHalf<'_>) {
     debug!("{}{}", identifier, " OK UID FETCH completed\r\n");
 }
 
-pub async fn logout(args: Vec<&str>, write: &mut WriteHalf<'_>) {
-    let identifier = args[0];
-
-    write
-        .write_all(b"* BYE IMAP4rev1 Server logging out\r\n")
-        .await
-        .expect("failed to write data to socket");
-    write
-        .write_all(format!("{}{}", identifier, " OK LOGOUT completed").as_ref())
-        .await
-        .expect("failed to write data to socket");
-
-    //Print to view for debug
-    debug!("{}", "* BYE IMAP4rev1 Server logging out\r\n");
-    debug!("{}{}", identifier, " OK LOGOUT completed\r\n");
-}
-
 pub mod authenticate;
 
 #[deprecated(
-since = "0.0.1",
-note = "please use `commands::authenticate::authenticate` instead"
+    since = "0.0.1",
+    note = "please use `commands::authenticate::authenticate` instead"
 )]
 pub async fn login(args: Vec<&str>, write: &mut WriteHalf<'_>) {
     let identifier = args[0];
