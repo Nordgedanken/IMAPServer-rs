@@ -24,40 +24,40 @@ impl Authentication {
         let string_str = &string;
         let up: Vec<&str> = string_str.split("\u{0000}").collect();
 
-        let identifier = args[0];
-
         let mut state = state.lock().await;
 
-        if up.len() < 2 { return Ok(()); }
+
+        if up.len() < 2 {
+            return Ok(());
+        }
 
         // TODO make this dynamic and use real accounts
-        if up[1].contains("@riot.nordgedanken.de") {
-            state.respond(addr, "+\r\n").await?;
+        if up[1].contains("@riot.nordgedanken.de") || up[1].contains("@localhost") {
+            state.respond(addr, "+\r").await?;
+            debug!("Responded: +");
             // DO NOT INLINE!
-            let response = format!(
-                "{} {}",
-                identifier, "OK PLAIN authentication successful\r\n"
-            );
+            let response = format!("{} {}", &state.peers.get(&addr).expect("unable to find peer").identifier, "OK PLAIN authentication successful");
             state.respond(addr, &response).await?;
 
-            state.peers.get_mut(&addr).expect("unable to find peer").state = State::LoggedIn;
+            state
+                .peers
+                .get_mut(&addr)
+                .expect("unable to find peer")
+                .state = State::LoggedIn;
 
             //Print to view for debug
             debug!(
                 "Responded: {} {}",
-                identifier, "OK PLAIN authentication successful\r\n"
+                &state.peers.get(&addr).expect("unable to find peer").identifier, "OK PLAIN authentication successful"
             );
         } else {
-            state.respond(addr, "+\r\n").await?;
+            state.respond(addr, "+\r").await?;
             // DO NOT INLINE!
-            let response = format!("{} {}", identifier, "NO credentials rejected\r\n");
+            let response = format!("{} {}", &state.peers.get(&addr).expect("unable to find peer").identifier, "NO credentials rejected\r");
             state.respond(addr, &response).await?;
 
             //Print to view for debug
-            debug!(
-                "Responded: {} {}",
-                identifier, "NO credentials rejected\r\n"
-            );
+            debug!("Responded: {} {}", &state.peers.get(&addr).expect("unable to find peer").identifier, "NO credentials rejected\r");
         }
         debug!("user: {} \r\n password: {}", up[1], up[2]);
         Ok(())
@@ -71,13 +71,16 @@ impl Authentication {
         let identifier = args[0];
 
         let mut state = state.lock().await;
+        let mut peer = state.peers.get_mut(&addr).expect("unable to find peer");
+
+        peer.identifier = identifier.to_string();
 
         // This space is important!
-        state.respond(addr, "+\r\n").await?;
+        state.respond(addr, "+\r").await?;
 
         // DO NOT INLINE!
         // This space is important!
-        let response = format!("{} {}", identifier, "+\r\n");
+        let response = format!("{} {}", identifier, "+\r");
 
         //state.respond(addr, &response).await?;
 

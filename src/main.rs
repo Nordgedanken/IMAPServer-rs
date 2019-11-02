@@ -64,6 +64,7 @@ enum State {
 
 struct Connection {
     state: State,
+    identifier: String,
     tx: Tx,
 }
 
@@ -133,6 +134,7 @@ impl Peer {
 
         // Add an entry for this `Peer` in the shared state map.
         let connection = Connection {
+            identifier: "".to_string(),
             state: State::LoggedOut,
             tx,
         };
@@ -189,7 +191,7 @@ async fn process(
 
     // Send Capabilities
     lines
-        .send(String::from("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ONLY LOGINDISABLED] IMAP4rev1 Service Ready\r\n"))
+        .send(String::from("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED] IMAP4rev1 Service Ready\r"))
         .await?;
 
     // Register our peer with state which internally sets up some channels.
@@ -208,15 +210,19 @@ async fn process(
 
                     if command == "capability" {
                         commands::Commands::capability(args, addr, state.clone()).await?;
+                    } else if command == "login" {
+                        commands::Commands::login(args, addr, state.clone()).await?;
                     } else if command == "logout" {
                         commands::Commands::logout(args, addr, state.clone()).await?;
+                    } else if command == "noop" {
+                        commands::Commands::noop(args, addr, state.clone()).await?;
                     } else if command == "authenticate" {
                         commands::authenticate::Authentication::authenticate(
                             args,
                             addr,
                             state.clone(),
                         )
-                            .await?;
+                        .await?;
                     } else {
                         error!("Command {} by {} is not known. dropping it.", command, addr);
 
@@ -232,7 +238,7 @@ async fn process(
                         addr,
                         state.clone(),
                     )
-                        .await?;
+                    .await?;
                 }
             }
 
