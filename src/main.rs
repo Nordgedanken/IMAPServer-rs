@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // client connection.
     let state = Arc::new(Mutex::new(Shared::new()));
 
-    let addr: SocketAddr = "127.0.0.1:143".parse()?;
+    let addr: SocketAddr = "0.0.0.0:143".parse()?;
     let mut listener = TcpListener::bind(&addr).await?;
     info!("Listening on: {}", addr);
 
