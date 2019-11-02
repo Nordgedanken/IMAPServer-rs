@@ -214,6 +214,10 @@ async fn process(
                         commands::Commands::login(args, addr, state.clone()).await?;
                     } else if command == "logout" {
                         commands::Commands::logout(args, addr, state.clone()).await?;
+                    } else if command == "select" {
+                        commands::Commands::select(args, addr, state.clone()).await?;
+                    } else if command == "list" {
+                        commands::Commands::list(args, addr, state.clone()).await?;
                     } else if command == "noop" {
                         commands::Commands::noop(args, addr, state.clone()).await?;
                     } else if command == "authenticate" {
@@ -247,6 +251,7 @@ async fn process(
                     "an error occured while processing messages for {}; error = {:?}",
                     addr, e
                 );
+                // TODO handle reset
             }
             Ok(Message::Response(msg)) => {
                 peer.lines.send(msg).await?;

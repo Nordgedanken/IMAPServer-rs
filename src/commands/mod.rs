@@ -52,6 +52,8 @@ impl Commands {
             .respond(addr, "* BYE IMAP4rev1 Server logging out\r")
             .await?;
 
+        state.peers.remove(&addr);
+
         let response = format!("{}{}", identifier, " OK LOGOUT completed");
         state.respond(addr, &response).await?;
 
@@ -100,23 +102,69 @@ impl Commands {
         debug!("Responded: {} {}", identifier, "OK LOGIN completed\r");
         Ok(())
     }
-}
 
-pub async fn list(args: Vec<&str>, write: &mut WriteHalf<'_>) {
-    let identifier = args[0];
+    pub async fn list(
+        args: Vec<&str>,
+        addr: SocketAddr,
+        state: Arc<Mutex<Shared>>,
+    ) -> Result<(), mpsc::error::UnboundedSendError> {
+        let identifier = args[0];
 
-    write
-        .write_all(b"* LIST () \"/\" INBOX\r")
-        .await
-        .expect("failed to write data to socket");
-    write
-        .write_all(format!("{}{}", identifier, " OK LIST Completed\r").as_ref())
-        .await
-        .expect("failed to write data to socket");
+        let mut state = state.lock().await;
 
-    //Print to view for debug
-    debug!("{}", "* LIST () \"/\" \"INBOX\"");
-    debug!("{}{}", identifier, " OK LIST Completed");
+        state.respond(addr, "* LIST () \"/\" INBOX\r").await?;
+
+        let response = format!("{} {}", identifier, "OK LIST Completed\r");
+
+        state.respond(addr, &response).await?;
+
+        //Print to view for debug
+        debug!("Responded: {}", "* LIST () \"/\" \"INBOX\"");
+        debug!("Responded: {} {}", identifier, "OK LIST Completed");
+        Ok(())
+    }
+
+    pub async fn select(
+        args: Vec<&str>,
+        addr: SocketAddr,
+        state: Arc<Mutex<Shared>>,
+    ) -> Result<(), mpsc::error::UnboundedSendError> {
+        let identifier = args[0];
+        let mut state = state.lock().await;
+
+        state.respond(addr, "* 1 EXISTS\r").await?;
+        state.respond(addr, "* 1 RECENT\r").await?;
+        state
+            .respond(addr, "* OK [UNSEEN 1] Message 1 is first unseen\r")
+            .await?;
+        state
+            .respond(addr, "* OK [UIDNEXT 1] Predicted next UID\r")
+            .await?;
+        state
+            .respond(
+                addr,
+                "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r",
+            )
+            .await?;
+        state
+            .respond(
+                addr,
+                "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r",
+            )
+            .await?;
+
+        let response = format!("{} {}", identifier, "OK [READ-WRITE] SELECT completed\r");
+
+        state.respond(addr, &response).await?;
+
+        //Print to view for debug
+        debug!(
+            "Responded (truncated): {} {}",
+            identifier, "OK [READ-WRITE] SELECT completed"
+        );
+
+        Ok(())
+    }
 }
 
 pub async fn uid(args: Vec<&str>, write: &mut WriteHalf<'_>) {
@@ -137,42 +185,6 @@ pub async fn uid(args: Vec<&str>, write: &mut WriteHalf<'_>) {
 }
 
 pub mod authenticate;
-
-pub async fn select(args: Vec<&str>, write: &mut WriteHalf<'_>) {
-    let identifier = args[0];
-
-    write
-        .write_all(b"* 1 EXISTS\r")
-        .await
-        .expect("failed to write data to socket");
-    write
-        .write_all(b"* 0 RECENT\r")
-        .await
-        .expect("failed to write data to socket");
-    write
-        .write_all(b"* OK [UNSEEN 1] Message 1 is first unseen\r")
-        .await
-        .expect("failed to write data to socket");
-    write
-        .write_all(b"* OK [UIDNEXT 1] Predicted next UID\r")
-        .await
-        .expect("failed to write data to socket");
-    write
-        .write_all(b"* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r")
-        .await
-        .expect("failed to write data to socket");
-    write
-        .write_all(b"* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r")
-        .await
-        .expect("failed to write data to socket");
-    write
-        .write_all(format!("{} {}", identifier, "OK [READ-WRITE] SELECT completed\r").as_ref())
-        .await
-        .expect("failed to write data to socket");
-
-    //Print to view for debug
-    debug!("{} {}", identifier, "OK [READ-WRITE] SELECT completed");
-}
 
 pub async fn check(args: Vec<&str>, write: &mut WriteHalf<'_>) {
     let identifier = args[0];

@@ -26,7 +26,6 @@ impl Authentication {
 
         let mut state = state.lock().await;
 
-
         if up.len() < 2 {
             return Ok(());
         }
@@ -36,7 +35,15 @@ impl Authentication {
             state.respond(addr, "+\r").await?;
             debug!("Responded: +");
             // DO NOT INLINE!
-            let response = format!("{} {}", &state.peers.get(&addr).expect("unable to find peer").identifier, "OK PLAIN authentication successful");
+            let response = format!(
+                "{} {}",
+                &state
+                    .peers
+                    .get(&addr)
+                    .expect("unable to find peer")
+                    .identifier,
+                "OK PLAIN authentication successful"
+            );
             state.respond(addr, &response).await?;
 
             state
@@ -48,16 +55,37 @@ impl Authentication {
             //Print to view for debug
             debug!(
                 "Responded: {} {}",
-                &state.peers.get(&addr).expect("unable to find peer").identifier, "OK PLAIN authentication successful"
+                &state
+                    .peers
+                    .get(&addr)
+                    .expect("unable to find peer")
+                    .identifier,
+                "OK PLAIN authentication successful"
             );
         } else {
             state.respond(addr, "+\r").await?;
             // DO NOT INLINE!
-            let response = format!("{} {}", &state.peers.get(&addr).expect("unable to find peer").identifier, "NO credentials rejected\r");
+            let response = format!(
+                "{} {}",
+                &state
+                    .peers
+                    .get(&addr)
+                    .expect("unable to find peer")
+                    .identifier,
+                "NO credentials rejected\r"
+            );
             state.respond(addr, &response).await?;
 
             //Print to view for debug
-            debug!("Responded: {} {}", &state.peers.get(&addr).expect("unable to find peer").identifier, "NO credentials rejected\r");
+            debug!(
+                "Responded: {} {}",
+                &state
+                    .peers
+                    .get(&addr)
+                    .expect("unable to find peer")
+                    .identifier,
+                "NO credentials rejected\r"
+            );
         }
         debug!("user: {} \r\n password: {}", up[1], up[2]);
         Ok(())
