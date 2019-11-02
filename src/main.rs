@@ -1,15 +1,16 @@
 #![warn(missing_debug_implementations)]
 
+use std::collections::HashMap;
 use std::error::Error;
 use std::net::SocketAddr;
 use std::pin::Pin;
+use std::sync::Arc;
 
-use futures::task::Context;
+use futures::io::ErrorKind::{ConnectionAborted, ConnectionReset};
 use futures::Poll;
 use futures::StreamExt;
+use futures::task::Context;
 use log::{debug, error, info};
-use std::collections::HashMap;
-use std::sync::Arc;
 use tokio::codec::{Framed, LinesCodec, LinesCodecError};
 use tokio::io;
 use tokio::net::{TcpListener, TcpStream};
@@ -226,13 +227,13 @@ async fn process(
                             addr,
                             state.clone(),
                         )
-                        .await?;
+                            .await?;
                     } else {
                         error!("Command {} by {} is not known. dropping it.", command, addr);
 
                         let mut state = state.lock().await;
                         state
-                            .respond(addr, "* BAD Command not known\r\n")
+                            .respond(addr, "* BAD Command not known\r")
                             .await
                             .expect("Unable to write");
                     }
@@ -242,7 +243,7 @@ async fn process(
                         addr,
                         state.clone(),
                     )
-                    .await?;
+                        .await?;
                 }
             }
 
@@ -251,7 +252,26 @@ async fn process(
                     "an error occured while processing messages for {}; error = {:?}",
                     addr, e
                 );
-                // TODO handle reset
+
+                // Handle some extra errors specially
+                match e {
+                    LinesCodecError::MaxLineLengthExceeded => {}
+                    LinesCodecError::Io(e) => {
+                        match e.kind() {
+                            ConnectionReset => {
+                                error!("connection reset");
+                                return Ok(());
+                            }
+                            ConnectionAborted => {
+                                error!("connection aborted");
+                                return Ok(());
+                            }
+                            _ => {}
+                        }
+                        let mut state = state.lock().await;
+                        state.peers.remove(&addr);
+                    }
+                }
             }
             Ok(Message::Response(msg)) => {
                 peer.lines.send(msg).await?;
