@@ -229,7 +229,7 @@ async fn process(
                         commands::Commands::capability(args, addr, state.clone()).await?;
                     } else if command == "logout" {
                         commands::Commands::logout(args, addr, state.clone()).await?;
-                    } else if command == "select" {
+                    } else if command == "select" || command == "examine" {
                         commands::Commands::select(args, addr, state.clone()).await?;
                     } else if command == "list" {
                         commands::Commands::list(args, addr, state.clone()).await?;

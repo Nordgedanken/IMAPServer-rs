@@ -327,6 +327,7 @@ impl Commands {
         state: Arc<Mutex<Shared>>,
     ) -> Result<(), mpsc::error::UnboundedSendError> {
         let identifier = args[0];
+        let command = args[1];
         let mut state = state.lock().await;
 
         match state.peers.get(&addr).expect("unable to find peer").state {
@@ -358,9 +359,15 @@ impl Commands {
                     .respond(addr, "* OK [UIDNEXT 44292] Predicted next UID\r")
                     .await?;
 
-                let response = format!("{} {}", identifier, "OK [READ-WRITE] SELECT completed\r");
+                if command == "select" {
+                    let response = format!("{} {}", identifier, "OK [READ-WRITE] SELECT completed\r");
 
-                state.respond(addr, &response).await?;
+                    state.respond(addr, &response).await?;
+                } else {
+                    let response = format!("{} {}", identifier, "OK [READ-ONLY] SELECT completed\r");
+
+                    state.respond(addr, &response).await?;
+                }
 
                 //Print to view for debug
                 debug!(
