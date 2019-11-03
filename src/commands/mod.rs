@@ -24,7 +24,7 @@ impl Commands {
         state
             .respond(
                 addr,
-                "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT NAMESPACE ID LOGINDISABLED\r",
+                "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT NAMESPACE ID LIST-EXTENDED ENABLE LOGINDISABLED\r",
             )
             .await?;
 
@@ -82,6 +82,25 @@ impl Commands {
         Ok(())
     }
 
+    // TODO actually implement
+    pub async fn enable(
+        args: Vec<&str>,
+        addr: SocketAddr,
+        state: Arc<Mutex<Shared>>,
+    ) -> Result<(), mpsc::error::UnboundedSendError> {
+        let identifier = args[0];
+
+        let mut state = state.lock().await;
+
+        let response = format!("{} {}", identifier, "OK enabled\r");
+
+        state.respond(addr, &response).await?;
+
+        //Print to view for debug
+        debug!("Responded: {} {}", identifier, "OK enabled");
+        Ok(())
+    }
+
     pub async fn list(
         args: Vec<&str>,
         addr: SocketAddr,
@@ -94,14 +113,17 @@ impl Commands {
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
                 state
-                    .respond(addr, "* LIST  (\\Subscribed) \"/\" \"\"\r")
+                    .respond(addr, "* LIST (\\Marked \\HasNoChildren \\Noinferiors \\Subscribed) \".\" INBOX\r")
                     .await?;
                 state
-                    .respond(addr, "* LIST  (\\Subscribed) \"/\" \"INBOX/test\"\r")
+                    .respond(addr, "* LIST  (\\Subscribed) \".\" \"test\"\r")
                     .await?;
 
                 state
-                    .respond(addr, "* LIST  (\\Subscribed) \"/\" \"INBOX/Trash\"\r")
+                    .respond(
+                        addr,
+                        "* LIST  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r",
+                    )
                     .await?;
 
                 let response = format!("{} {}", identifier, "OK LIST Completed\r");
@@ -109,14 +131,11 @@ impl Commands {
                 state.respond(addr, &response).await?;
 
                 //Print to view for debug
-                debug!("Responded: {}", "* LIST (\\Subscribed) \"/\" \"\"");
+                debug!("Responded: {}", "* LIST (\\Marked \\HasNoChildren \\Noinferiors \\Subscribed) \".\" INBOX");
+                debug!("Responded: {}", "* LIST (\\Subscribed) \".\" \"test\"");
                 debug!(
                     "Responded: {}",
-                    "* LIST (\\Subscribed) \"/\" \"INBOX/test\""
-                );
-                debug!(
-                    "Responded: {}",
-                    "* LIST (\\Subscribed) \"/\" \"INBOX/Trash\""
+                    "* LIST (\\Subscribed \\Noinferiors) \".\" \"Trash\""
                 );
                 debug!("Responded: {} {}", identifier, "OK LIST Completed");
             }
@@ -144,12 +163,17 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                state.respond(addr, "* LSUB  () \".\" \"\"\r").await?;
                 state
-                    .respond(addr, "* LSUB  () \".\" \"INBOX.test\"\r")
+                    .respond(addr, "* LSUB (\\HasNoChildren) \".\" INBOX\r")
                     .await?;
                 state
-                    .respond(addr, "* LSUB  () \".\" \"INBOX.Trash\"\r")
+                    .respond(addr, "* LSUB  (\\Subscribed) \".\" \"test\"\r")
+                    .await?;
+                state
+                    .respond(
+                        addr,
+                        "* LSUB  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r",
+                    )
                     .await?;
 
                 let response = format!("{} {}", identifier, "OK LSUB Completed\r");
@@ -157,7 +181,12 @@ impl Commands {
                 state.respond(addr, &response).await?;
 
                 //Print to view for debug
-                debug!("Responded: {}", "* LSUB  () \".\" \"\"");
+                debug!("Responded: {}", "* LSUB (\\HasNoChildren) \".\" INBOX");
+                debug!("Responded: {}", "* LSUB (\\Subscribed) \".\" \"test\"");
+                debug!(
+                    "Responded: {}",
+                    "* LSUB (\\Subscribed \\Noinferiors) \".\" \"Trash\""
+                );
                 debug!("Responded: {} {}", identifier, "OK LSUB Completed");
             }
             _ => {
@@ -185,14 +214,20 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                let response = format!("* STATUS {} (MESSAGES 1 UIDNEXT 44292 UNSEEN 1 RECENT 1)\r", path);
+                let response = format!(
+                    "* STATUS {} (MESSAGES 1 UIDNEXT 44292 UNSEEN 1 RECENT 1)\r",
+                    path
+                );
                 state.respond(addr, &response).await?;
                 let response_completed = format!("{} {}", identifier, "OK STATUS Completed\r");
 
                 state.respond(addr, &response_completed).await?;
 
                 //Print to view for debug
-                debug!("Responded: * STATUS {} (MESSAGES 1 UIDNEXT 44292 UNSEEN 1 RECENT 1)", path);
+                debug!(
+                    "Responded: * STATUS {} (MESSAGES 1 UIDNEXT 44292 UNSEEN 1 RECENT 1)",
+                    path
+                );
                 debug!("Responded: {} {}", identifier, "OK STATUS Completed");
             }
             _ => {
@@ -228,7 +263,7 @@ impl Commands {
                 state.respond(addr, &response).await?;
 
                 //Print to view for debug
-                debug!("Responded: {}", "* NAMESPACE ((\"INBOX.\" \".\")) NIL  NIL");
+                debug!("Responded: {}", "* NAMESPACE ((\"\" \".\")) NIL  NIL");
                 debug!("Responded: {} {}", identifier, "OK NAMESPACE Completed");
             }
             _ => {
@@ -256,7 +291,10 @@ impl Commands {
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
                 state
-                    .respond(addr, "* ID (\"name\" \"IMAPServer-rs\" \"version\" \"0.1.0\")\r")
+                    .respond(
+                        addr,
+                        "* ID (\"name\" \"IMAPServer-rs\" \"version\" \"0.1.0\")\r",
+                    )
                     .await?;
 
                 let response = format!("{} {}", identifier, "OK ID Completed\r");
@@ -264,7 +302,10 @@ impl Commands {
                 state.respond(addr, &response).await?;
 
                 //Print to view for debug
-                debug!("Responded: {}", "* ID (\"name\" \"IMAPServer-rs\" \"version\" \"0.1.0\")");
+                debug!(
+                    "Responded: {}",
+                    "* ID (\"name\" \"IMAPServer-rs\" \"version\" \"0.1.0\")"
+                );
                 debug!("Responded: {} {}", identifier, "OK ID Completed");
             }
             _ => {
@@ -303,7 +344,10 @@ impl Commands {
                     .await?;
 
                 state
-                    .respond(addr, "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r")
+                    .respond(
+                        addr,
+                        "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r",
+                    )
                     .await?;
 
                 state
@@ -351,7 +395,7 @@ impl Commands {
             State::LoggedIn => {
                 let mailboxdummy = Mailbox::new();
 
-                let path = format!("{}/{}", mailboxdummy.mailbox_root, path.replace("\"", ""));
+                let path = format!("{}/{}", mailboxdummy.mailbox_root, path.replace("\"", "").replace(".", "/"));
                 debug!("{}", path);
                 mailboxdummy
                     .create_folder(path)

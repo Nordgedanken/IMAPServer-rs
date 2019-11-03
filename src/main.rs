@@ -208,7 +208,7 @@ async fn process(
 
     // Send Capabilities
     lines
-        .send(String::from("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT NAMESPACE ID LOGINDISABLED] IMAP4rev1 Service Ready\r"))
+        .send(String::from("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT NAMESPACE ID LIST-EXTENDED ENABLE LOGINDISABLED] IMAP4rev1 Service Ready\r"))
         .await?;
 
     // Register our peer with state which internally sets up some channels.
@@ -245,6 +245,8 @@ async fn process(
                         commands::Commands::id(args, addr, state.clone()).await?;
                     } else if command == "noop" {
                         commands::Commands::noop(args, addr, state.clone()).await?;
+                    } else if command == "enable" {
+                        commands::Commands::enable(args, addr, state.clone()).await?;
                     } else if command == "authenticate" {
                         commands::authenticate::Authentication::authenticate(
                             args,
