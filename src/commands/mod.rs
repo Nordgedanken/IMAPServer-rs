@@ -81,28 +81,6 @@ impl Commands {
         Ok(())
     }
 
-    #[deprecated(
-        since = "0.0.1",
-        note = "please use `commands::authenticate::authenticate` instead"
-    )]
-    pub async fn login(
-        args: Vec<&str>,
-        addr: SocketAddr,
-        state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
-        let identifier = args[0];
-
-        let mut state = state.lock().await;
-
-        let response = format!("{} {}", identifier, "OK LOGIN completed\r");
-
-        state.respond(addr, &response).await?;
-
-        //Print to view for debug
-        debug!("Responded: {} {}", identifier, "OK LOGIN completed\r");
-        Ok(())
-    }
-
     pub async fn list(
         args: Vec<&str>,
         addr: SocketAddr,
@@ -112,7 +90,7 @@ impl Commands {
 
         let mut state = state.lock().await;
 
-        state.respond(addr, "* LIST () \"/\" INBOX\r").await?;
+        state.respond(addr, "* LIST  () \"/\" \"\"\r").await?;
 
         let response = format!("{} {}", identifier, "OK LIST Completed\r");
 

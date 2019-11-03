@@ -7,9 +7,9 @@ use std::pin::Pin;
 use std::sync::Arc;
 
 use futures::io::ErrorKind::{ConnectionAborted, ConnectionReset};
+use futures::task::Context;
 use futures::Poll;
 use futures::StreamExt;
-use futures::task::Context;
 use log::{debug, error, info};
 use tokio::codec::{Framed, LinesCodec, LinesCodecError};
 use tokio::io;
@@ -211,8 +211,6 @@ async fn process(
 
                     if command == "capability" {
                         commands::Commands::capability(args, addr, state.clone()).await?;
-                    } else if command == "login" {
-                        commands::Commands::login(args, addr, state.clone()).await?;
                     } else if command == "logout" {
                         commands::Commands::logout(args, addr, state.clone()).await?;
                     } else if command == "select" {
@@ -227,7 +225,7 @@ async fn process(
                             addr,
                             state.clone(),
                         )
-                            .await?;
+                        .await?;
                     } else {
                         error!("Command {} by {} is not known. dropping it.", command, addr);
 
@@ -243,7 +241,7 @@ async fn process(
                         addr,
                         state.clone(),
                     )
-                        .await?;
+                    .await?;
                 }
             }
 
