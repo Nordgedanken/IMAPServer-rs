@@ -230,6 +230,8 @@ async fn process(
                         commands::Commands::select(args, addr, state.clone()).await?;
                     } else if command == "list" {
                         commands::Commands::list(args, addr, state.clone()).await?;
+                    } else if command == "lsub" {
+                        commands::Commands::lsub(args, addr, state.clone()).await?;
                     } else if command == "noop" {
                         commands::Commands::noop(args, addr, state.clone()).await?;
                     } else if command == "authenticate" {

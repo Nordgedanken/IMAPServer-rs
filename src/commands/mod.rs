@@ -95,14 +95,50 @@ impl Commands {
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
                 state.respond(addr, "* LIST  () \"/\" \"\"\r").await?;
+                state.respond(addr, "* LIST  () \"/\" \"~/test\"\r").await?;
 
                 let response = format!("{} {}", identifier, "OK LIST Completed\r");
 
                 state.respond(addr, &response).await?;
 
                 //Print to view for debug
-                debug!("Responded: {}", "* LIST () \"/\" \"INBOX\"");
+                debug!("Responded: {}", "* LIST () \"/\" \"\"");
                 debug!("Responded: {} {}", identifier, "OK LIST Completed");
+            }
+            _ => {
+                let response = format!("{} {}", identifier, "NO Please Login first!\r");
+
+                state.respond(addr, &response).await?;
+
+                //Print to view for debug
+                debug!("Responded: {} {}", identifier, "NO Please Login first!");
+            }
+        }
+
+        Ok(())
+    }
+
+    pub async fn lsub(
+        args: Vec<&str>,
+        addr: SocketAddr,
+        state: Arc<Mutex<Shared>>,
+    ) -> Result<(), mpsc::error::UnboundedSendError> {
+        let identifier = args[0];
+
+        let mut state = state.lock().await;
+
+        match state.peers.get(&addr).expect("unable to find peer").state {
+            State::LoggedIn => {
+                state.respond(addr, "* LSUB  () \".\" \"\"\r").await?;
+                state.respond(addr, "* LSUB  () \".\" \"test\"\r").await?;
+
+                let response = format!("{} {}", identifier, "OK LSUB Completed\r");
+
+                state.respond(addr, &response).await?;
+
+                //Print to view for debug
+                debug!("Responded: {}", "* LSUB  () \".\" \"\"");
+                debug!("Responded: {} {}", identifier, "OK LSUB Completed");
             }
             _ => {
                 let response = format!("{} {}", identifier, "NO Please Login first!\r");
