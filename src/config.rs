@@ -4,4 +4,5 @@ use serde::{Deserialize, Serialize};
 struct Config {
     mailbox_root: String,
     server_ip: String,
+    log_level: String,
 }

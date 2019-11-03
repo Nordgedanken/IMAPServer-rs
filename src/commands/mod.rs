@@ -24,7 +24,7 @@ impl Commands {
         state
             .respond(
                 addr,
-                "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT LOGINDISABLED\r",
+                "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT NAMESPACE ID LOGINDISABLED\r",
             )
             .await?;
 
@@ -93,16 +93,31 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                state.respond(addr, "* LIST  () \"/\" \"\"\r").await?;
-                state.respond(addr, "* LIST  () \"/\" \"INBOX/test\"\r").await?;
+                state
+                    .respond(addr, "* LIST  (\\Subscribed) \"/\" \"\"\r")
+                    .await?;
+                state
+                    .respond(addr, "* LIST  (\\Subscribed) \"/\" \"INBOX/test\"\r")
+                    .await?;
+
+                state
+                    .respond(addr, "* LIST  (\\Subscribed) \"/\" \"INBOX/Trash\"\r")
+                    .await?;
 
                 let response = format!("{} {}", identifier, "OK LIST Completed\r");
 
                 state.respond(addr, &response).await?;
 
                 //Print to view for debug
-                debug!("Responded: {}", "* LIST () \"/\" \"\"");
-                debug!("Responded: {}", "* LIST () \"/\" \"INBOX/test\"");
+                debug!("Responded: {}", "* LIST (\\Subscribed) \"/\" \"\"");
+                debug!(
+                    "Responded: {}",
+                    "* LIST (\\Subscribed) \"/\" \"INBOX/test\""
+                );
+                debug!(
+                    "Responded: {}",
+                    "* LIST (\\Subscribed) \"/\" \"INBOX/Trash\""
+                );
                 debug!("Responded: {} {}", identifier, "OK LIST Completed");
             }
             _ => {
@@ -130,7 +145,12 @@ impl Commands {
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
                 state.respond(addr, "* LSUB  () \".\" \"\"\r").await?;
-                state.respond(addr, "* LSUB  () \".\" \"#INBOX.test\"\r").await?;
+                state
+                    .respond(addr, "* LSUB  () \".\" \"INBOX.test\"\r")
+                    .await?;
+                state
+                    .respond(addr, "* LSUB  () \".\" \"INBOX.Trash\"\r")
+                    .await?;
 
                 let response = format!("{} {}", identifier, "OK LSUB Completed\r");
 
@@ -139,6 +159,113 @@ impl Commands {
                 //Print to view for debug
                 debug!("Responded: {}", "* LSUB  () \".\" \"\"");
                 debug!("Responded: {} {}", identifier, "OK LSUB Completed");
+            }
+            _ => {
+                let response = format!("{} {}", identifier, "NO Please Login first!\r");
+
+                state.respond(addr, &response).await?;
+
+                //Print to view for debug
+                debug!("Responded: {} {}", identifier, "NO Please Login first!");
+            }
+        }
+
+        Ok(())
+    }
+
+    pub async fn status(
+        args: Vec<&str>,
+        addr: SocketAddr,
+        state: Arc<Mutex<Shared>>,
+    ) -> Result<(), mpsc::error::UnboundedSendError> {
+        let identifier = args[0];
+        let path = args[2];
+
+        let mut state = state.lock().await;
+
+        match state.peers.get(&addr).expect("unable to find peer").state {
+            State::LoggedIn => {
+                let response = format!("* STATUS {} (MESSAGES 1 UIDNEXT 44292 UNSEEN 1 RECENT 1)\r", path);
+                state.respond(addr, &response).await?;
+                let response_completed = format!("{} {}", identifier, "OK STATUS Completed\r");
+
+                state.respond(addr, &response_completed).await?;
+
+                //Print to view for debug
+                debug!("Responded: * STATUS {} (MESSAGES 1 UIDNEXT 44292 UNSEEN 1 RECENT 1)", path);
+                debug!("Responded: {} {}", identifier, "OK STATUS Completed");
+            }
+            _ => {
+                let response = format!("{} {}", identifier, "NO Please Login first!\r");
+
+                state.respond(addr, &response).await?;
+
+                //Print to view for debug
+                debug!("Responded: {} {}", identifier, "NO Please Login first!");
+            }
+        }
+
+        Ok(())
+    }
+
+    pub async fn namespace(
+        args: Vec<&str>,
+        addr: SocketAddr,
+        state: Arc<Mutex<Shared>>,
+    ) -> Result<(), mpsc::error::UnboundedSendError> {
+        let identifier = args[0];
+
+        let mut state = state.lock().await;
+
+        match state.peers.get(&addr).expect("unable to find peer").state {
+            State::LoggedIn => {
+                state
+                    .respond(addr, "* NAMESPACE ((\"\" \".\")) NIL  NIL\r")
+                    .await?;
+
+                let response = format!("{} {}", identifier, "OK NAMESPACE Completed\r");
+
+                state.respond(addr, &response).await?;
+
+                //Print to view for debug
+                debug!("Responded: {}", "* NAMESPACE ((\"INBOX.\" \".\")) NIL  NIL");
+                debug!("Responded: {} {}", identifier, "OK NAMESPACE Completed");
+            }
+            _ => {
+                let response = format!("{} {}", identifier, "NO Please Login first!\r");
+
+                state.respond(addr, &response).await?;
+
+                //Print to view for debug
+                debug!("Responded: {} {}", identifier, "NO Please Login first!");
+            }
+        }
+
+        Ok(())
+    }
+
+    pub async fn id(
+        args: Vec<&str>,
+        addr: SocketAddr,
+        state: Arc<Mutex<Shared>>,
+    ) -> Result<(), mpsc::error::UnboundedSendError> {
+        let identifier = args[0];
+
+        let mut state = state.lock().await;
+
+        match state.peers.get(&addr).expect("unable to find peer").state {
+            State::LoggedIn => {
+                state
+                    .respond(addr, "* ID (\"name\" \"IMAPServer-rs\" \"version\" \"0.1.0\")\r")
+                    .await?;
+
+                let response = format!("{} {}", identifier, "OK ID Completed\r");
+
+                state.respond(addr, &response).await?;
+
+                //Print to view for debug
+                debug!("Responded: {}", "* ID (\"name\" \"IMAPServer-rs\" \"version\" \"0.1.0\")");
+                debug!("Responded: {} {}", identifier, "OK ID Completed");
             }
             _ => {
                 let response = format!("{} {}", identifier, "NO Please Login first!\r");
@@ -164,34 +291,37 @@ impl Commands {
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
                 state.respond(addr, "* 1 EXISTS\r").await?;
-                state.respond(addr, "* 1 RECENT\r").await?;
-                state
-                    .respond(addr, "* OK [UNSEEN 1] Message 1 is first unseen\r")
-                    .await?;
-                state
-                    .respond(addr, "* OK [UIDNEXT 1] Predicted next UID\r")
-                    .await?;
                 state
                     .respond(
                         addr,
                         "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r",
                     )
                     .await?;
+                state.respond(addr, "* 1 RECENT\r").await?;
                 state
-                    .respond(
-                        addr,
-                        "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r",
-                    )
+                    .respond(addr, "* OK [UNSEEN 1] Message 1 is first unseen\r")
                     .await?;
 
-                let response = format!("{} {}", identifier, "OK [READ-ONLY] SELECT completed\r");
+                state
+                    .respond(addr, "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r")
+                    .await?;
+
+                state
+                    .respond(addr, "* OK [UIDVALIDITY 3857529045] UIDs valid\r")
+                    .await?;
+
+                state
+                    .respond(addr, "* OK [UIDNEXT 44292] Predicted next UID\r")
+                    .await?;
+
+                let response = format!("{} {}", identifier, "OK [READ-WRITE] SELECT completed\r");
 
                 state.respond(addr, &response).await?;
 
                 //Print to view for debug
                 debug!(
                     "Responded (truncated): {} {}",
-                    identifier, "OK [READ-ONLY] SELECT completed"
+                    identifier, "OK [READ-WRITE] SELECT completed"
                 );
             }
             _ => {
@@ -211,7 +341,7 @@ impl Commands {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError>  {
+    ) -> Result<(), mpsc::error::UnboundedSendError> {
         let identifier = args[0];
         let path = args[2];
 
@@ -223,7 +353,10 @@ impl Commands {
 
                 let path = format!("{}/{}", mailboxdummy.mailbox_root, path.replace("\"", ""));
                 debug!("{}", path);
-                mailboxdummy.create_folder(path).await.expect("failed to create folder");
+                mailboxdummy
+                    .create_folder(path)
+                    .await
+                    .expect("failed to create folder");
 
                 // TODO handle error and respond that one to the client
 
