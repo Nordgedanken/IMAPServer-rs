@@ -29,3 +29,6 @@ fern = "0.5"
 chrono = "0.4"
 serde = { version = "1.0", features = ["derive"]}
 serde_yaml = "0.8"
+diesel = { version = "1.0.0", features = ["sqlite"] }
+dotenv = "0.9.0"
+easy_password = "0.1.2"
