@@ -6,6 +6,7 @@ use std::net::SocketAddr;
 use std::pin::Pin;
 use std::sync::Arc;
 
+use crate::mailbox::{check_mailbox_folder, check_mailbox_root};
 use futures::io::ErrorKind::{ConnectionAborted, ConnectionReset};
 use futures::task::Context;
 use futures::Poll;
@@ -18,7 +19,9 @@ use tokio::prelude::*;
 use tokio::sync::{mpsc, Mutex};
 
 mod commands;
+mod config;
 mod log_helper;
+mod mailbox;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -35,6 +38,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut listener = TcpListener::bind(&addr).await?;
     info!("Listening on: {}", addr);
 
+    // Startup procedure
+    info!("Starting up...");
+
+    check_mailbox_root().await?;
+    // Create INBOX if needed
+    check_mailbox_folder("./mailbox_root/INBOX").await?;
+
+    // Listening
+    info!("Start listening...");
     loop {
         // Asynchronously wait for an inbound socket.
         let (stream, addr) = listener.accept().await?;
@@ -58,6 +70,7 @@ type Tx = mpsc::UnboundedSender<String>;
 /// Shorthand for the receive half of the message channel.
 type Rx = mpsc::UnboundedReceiver<String>;
 
+#[derive(PartialEq)]
 enum State {
     LoggedOut,
     LoggedIn,

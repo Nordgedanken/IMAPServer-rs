@@ -103,14 +103,7 @@ impl Authentication {
 
         peer.identifier = identifier.to_string();
 
-        // This space is important!
         state.respond(addr, "+\r").await?;
-
-        // DO NOT INLINE!
-        // This space is important!
-        let response = format!("{} {}", identifier, "+\r");
-
-        //state.respond(addr, &response).await?;
 
         //Print to view for debug
         debug!("Responded: +");
