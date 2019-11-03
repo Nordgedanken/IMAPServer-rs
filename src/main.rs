@@ -6,7 +6,7 @@ use std::net::SocketAddr;
 use std::pin::Pin;
 use std::sync::Arc;
 
-use crate::mailbox::{check_mailbox_folder, check_mailbox_root};
+use crate::mailbox::Mailbox;
 use futures::io::ErrorKind::{ConnectionAborted, ConnectionReset};
 use futures::task::Context;
 use futures::Poll;
@@ -41,9 +41,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Startup procedure
     info!("Starting up...");
 
-    check_mailbox_root().await?;
+    let mailboxdummy = Mailbox::new();
+    mailboxdummy.check_mailbox_root().await?;
     // Create INBOX if needed
-    check_mailbox_folder("./mailbox_root/INBOX").await?;
+    mailboxdummy
+        .check_mailbox_folder("./mailbox_root/INBOX")
+        .await?;
 
     // Listening
     info!("Start listening...");
@@ -232,6 +235,8 @@ async fn process(
                         commands::Commands::list(args, addr, state.clone()).await?;
                     } else if command == "lsub" {
                         commands::Commands::lsub(args, addr, state.clone()).await?;
+                    } else if command == "create" {
+                        commands::Commands::create(args, addr, state.clone()).await?;
                     } else if command == "noop" {
                         commands::Commands::noop(args, addr, state.clone()).await?;
                     } else if command == "authenticate" {

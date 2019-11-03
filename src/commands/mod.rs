@@ -2,10 +2,9 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use log::debug;
-use tokio::io::AsyncWriteExt;
-use tokio::net::tcp::split::WriteHalf;
 use tokio::sync::{mpsc, Mutex};
 
+use crate::mailbox::Mailbox;
 use crate::{Shared, State};
 
 pub mod authenticate;
@@ -95,7 +94,7 @@ impl Commands {
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
                 state.respond(addr, "* LIST  () \"/\" \"\"\r").await?;
-                state.respond(addr, "* LIST  () \"/\" \"~/test\"\r").await?;
+                state.respond(addr, "* LIST  () \"/\" \"INBOX/test\"\r").await?;
 
                 let response = format!("{} {}", identifier, "OK LIST Completed\r");
 
@@ -103,6 +102,7 @@ impl Commands {
 
                 //Print to view for debug
                 debug!("Responded: {}", "* LIST () \"/\" \"\"");
+                debug!("Responded: {}", "* LIST () \"/\" \"INBOX/test\"");
                 debug!("Responded: {} {}", identifier, "OK LIST Completed");
             }
             _ => {
@@ -130,7 +130,7 @@ impl Commands {
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
                 state.respond(addr, "* LSUB  () \".\" \"\"\r").await?;
-                state.respond(addr, "* LSUB  () \".\" \"test\"\r").await?;
+                state.respond(addr, "* LSUB  () \".\" \"#INBOX.test\"\r").await?;
 
                 let response = format!("{} {}", identifier, "OK LSUB Completed\r");
 
@@ -193,6 +193,46 @@ impl Commands {
                     "Responded (truncated): {} {}",
                     identifier, "OK [READ-ONLY] SELECT completed"
                 );
+            }
+            _ => {
+                let response = format!("{} {}", identifier, "NO Please Login first!\r");
+
+                state.respond(addr, &response).await?;
+
+                //Print to view for debug
+                debug!("Responded: {} {}", identifier, "NO Please Login first!");
+            }
+        }
+
+        Ok(())
+    }
+
+    pub async fn create(
+        args: Vec<&str>,
+        addr: SocketAddr,
+        state: Arc<Mutex<Shared>>,
+    ) -> Result<(), mpsc::error::UnboundedSendError>  {
+        let identifier = args[0];
+        let path = args[2];
+
+        let mut state = state.lock().await;
+
+        match state.peers.get(&addr).expect("unable to find peer").state {
+            State::LoggedIn => {
+                let mailboxdummy = Mailbox::new();
+
+                let path = format!("{}/{}", mailboxdummy.mailbox_root, path.replace("\"", ""));
+                debug!("{}", path);
+                mailboxdummy.create_folder(path).await.expect("failed to create folder");
+
+                // TODO handle error and respond that one to the client
+
+                let response = format!("{} {}", identifier, "OK CREATE Completed\r");
+
+                state.respond(addr, &response).await?;
+
+                //Print to view for debug
+                debug!("Responded: {} {}", identifier, "OK CREATE Completed");
             }
             _ => {
                 let response = format!("{} {}", identifier, "NO Please Login first!\r");
