@@ -3,14 +3,10 @@
 
 environment:
   global:
-  # TODO This is the Rust channel that build jobs will use by default but can be
-  # overridden on a case by case basis down below
     RUST_VERSION: stable
 
-    # TODO Update this to match the name of your project.
     CRATE_NAME: IMAPServer
 
-  # TODO These are all the build jobs. Adjust as necessary. Comment out what you
   # don't need
   matrix:
     # MinGW
@@ -51,8 +47,7 @@ test_script:
     )
 
 before_deploy:
-  # TODO Update this to build the artifacts that matter to you
-  - cargo rustc --target %TARGET% --release --bin hello -- -C lto
+  - cargo rustc --target %TARGET% --release --bin IMAPServer -- -C lto
   - ps: ci\before_deploy.ps1
 
 #deploy:

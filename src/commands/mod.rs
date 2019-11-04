@@ -49,14 +49,15 @@ impl Commands {
 
         let mut state = state.lock().await;
 
-        state
-            .respond(addr, "* BYE IMAP4rev1 Server logging out\r")
-            .await?;
+        let one = "* BYE IMAP4rev1 Server logging out\r\n";
 
         state.peers.remove(&addr);
 
-        let response = format!("{}{}", identifier, " OK LOGOUT completed");
-        state.respond(addr, &response).await?;
+        let response = format!("{}{}", identifier, " OK LOGOUT completed\r");
+
+        let complete = [one, &response].concat();
+
+        state.respond(addr, &complete).await?;
 
         //Print to view for debug
         debug!("Responded: {}", "* BYE IMAP4rev1 Server logging out\r");
@@ -112,26 +113,21 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                state
-                    .respond(addr, "* LIST (\\Marked \\HasNoChildren \\Noinferiors \\Subscribed) \".\" INBOX\r")
-                    .await?;
-                state
-                    .respond(addr, "* LIST  (\\Subscribed) \".\" \"test\"\r")
-                    .await?;
-
-                state
-                    .respond(
-                        addr,
-                        "* LIST  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r",
-                    )
-                    .await?;
+                let one = "* LIST (\\Marked \\HasNoChildren \\Noinferiors \\Subscribed) \".\" INBOX\r\n";
+                let two = "* LIST  (\\Subscribed) \".\" \"test\"\r\n";
+                let three = "* LIST  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r\n";
 
                 let response = format!("{} {}", identifier, "OK LIST Completed\r");
 
-                state.respond(addr, &response).await?;
+                let complete = [one, two, three, &response].concat();
+
+                state.respond(addr, &complete).await?;
 
                 //Print to view for debug
-                debug!("Responded: {}", "* LIST (\\Marked \\HasNoChildren \\Noinferiors \\Subscribed) \".\" INBOX");
+                debug!(
+                    "Responded: {}",
+                    "* LIST (\\Marked \\HasNoChildren \\Noinferiors \\Subscribed) \".\" INBOX"
+                );
                 debug!("Responded: {}", "* LIST (\\Subscribed) \".\" \"test\"");
                 debug!(
                     "Responded: {}",
@@ -163,22 +159,16 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                state
-                    .respond(addr, "* LSUB (\\HasNoChildren) \".\" INBOX\r")
-                    .await?;
-                state
-                    .respond(addr, "* LSUB  (\\Subscribed) \".\" \"test\"\r")
-                    .await?;
-                state
-                    .respond(
-                        addr,
-                        "* LSUB  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r",
-                    )
-                    .await?;
+                let one = "* LSUB (\\HasNoChildren) \".\" INBOX\r\n";
+                let two = "* LSUB  (\\Subscribed) \".\" \"test\"\r\n";
+                let three = "* LSUB  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r\n";
 
                 let response = format!("{} {}", identifier, "OK LSUB Completed\r");
 
-                state.respond(addr, &response).await?;
+
+                let complete = [one, two, three, &response].concat();
+
+                state.respond(addr, &complete).await?;
 
                 //Print to view for debug
                 debug!("Responded: {}", "* LSUB (\\HasNoChildren) \".\" INBOX");
@@ -215,13 +205,15 @@ impl Commands {
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
                 let response = format!(
-                    "* STATUS {} (MESSAGES 1 UIDNEXT 44292 UNSEEN 1 RECENT 1)\r",
+                    "* STATUS {} (MESSAGES 1 UIDNEXT 44292 UNSEEN 1 RECENT 1)\r\n",
                     path
                 );
-                state.respond(addr, &response).await?;
+
                 let response_completed = format!("{} {}", identifier, "OK STATUS Completed\r");
 
-                state.respond(addr, &response_completed).await?;
+                let complete = [response, response_completed].concat();
+
+                state.respond(addr, &complete).await?;
 
                 //Print to view for debug
                 debug!(
@@ -254,13 +246,13 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                state
-                    .respond(addr, "* NAMESPACE ((\"\" \".\")) NIL  NIL\r")
-                    .await?;
+                let one = "* NAMESPACE ((\"\" \".\")) NIL  NIL\r\n";
 
                 let response = format!("{} {}", identifier, "OK NAMESPACE Completed\r");
 
-                state.respond(addr, &response).await?;
+                let complete = [one, &response].concat();
+
+                state.respond(addr, &complete).await?;
 
                 //Print to view for debug
                 debug!("Responded: {}", "* NAMESPACE ((\"\" \".\")) NIL  NIL");
@@ -290,16 +282,13 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                state
-                    .respond(
-                        addr,
-                        "* ID (\"name\" \"IMAPServer-rs\" \"version\" \"0.1.0\")\r",
-                    )
-                    .await?;
+                let one = "* ID (\"name\" \"IMAPServer-rs\" \"version\" \"0.1.0\")\r\n";
 
                 let response = format!("{} {}", identifier, "OK ID Completed\r");
 
-                state.respond(addr, &response).await?;
+                let complete = [one, &response].concat();
+
+                state.respond(addr, &complete).await?;
 
                 //Print to view for debug
                 debug!(
@@ -332,41 +321,34 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                state.respond(addr, "* 1 EXISTS\r").await?;
-                state
-                    .respond(
-                        addr,
-                        "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r",
-                    )
-                    .await?;
-                state.respond(addr, "* 1 RECENT\r").await?;
-                state
-                    .respond(addr, "* OK [UNSEEN 1] Message 1 is first unseen\r")
-                    .await?;
+                let one = "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n";
+                let two = "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r\n";
+                let three = "* 2 EXISTS\r\n";
+                let four = "* 1 RECENT\r\n";
+                let five = "* OK [UNSEEN 1] First unseen\r\n";
 
-                state
-                    .respond(
-                        addr,
-                        "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r",
-                    )
-                    .await?;
-
-                state
+                /*state
                     .respond(addr, "* OK [UIDVALIDITY 3857529045] UIDs valid\r")
                     .await?;
 
                 state
                     .respond(addr, "* OK [UIDNEXT 44292] Predicted next UID\r")
-                    .await?;
+                    .await?;*/
 
                 if command == "select" {
-                    let response = format!("{} {}", identifier, "OK [READ-WRITE] SELECT completed\r");
+                    let response =
+                        format!("{} {}", identifier, "OK [READ-WRITE] SELECT completed\r");
 
-                    state.respond(addr, &response).await?;
+                    let complete = [one, two, three, four, five, &response].concat();
+
+                    state.respond(addr, &complete).await?;
                 } else {
-                    let response = format!("{} {}", identifier, "OK [READ-ONLY] SELECT completed\r");
+                    let response =
+                        format!("{} {}", identifier, "OK [READ-ONLY] SELECT completed\r");
 
-                    state.respond(addr, &response).await?;
+                    let complete = [one, two, three, four, five, &response].concat();
+
+                    state.respond(addr, &complete).await?;
                 }
 
                 //Print to view for debug
@@ -402,7 +384,11 @@ impl Commands {
             State::LoggedIn => {
                 let mailboxdummy = Mailbox::new();
 
-                let path = format!("{}/{}", mailboxdummy.mailbox_root, path.replace("\"", "").replace(".", "/"));
+                let path = format!(
+                    "{}/{}",
+                    mailboxdummy.mailbox_root,
+                    path.replace("\"", "").replace(".", "/")
+                );
                 debug!("{}", path);
                 mailboxdummy
                     .create_folder(path)
