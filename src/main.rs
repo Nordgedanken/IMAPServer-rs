@@ -1,12 +1,17 @@
 #![warn(missing_debug_implementations)]
 
+#[macro_use]
+extern crate diesel;
+#[macro_use]
+extern crate diesel_migrations;
+
 use std::collections::HashMap;
 use std::error::Error;
 use std::net::SocketAddr;
 use std::pin::Pin;
 use std::sync::Arc;
 
-use crate::mailbox::Mailbox;
+use diesel_migrations::embed_migrations;
 use futures::io::ErrorKind::{ConnectionAborted, ConnectionReset};
 use futures::task::Context;
 use futures::Poll;
@@ -18,14 +23,26 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::prelude::*;
 use tokio::sync::{mpsc, Mutex};
 
+use crate::mailbox::Mailbox;
+
 mod commands;
 mod config;
+mod database;
 mod log_helper;
 mod mailbox;
+mod models;
+mod schema;
+#[cfg(test)]
+mod tests;
+
+embed_migrations!("./migrations");
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     log_helper::setup_logger().expect("Unable to start logger.");
+
+    let connection = database::establish_connection();
+    embedded_migrations::run(&connection).expect("failed to run database migrations");
 
     // Create the shared state. This is how all the peers communicate.
     //
@@ -286,16 +303,19 @@ async fn process(
                         match e.kind() {
                             ConnectionReset => {
                                 error!("connection reset");
-                                return Ok(());
                             }
                             ConnectionAborted => {
                                 error!("connection aborted");
-                                return Ok(());
+                            }
+                            std::io::ErrorKind::BrokenPipe => {
+                                error!("broken pipe");
                             }
                             _ => {}
                         }
                         let mut state = state.lock().await;
                         state.peers.remove(&addr);
+
+                        return Ok(());
                     }
                 }
             }

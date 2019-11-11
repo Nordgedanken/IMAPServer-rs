@@ -51,13 +51,13 @@ impl Commands {
 
         let one = "* BYE IMAP4rev1 Server logging out\r\n";
 
-        state.peers.remove(&addr);
-
         let response = format!("{}{}", identifier, " OK LOGOUT completed\r");
 
         let complete = [one, &response].concat();
 
         state.respond(addr, &complete).await?;
+
+        state.peers.remove(&addr);
 
         //Print to view for debug
         debug!("Responded: {}", "* BYE IMAP4rev1 Server logging out\r");
@@ -113,7 +113,8 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                let one = "* LIST (\\Marked \\HasNoChildren \\Noinferiors \\Subscribed) \".\" INBOX\r\n";
+                let one =
+                    "* LIST (\\Marked \\HasNoChildren \\Noinferiors \\Subscribed) \".\" INBOX\r\n";
                 let two = "* LIST  (\\Subscribed) \".\" \"test\"\r\n";
                 let three = "* LIST  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r\n";
 
@@ -165,7 +166,6 @@ impl Commands {
 
                 let response = format!("{} {}", identifier, "OK LSUB Completed\r");
 
-
                 let complete = [one, two, three, &response].concat();
 
                 state.respond(addr, &complete).await?;
@@ -205,8 +205,8 @@ impl Commands {
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
                 let response = format!(
-                    "* STATUS {} (MESSAGES 1 UIDNEXT 44292 UNSEEN 1 RECENT 1)\r\n",
-                    path
+                    "* STATUS {} (MESSAGES 2 UIDNEXT 44292 UNSEEN 1 RECENT 1)\r\n",
+                    path.replace("\"", "")
                 );
 
                 let response_completed = format!("{} {}", identifier, "OK STATUS Completed\r");
@@ -217,7 +217,7 @@ impl Commands {
 
                 //Print to view for debug
                 debug!(
-                    "Responded: * STATUS {} (MESSAGES 1 UIDNEXT 44292 UNSEEN 1 RECENT 1)",
+                    "Responded: * STATUS {} (MESSAGES 2 UIDNEXT 44292 UNSEEN 1 RECENT 1)",
                     path
                 );
                 debug!("Responded: {} {}", identifier, "OK STATUS Completed");
