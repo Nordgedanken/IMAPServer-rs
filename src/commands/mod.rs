@@ -382,7 +382,9 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                let mailboxdummy = Mailbox::new();
+                let email = &state.peers.get(&addr).expect("unable to find peer").user;
+
+                let mailboxdummy = Mailbox::load(email.to_string()).expect("failed to get mailbox");
 
                 let path = format!(
                     "{}/{}",

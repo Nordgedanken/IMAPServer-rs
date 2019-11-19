@@ -58,12 +58,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Startup procedure
     info!("Starting up...");
 
-    let mailboxdummy = Mailbox::new();
-    mailboxdummy.check_mailbox_root().await?;
-    // Create INBOX if needed
-    mailboxdummy
-        .check_mailbox_folder("./mailbox_root/INBOX")
-        .await?;
+    let mailboxes = Mailbox::load_all().expect("failed to get mailbox");
+
+    for mailbox in &mailboxes {
+        mailbox.check_mailbox_root().await?;
+
+        // Create INBOX if needed
+        mailbox.check_mailbox_folder("INBOX").await?;
+
+        // Create Trash if needed
+        mailbox.check_mailbox_folder("Trash").await?;
+
+        // Create test if needed
+        mailbox.check_mailbox_folder("test").await?;
+    }
 
     // Listening
     info!("Start listening...");
@@ -100,6 +108,7 @@ struct Connection {
     state: State,
     identifier: String,
     tx: Tx,
+    user: String,
 }
 
 /// Data that is shared between all peers in the chat server.
@@ -170,6 +179,7 @@ impl Peer {
         let connection = Connection {
             identifier: "".to_string(),
             state: State::LoggedOut,
+            user: String::new(),
             tx,
         };
         state.lock().await.peers.insert(addr, connection);

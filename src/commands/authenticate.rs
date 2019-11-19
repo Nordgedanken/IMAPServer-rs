@@ -50,6 +50,12 @@ impl Authentication {
                 .peers
                 .get_mut(&addr)
                 .expect("unable to find peer")
+                .user = up[1].to_string();
+
+            state
+                .peers
+                .get_mut(&addr)
+                .expect("unable to find peer")
                 .state = State::LoggedIn;
 
             //Print to view for debug

@@ -5,7 +5,7 @@ pub struct User {
     pub id: i32,
     pub email: String,
     pub password_hash: String,
-    pub uid_validity_identifier: String,
+    pub uid_validity_identifier: i32,
 }
 
 #[derive(Debug, Insertable)]
@@ -13,5 +13,5 @@ pub struct User {
 pub struct NewUser<'a> {
     pub email: &'a str,
     pub password_hash: &'a str,
-    pub uid_validity_identifier: &'a str,
+    pub uid_validity_identifier: i32,
 }
