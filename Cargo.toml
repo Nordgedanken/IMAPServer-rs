@@ -25,7 +25,7 @@ bytes = "0.4.12"
 mailparse = "0.8.2"
 base64 = "0.10.1"
 log = "0.4"
-fern = "0.5"
+fern = {version = "0.5", features = ["colored"]}
 chrono = "0.4"
 serde = { version = "1.0", features = ["derive"]}
 serde_yaml = "0.8"

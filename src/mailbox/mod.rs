@@ -2,7 +2,7 @@ use std::path::Path;
 
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use futures::StreamExt;
-use log::{debug, warn};
+use log::warn;
 use rand::{thread_rng, Rng};
 use tokio::fs::{create_dir_all, metadata, read_dir};
 
@@ -105,8 +105,7 @@ impl Mailbox {
                 dirs_lsub.push("* LSUB  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r\n");
                 continue;
             } else {
-                let path_string =
-                    format!("* LSUB  (\\Subscribed) \".\" {:?}\r\n", dir.file_name());
+                let path_string = format!("* LSUB  (\\Subscribed) \".\" {:?}\r\n", dir.file_name());
                 let path_string = string_to_static_str(path_string);
                 dirs_lsub.push(path_string);
                 continue;
@@ -140,9 +139,7 @@ impl Mailbox {
                 continue;
             } else {
                 // TODO actually check if subscribed or not.
-                let path_string =
-                    format!("* LIST (\\Subscribed) \".\" {:?}\r\n", dir.file_name());
-                debug!("DEBUG PATH: {}", path_string);
+                let path_string = format!("* LIST (\\Subscribed) \".\" {:?}\r\n", dir.file_name());
                 let path_string = string_to_static_str(path_string);
                 dirs_list.push(path_string);
                 continue;
