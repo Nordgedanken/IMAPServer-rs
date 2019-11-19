@@ -113,27 +113,23 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                let one =
-                    "* LIST (\\Marked \\HasNoChildren \\Noinferiors \\Subscribed) \".\" INBOX\r\n";
-                let two = "* LIST  (\\Subscribed) \".\" \"test\"\r\n";
-                let three = "* LIST  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r\n";
+                let email = &state.peers.get(&addr).expect("unable to find peer").user;
+
+                let mailbox = Mailbox::load(email.to_string()).expect("failed to get mailbox");
+
+                let mut folders: Vec<String> =
+                    mailbox.get_list().await.expect("unable to get folders");
+                debug!("Responded: {:?}", folders);
 
                 let response = format!("{} {}", identifier, "OK LIST Completed\r");
+                folders.push(response);
 
-                let complete = [one, two, three, &response].concat();
+                let complete = folders.concat();
 
                 state.respond(addr, &complete).await?;
 
                 //Print to view for debug
-                debug!(
-                    "Responded: {}",
-                    "* LIST (\\Marked \\HasNoChildren \\Noinferiors \\Subscribed) \".\" INBOX"
-                );
-                debug!("Responded: {}", "* LIST (\\Subscribed) \".\" \"test\"");
-                debug!(
-                    "Responded: {}",
-                    "* LIST (\\Subscribed \\Noinferiors) \".\" \"Trash\""
-                );
+
                 debug!("Responded: {} {}", identifier, "OK LIST Completed");
             }
             _ => {
@@ -160,23 +156,22 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                let one = "* LSUB (\\HasNoChildren) \".\" INBOX\r\n";
-                let two = "* LSUB  (\\Subscribed) \".\" \"test\"\r\n";
-                let three = "* LSUB  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r\n";
+                let email = &state.peers.get(&addr).expect("unable to find peer").user;
+
+                let mailbox = Mailbox::load(email.to_string()).expect("failed to get mailbox");
+
+                let mut folders: Vec<String> =
+                    mailbox.get_lsub().await.expect("unable to get folders");
+                debug!("Responded: {:?}", folders);
 
                 let response = format!("{} {}", identifier, "OK LSUB Completed\r");
+                folders.push(response);
 
-                let complete = [one, two, three, &response].concat();
+                let complete = folders.concat();
 
                 state.respond(addr, &complete).await?;
 
                 //Print to view for debug
-                debug!("Responded: {}", "* LSUB (\\HasNoChildren) \".\" INBOX");
-                debug!("Responded: {}", "* LSUB (\\Subscribed) \".\" \"test\"");
-                debug!(
-                    "Responded: {}",
-                    "* LSUB (\\Subscribed \\Noinferiors) \".\" \"Trash\""
-                );
                 debug!("Responded: {} {}", identifier, "OK LSUB Completed");
             }
             _ => {
@@ -384,15 +379,11 @@ impl Commands {
             State::LoggedIn => {
                 let email = &state.peers.get(&addr).expect("unable to find peer").user;
 
-                let mailboxdummy = Mailbox::load(email.to_string()).expect("failed to get mailbox");
+                let mailbox = Mailbox::load(email.to_string()).expect("failed to get mailbox");
 
-                let path = format!(
-                    "{}/{}",
-                    mailboxdummy.mailbox_root,
-                    path.replace("\"", "").replace(".", "/")
-                );
+                let path = path.replace("\"", "").replace(".", "/");
                 debug!("{}", path);
-                mailboxdummy
+                mailbox
                     .create_folder(path)
                     .await
                     .expect("failed to create folder");

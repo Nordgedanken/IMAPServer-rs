@@ -1,9 +1,10 @@
 use std::path::Path;
 
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
-use log::warn;
+use futures::StreamExt;
+use log::{debug, warn};
 use rand::{thread_rng, Rng};
-use tokio::fs::{create_dir_all, metadata};
+use tokio::fs::{create_dir_all, metadata, read_dir};
 
 use crate::database::establish_connection;
 use crate::models::{NewUser, User};
@@ -11,6 +12,10 @@ use crate::schema::users;
 
 pub(crate) struct Mailbox {
     pub(crate) mailbox_root: String,
+}
+
+fn string_to_static_str(s: String) -> &'static str {
+    Box::leak(s.into_boxed_str())
 }
 
 impl Mailbox {
@@ -59,9 +64,7 @@ impl Mailbox {
         match results {
             Ok(results) => {
                 let mailbox_root = format!("./mailbox_root/{}", results.email);
-                Some(Mailbox {
-                    mailbox_root: mailbox_root,
-                })
+                Some(Mailbox { mailbox_root })
             }
             _ => None,
         }
@@ -83,6 +86,75 @@ impl Mailbox {
         }
 
         Some(returns)
+    }
+
+    // TODO get filtered if wanted by the client
+    pub async fn get_lsub(&self) -> Option<Vec<String>> {
+        let mut dirs = read_dir(self.mailbox_root.to_owned())
+            .await
+            .expect("unable to read dir");
+
+        let mut dirs_lsub: Vec<&str> = Vec::new();
+
+        while let Some(dir) = dirs.next().await {
+            let dir = dir.expect("unable to get dir");
+            if dir.file_name() == "INBOX" {
+                dirs_lsub.push("* LSUB (\\HasNoChildren) \".\" INBOX\r\n");
+                continue;
+            } else if dir.file_name() == "Trash" {
+                dirs_lsub.push("* LSUB  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r\n");
+                continue;
+            } else {
+                let path_string =
+                    format!("* LSUB  (\\Subscribed) \".\" {:?}\r\n", dir.file_name());
+                let path_string = string_to_static_str(path_string);
+                dirs_lsub.push(path_string);
+                continue;
+            }
+        }
+
+        if dirs_lsub.len() > 0 {
+            let dirs_lsub: Vec<String> = dirs_lsub.iter().map(|s| (*s).to_string()).collect();
+            Some(dirs_lsub)
+        } else {
+            None
+        }
+    }
+
+    // TODO get filtered if wanted by the client
+    pub async fn get_list(&self) -> Option<Vec<String>> {
+        let mut dirs = read_dir(self.mailbox_root.to_owned())
+            .await
+            .expect("unable to read dir");
+
+        let mut dirs_list: Vec<&str> = Vec::new();
+
+        while let Some(dir) = dirs.next().await {
+            let dir = dir.expect("unable to get dir");
+            if dir.file_name() == "INBOX" {
+                dirs_list
+                    .push("* LIST (\\Marked \\HasNoChildren \\Subscribed) \".\" \"INBOX\"\r\n");
+                continue;
+            } else if dir.file_name() == "Trash" {
+                dirs_list.push("* LIST  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r\n");
+                continue;
+            } else {
+                // TODO actually check if subscribed or not.
+                let path_string =
+                    format!("* LIST (\\Subscribed) \".\" {:?}\r\n", dir.file_name());
+                debug!("DEBUG PATH: {}", path_string);
+                let path_string = string_to_static_str(path_string);
+                dirs_list.push(path_string);
+                continue;
+            }
+        }
+
+        if dirs_list.len() > 0 {
+            let dirs_list: Vec<String> = dirs_list.iter().map(|s| (*s).to_string()).collect();
+            Some(dirs_list)
+        } else {
+            None
+        }
     }
 
     pub async fn check_mailbox_root(&self) -> Result<(), std::io::Error> {
