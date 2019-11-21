@@ -6,7 +6,7 @@ pub(crate) fn setup_logger() -> Result<(), fern::InitError> {
         .warn(Color::Yellow)
         // we actually don't need to specify the color for debug and info, they are white by default
         .info(Color::White)
-        .debug(Color::White)
+        .debug(Color::Magenta)
         // depending on the terminals color scheme, this is the same as the background color
         .trace(Color::BrightBlack);
 
