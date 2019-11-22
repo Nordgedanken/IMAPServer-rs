@@ -1,9 +1,10 @@
-use std::fs;
-
 use log::error;
 use rand::distributions::Alphanumeric;
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
+use tokio::fs::File;
+use tokio::fs::metadata;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Config {
@@ -12,12 +13,11 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new() -> Option<Self> {
-        let mut rng = thread_rng();
-
+    pub async fn new() -> Option<Self> {
+        let mut rng = StdRng::from_entropy();
         // This does need to stay mutable even when the compiler says otherwise. If it is not mut it fails to generate random numbers
         #[allow(unused_mut)]
-        let mut random_string: String;
+            let mut random_string: String;
 
         if rng.gen() {
             random_string = rng.sample_iter(&Alphanumeric).take(100).collect::<String>();
@@ -32,7 +32,10 @@ impl Config {
 
         // TODO consider using /etc/ImapServer/Config.yml instead
         let c = serde_yaml::to_string(&config).expect("unable to convert config to string");
-        let wrote = fs::write("./Config.yml", c);
+        let mut file = File::create("./Config.yml")
+            .await
+            .expect("unable to create file");
+        let wrote = file.write_all(c.as_bytes()).await;
 
         match wrote {
             Ok(_) => {
@@ -45,25 +48,31 @@ impl Config {
         }
     }
 
-    pub fn load() -> Option<Self> {
-        let metadata = fs::metadata("./Config.yml");
+    pub async fn load() -> Option<Self> {
+        let metadata = metadata("./Config.yml").await;
         match metadata {
             Ok(metadata) => {
                 if metadata.is_file() {
-                    let data = fs::read_to_string("./Config.yml").expect("Unable to read config");
+                    let mut file = File::open("./Config.yml")
+                        .await
+                        .expect("unable to open file");
+                    let mut data = String::new();
+                    file.read_to_string(&mut data)
+                        .await
+                        .expect("unable to read config file");
 
                     let deserialized_config: Self = serde_yaml::from_str(&data)
                         .expect("unable to make struct from config content");
 
                     return Some(deserialized_config);
                 } else {
-                    return Config::new();
+                    return Config::new().await;
                 }
             }
 
             Err(e) => {
                 error!("{}", e);
-                return Config::new();
+                return Config::new().await;
             }
         }
     }

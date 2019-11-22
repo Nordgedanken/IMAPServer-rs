@@ -32,11 +32,11 @@ impl Authentication {
             return Ok(());
         }
 
-        let mailbox = Mailbox::load(up[1].to_string());
+        let mailbox = Mailbox::load(up[1].to_string()).await;
 
         match mailbox {
             Some(mailbox) => {
-                let authenticated = mailbox.check_password_plain(up[2].to_string());
+                let authenticated = mailbox.check_password_plain(up[2].to_string()).await;
 
                 match authenticated {
                     Ok(_) => {

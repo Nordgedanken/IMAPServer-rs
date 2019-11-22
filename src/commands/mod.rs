@@ -116,7 +116,9 @@ impl Commands {
             State::LoggedIn => {
                 let email = &state.peers.get(&addr).expect("unable to find peer").user;
 
-                let mailbox = Mailbox::load(email.to_string()).expect("failed to get mailbox");
+                let mailbox = Mailbox::load(email.to_string())
+                    .await
+                    .expect("failed to get mailbox");
 
                 let mut folders: Vec<String> =
                     mailbox.get_list().await.expect("unable to get folders");
@@ -159,7 +161,9 @@ impl Commands {
             State::LoggedIn => {
                 let email = &state.peers.get(&addr).expect("unable to find peer").user;
 
-                let mailbox = Mailbox::load(email.to_string()).expect("failed to get mailbox");
+                let mailbox = Mailbox::load(email.to_string())
+                    .await
+                    .expect("failed to get mailbox");
 
                 let mut folders: Vec<String> =
                     mailbox.get_lsub().await.expect("unable to get folders");
@@ -380,7 +384,9 @@ impl Commands {
             State::LoggedIn => {
                 let email = &state.peers.get(&addr).expect("unable to find peer").user;
 
-                let mailbox = Mailbox::load(email.to_string()).expect("failed to get mailbox");
+                let mailbox = Mailbox::load(email.to_string())
+                    .await
+                    .expect("failed to get mailbox");
 
                 let path = path.replace("\"", "").replace(".", "/");
                 debug!("{}", path);

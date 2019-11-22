@@ -15,6 +15,7 @@ use crate::schema::users::dsl::*;
 pub struct Mailbox {
     pub user: String,
     pub mailbox_root: String,
+    password_hash: String,
 }
 
 fn string_to_static_str(s: String) -> &'static str {
@@ -22,8 +23,8 @@ fn string_to_static_str(s: String) -> &'static str {
 }
 
 impl Mailbox {
-    pub fn new(user: String, password: String) -> Option<Self> {
-        let config = Config::load().expect("unable to load config");
+    pub async fn new(user: String, password: String) -> Option<Self> {
+        let config = Config::load().await.expect("unable to load config");
 
         let key = config.shared_secret;
         let key = key.as_bytes();
@@ -31,7 +32,7 @@ impl Mailbox {
         let password_hash_new = easy_password::bcrypt::hash_password(&password, key, 12)
             .expect("unable to hash password");
 
-        let mut rng = thread_rng();
+        let mut rng = StdRng::from_entropy();
 
         // This does need to stay mutable even when the compiler says otherwise. If it is not mut it fails to generate random numbers
         #[allow(unused_mut)]
@@ -56,7 +57,11 @@ impl Mailbox {
         match results {
             Ok(m) => {
                 let mailbox_root = format!("{}/{}", config.mailbox_root, m.email);
-                return Some(Mailbox { mailbox_root, user });
+                return Some(Mailbox {
+                    mailbox_root,
+                    user,
+                    password_hash: m.password_hash,
+                });
             }
             Err(_) => {
                 let new_user = NewUser {
@@ -75,14 +80,15 @@ impl Mailbox {
                 return Some(Mailbox {
                     mailbox_root,
                     user: user_local,
+                    password_hash: password_hash_new,
                 });
             }
         }
     }
 
-    pub fn load(user: String) -> Option<Self> {
+    pub async fn load(user: String) -> Option<Self> {
         let connection = establish_connection();
-        let config = Config::load().expect("unable to load config");
+        let config = Config::load().await.expect("unable to load config");
         let user_local = user.clone();
 
         let results: Result<User, diesel::result::Error> = users
@@ -96,15 +102,16 @@ impl Mailbox {
                 Some(Mailbox {
                     mailbox_root,
                     user: user_local,
+                    password_hash: results.password_hash,
                 })
             }
             _ => None,
         }
     }
 
-    pub fn load_all() -> Option<Vec<Self>> {
+    pub async fn load_all() -> Option<Vec<Self>> {
         let connection = establish_connection();
-        let config = Config::load().expect("unable to load config");
+        let config = Config::load().await.expect("unable to load config");
 
         let results: Vec<User> = users
             .load::<User>(&connection)
@@ -117,43 +124,30 @@ impl Mailbox {
             returns.push(Mailbox {
                 mailbox_root,
                 user: entry.email.clone(),
+                password_hash: entry.password_hash.clone(),
             })
         }
 
         Some(returns)
     }
 
-    pub fn check_password_plain(&self, password: String) -> Result<(), ()> {
-        let connection = establish_connection();
-        let config = Config::load().expect("unable to load config");
+    pub async fn check_password_plain(&self, password: String) -> Result<(), ()> {
+        let config = Config::load().await.expect("unable to load config");
 
-        let user = self.user.clone();
+        let local_hash = self.password_hash.clone();
 
-        let results: Result<User, diesel::result::Error> = users
-            .filter(email.eq(user))
-            .limit(1)
-            .get_result::<User>(&connection);
-
-        match results {
-            Ok(result) => {
-                let key = config.shared_secret;
-                let key = key.as_bytes();
-                let verified =
-                    easy_password::bcrypt::verify_password(&password, &result.password_hash, key);
-                match verified {
-                    Ok(v) => {
-                        if v {
-                            return Ok(());
-                        } else {
-                            return Err(());
-                        }
-                    }
-                    Err(_) => {
-                        return Err(());
-                    }
+        let key = config.shared_secret;
+        let key = key.as_bytes();
+        let verified = easy_password::bcrypt::verify_password(&password, &local_hash, key);
+        match verified {
+            Ok(v) => {
+                if v {
+                    return Ok(());
+                } else {
+                    return Err(());
                 }
             }
-            _ => {
+            Err(_) => {
                 return Err(());
             }
         }
@@ -171,9 +165,6 @@ impl Mailbox {
             let dir = dir.expect("unable to get dir");
             if dir.file_name() == "INBOX" {
                 dirs_lsub.push("* LSUB (\\HasNoChildren) \".\" INBOX\r\n");
-                continue;
-            } else if dir.file_name() == "Trash" {
-                dirs_lsub.push("* LSUB  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r\n");
                 continue;
             } else {
                 let path_string = format!("* LSUB  (\\Subscribed) \".\" {:?}\r\n", dir.file_name());
@@ -202,11 +193,7 @@ impl Mailbox {
         while let Some(dir) = dirs.next().await {
             let dir = dir.expect("unable to get dir");
             if dir.file_name() == "INBOX" {
-                dirs_list
-                    .push("* LIST (\\Marked \\HasNoChildren \\Subscribed) \".\" \"INBOX\"\r\n");
-                continue;
-            } else if dir.file_name() == "Trash" {
-                dirs_list.push("* LIST  (\\Subscribed \\Noinferiors) \".\" \"Trash\"\r\n");
+                dirs_list.push("* LIST (\\HasNoChildren) \".\" \"INBOX\"\r\n");
                 continue;
             } else {
                 // TODO actually check if subscribed or not.

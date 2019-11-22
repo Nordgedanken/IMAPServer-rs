@@ -42,14 +42,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .get_matches();
 
     setup();
-    Config::load();
+    Config::load().await;
 
     if matches.is_present("add") {
         if let Some(ref matches) = matches.subcommand_matches("add") {
             let result = Mailbox::new(
                 matches.value_of("username").unwrap().parse()?,
                 matches.value_of("password").unwrap().parse()?,
-            );
+            )
+            .await;
             match result {
                 Some(_) => info!("Added User {}", matches.value_of("username").unwrap()),
                 None => error!(

@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     log_helper::setup_logger().expect("Unable to start logger.");
 
     setup();
-    Config::load();
+    Config::load().await;
 
     // Create the shared state. This is how all the peers communicate.
     //
@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Startup procedure
     info!("Starting up...");
 
-    let mailboxes = Mailbox::load_all().expect("failed to get mailbox");
+    let mailboxes = Mailbox::load_all().await.expect("failed to get mailbox");
 
     for mailbox in &mailboxes {
         mailbox.check_mailbox_root().await?;
@@ -56,6 +56,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         // Create Trash if needed
         mailbox.check_mailbox_folder("Trash").await?;
+
+        // Create Sent if needed
+        mailbox.check_mailbox_folder("Sent").await?;
+
+        // Create Drafts if needed
+        mailbox.check_mailbox_folder("Drafts").await?;
+
+        // Create Junk if needed
+        mailbox.check_mailbox_folder("Junk").await?;
     }
 
     // Listening
