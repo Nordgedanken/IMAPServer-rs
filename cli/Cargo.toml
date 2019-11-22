@@ -1,0 +1,21 @@
+[package]
+name = "IMAPServer-CLI"
+version = "0.1.0"
+authors = ["MTRNord <mtrnord1@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+futures-preview = "=0.3.0-alpha.19"
+tokio = "0.2.0-alpha.6"
+tokio-io = "0.2.0-alpha.6"
+log = "0.4"
+fern = {version = "0.5", features = ["colored"]}
+chrono = "0.4"
+clap = "2.33.0"
+
+[dependencies.IMAPServer-database]
+path = "../database"
+
+[[bin]]
+name = "mailbox-cli"
+path = "src/main.rs"

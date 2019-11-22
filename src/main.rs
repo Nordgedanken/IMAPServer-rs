@@ -1,17 +1,11 @@
 #![warn(missing_debug_implementations)]
 
-#[macro_use]
-extern crate diesel;
-#[macro_use]
-extern crate diesel_migrations;
-
 use std::collections::HashMap;
 use std::error::Error;
 use std::net::SocketAddr;
 use std::pin::Pin;
 use std::sync::Arc;
 
-use diesel_migrations::embed_migrations;
 use futures::io::ErrorKind::{ConnectionAborted, ConnectionReset};
 use futures::task::Context;
 use futures::Poll;
@@ -23,26 +17,20 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::prelude::*;
 use tokio::sync::{mpsc, Mutex};
 
-use crate::mailbox::Mailbox;
+use IMAPServer_database::mailbox::Mailbox;
+use IMAPServer_database::setup;
 
 mod commands;
 mod config;
-mod database;
 mod log_helper;
-mod mailbox;
-mod models;
-mod schema;
 #[cfg(test)]
 mod tests;
-
-embed_migrations!("./migrations");
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     log_helper::setup_logger().expect("Unable to start logger.");
 
-    let connection = database::establish_connection();
-    embedded_migrations::run(&connection).expect("failed to run database migrations");
+    setup();
 
     // Create the shared state. This is how all the peers communicate.
     //

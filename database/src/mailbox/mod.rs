@@ -9,9 +9,10 @@ use tokio::fs::{create_dir_all, metadata, read_dir};
 use crate::database::establish_connection;
 use crate::models::{NewUser, User};
 use crate::schema::users;
+use crate::schema::users::dsl::*;
 
-pub(crate) struct Mailbox {
-    pub(crate) mailbox_root: String,
+pub struct Mailbox {
+    pub mailbox_root: String,
 }
 
 fn string_to_static_str(s: String) -> &'static str {
@@ -19,41 +20,61 @@ fn string_to_static_str(s: String) -> &'static str {
 }
 
 impl Mailbox {
-    pub fn new(email: String, password: String) -> Option<Self> {
+    pub fn new(user: String, password: String) -> Option<Self> {
         // TODO define secure key in config
         let key = b"secure_key";
 
-        let password_hash = easy_password::bcrypt::hash_password(&password, key, 12)
+        let password_hash_new = easy_password::bcrypt::hash_password(&password, key, 12)
             .expect("unable to hash password");
 
         let mut rng = thread_rng();
 
+        // This does need to stay mutable even when the compiler says otherwise. If it is not mut it fails to generate random numbers
+        #[allow(unused_mut)]
+        let mut random_number: String;
+
         if rng.gen() {
-            let random_number: i32 = rng.gen_range(0, 2 ^ 32 - 1);
+            let random_number_int: i32 = rng.gen_range(0, 2 ^ 32 - 1);
 
-            let new_user = NewUser {
-                email: &email,
-                password_hash: &password_hash,
-                uid_validity_identifier: random_number,
-            };
-
-            let connection = establish_connection();
-            diesel::insert_into(users::table)
-                .values(&new_user)
-                .execute(&connection)
-                .expect("Failed to add new User");
-
-            // TODO Define in config
-            let mailbox_root = format!("./mailbox_root/{}", email);
-
-            return Some(Mailbox { mailbox_root });
+            random_number = format!("{:?}", random_number_int);
         } else {
+            warn!("here1");
             return None;
-        };
+        }
+
+        let connection = establish_connection();
+        let results: Result<User, diesel::result::Error> = users
+            .filter(email.eq(&user))
+            .limit(1)
+            .get_result::<User>(&connection);
+
+        match results {
+            Ok(m) => {
+                let mailbox_root = format!("./mailbox_root/{}", m.email);
+                warn!("here");
+                return Some(Mailbox { mailbox_root });
+            }
+            Err(_) => {
+                let new_user = NewUser {
+                    email: &user,
+                    password_hash: &password_hash_new,
+                    uid_validity_identifier: &random_number,
+                };
+
+                diesel::insert_into(users::table)
+                    .values(&new_user)
+                    .execute(&connection)
+                    .expect("Failed to add new User");
+
+                // TODO Define in config
+                let mailbox_root = format!("./mailbox_root/{}", user);
+
+                return Some(Mailbox { mailbox_root });
+            }
+        }
     }
 
     pub fn load(user: String) -> Option<Self> {
-        use crate::schema::users::dsl::*;
         let connection = establish_connection();
 
         let results: Result<User, diesel::result::Error> = users
@@ -71,7 +92,6 @@ impl Mailbox {
     }
 
     pub fn load_all() -> Option<Vec<Self>> {
-        use crate::schema::users::dsl::*;
         let connection = establish_connection();
 
         let results: Vec<User> = users

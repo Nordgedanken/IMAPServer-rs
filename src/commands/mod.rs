@@ -4,7 +4,8 @@ use std::sync::Arc;
 use log::debug;
 use tokio::sync::{mpsc, Mutex};
 
-use crate::mailbox::Mailbox;
+use IMAPServer_database::mailbox::Mailbox;
+
 use crate::{Shared, State};
 
 pub mod authenticate;
