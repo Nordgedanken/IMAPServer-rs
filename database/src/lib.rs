@@ -11,6 +11,9 @@ mod database;
 mod models;
 mod schema;
 
+#[cfg(test)]
+mod tests;
+
 embed_migrations!("../migrations");
 
 pub fn setup() {

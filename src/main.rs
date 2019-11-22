@@ -23,8 +23,6 @@ use IMAPServer_database::setup;
 mod commands;
 mod config;
 mod log_helper;
-#[cfg(test)]
-mod tests;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

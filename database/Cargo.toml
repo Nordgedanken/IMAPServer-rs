@@ -6,6 +6,7 @@ edition = "2018"
 
 [lib]
 doc = true
+test = true
 
 [dependencies]
 diesel = { version = "1.0.0", features = ["sqlite"] }
