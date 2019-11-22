@@ -12,6 +12,7 @@ use crate::schema::users;
 use crate::schema::users::dsl::*;
 
 pub struct Mailbox {
+    pub user: String,
     pub mailbox_root: String,
 }
 
@@ -38,11 +39,12 @@ impl Mailbox {
 
             random_number = format!("{:?}", random_number_int);
         } else {
-            warn!("here1");
+            warn!("Unable to generate random number");
             return None;
         }
 
         let connection = establish_connection();
+        let user_local = user.clone();
         let results: Result<User, diesel::result::Error> = users
             .filter(email.eq(&user))
             .limit(1)
@@ -52,7 +54,7 @@ impl Mailbox {
             Ok(m) => {
                 let mailbox_root = format!("./mailbox_root/{}", m.email);
                 warn!("here");
-                return Some(Mailbox { mailbox_root });
+                return Some(Mailbox { mailbox_root, user });
             }
             Err(_) => {
                 let new_user = NewUser {
@@ -69,13 +71,17 @@ impl Mailbox {
                 // TODO Define in config
                 let mailbox_root = format!("./mailbox_root/{}", user);
 
-                return Some(Mailbox { mailbox_root });
+                return Some(Mailbox {
+                    mailbox_root,
+                    user: user_local,
+                });
             }
         }
     }
 
     pub fn load(user: String) -> Option<Self> {
         let connection = establish_connection();
+        let user_local = user.clone();
 
         let results: Result<User, diesel::result::Error> = users
             .filter(email.eq(user))
@@ -85,7 +91,10 @@ impl Mailbox {
         match results {
             Ok(results) => {
                 let mailbox_root = format!("./mailbox_root/{}", results.email);
-                Some(Mailbox { mailbox_root })
+                Some(Mailbox {
+                    mailbox_root,
+                    user: user_local,
+                })
             }
             _ => None,
         }
@@ -102,10 +111,48 @@ impl Mailbox {
 
         for entry in &results {
             let mailbox_root = format!("./mailbox_root/{}", entry.email);
-            returns.push(Mailbox { mailbox_root })
+            returns.push(Mailbox {
+                mailbox_root,
+                user: entry.email.clone(),
+            })
         }
 
         Some(returns)
+    }
+
+    pub fn check_password_plain(&self, password: String) -> Result<(), ()> {
+        let connection = establish_connection();
+
+        let user = self.user.clone();
+
+        let results: Result<User, diesel::result::Error> = users
+            .filter(email.eq(user))
+            .limit(1)
+            .get_result::<User>(&connection);
+
+        match results {
+            Ok(result) => {
+                // TODO define secure key in config
+                let key = b"secure_key";
+                let verified =
+                    easy_password::bcrypt::verify_password(&password, &result.password_hash, key);
+                match verified {
+                    Ok(v) => {
+                        if v {
+                            return Ok(());
+                        } else {
+                            return Err(());
+                        }
+                    }
+                    Err(_) => {
+                        return Err(());
+                    }
+                }
+            }
+            _ => {
+                return Err(());
+            }
+        }
     }
 
     // TODO get filtered if wanted by the client

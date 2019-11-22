@@ -6,6 +6,8 @@ use base64::decode;
 use log::debug;
 use tokio::sync::{mpsc, Mutex};
 
+use IMAPServer_database::mailbox::Mailbox;
+
 use crate::{Shared, State};
 
 pub(crate) struct Authentication;
@@ -30,69 +32,106 @@ impl Authentication {
             return Ok(());
         }
 
-        // TODO make this dynamic and use real accounts
-        if up[1].contains("@riot.nordgedanken.de") || up[1].contains("@localhost") {
-            state.respond(addr, "+\r").await?;
-            debug!("Responded: +");
-            // DO NOT INLINE!
-            let response = format!(
-                "{} {}",
-                &state
-                    .peers
-                    .get(&addr)
-                    .expect("unable to find peer")
-                    .identifier,
-                "OK PLAIN authentication successful"
-            );
-            state.respond(addr, &response).await?;
+        let mailbox = Mailbox::load(up[1].to_string());
 
-            state
-                .peers
-                .get_mut(&addr)
-                .expect("unable to find peer")
-                .user = up[1].to_string();
+        match mailbox {
+            Some(mailbox) => {
+                let authenticated = mailbox.check_password_plain(up[2].to_string());
 
-            state
-                .peers
-                .get_mut(&addr)
-                .expect("unable to find peer")
-                .state = State::LoggedIn;
+                match authenticated {
+                    Ok(_) => {
+                        state.respond(addr, "+\r").await?;
+                        debug!("Responded: +");
+                        // DO NOT INLINE!
+                        let response = format!(
+                            "{} {}",
+                            &state
+                                .peers
+                                .get(&addr)
+                                .expect("unable to find peer")
+                                .identifier,
+                            "OK PLAIN authentication successful"
+                        );
+                        state.respond(addr, &response).await?;
 
-            //Print to view for debug
-            debug!(
-                "Responded: {} {}",
-                &state
-                    .peers
-                    .get(&addr)
-                    .expect("unable to find peer")
-                    .identifier,
-                "OK PLAIN authentication successful"
-            );
-        } else {
-            state.respond(addr, "+\r").await?;
-            // DO NOT INLINE!
-            let response = format!(
-                "{} {}",
-                &state
-                    .peers
-                    .get(&addr)
-                    .expect("unable to find peer")
-                    .identifier,
-                "NO credentials rejected\r"
-            );
-            state.respond(addr, &response).await?;
+                        state
+                            .peers
+                            .get_mut(&addr)
+                            .expect("unable to find peer")
+                            .user = up[1].to_string();
 
-            //Print to view for debug
-            debug!(
-                "Responded: {} {}",
-                &state
-                    .peers
-                    .get(&addr)
-                    .expect("unable to find peer")
-                    .identifier,
-                "NO credentials rejected\r"
-            );
+                        state
+                            .peers
+                            .get_mut(&addr)
+                            .expect("unable to find peer")
+                            .state = State::LoggedIn;
+
+                        //Print to view for debug
+                        debug!(
+                            "Responded: {} {}",
+                            &state
+                                .peers
+                                .get(&addr)
+                                .expect("unable to find peer")
+                                .identifier,
+                            "OK PLAIN authentication successful"
+                        );
+                    }
+
+                    Err(_) => {
+                        state.respond(addr, "+\r").await?;
+                        // DO NOT INLINE!
+                        let response = format!(
+                            "{} {}",
+                            &state
+                                .peers
+                                .get(&addr)
+                                .expect("unable to find peer")
+                                .identifier,
+                            "NO credentials rejected\r"
+                        );
+                        state.respond(addr, &response).await?;
+
+                        //Print to view for debug
+                        debug!(
+                            "Responded: {} {}",
+                            &state
+                                .peers
+                                .get(&addr)
+                                .expect("unable to find peer")
+                                .identifier,
+                            "NO credentials rejected\r"
+                        );
+                    }
+                }
+            }
+            None => {
+                state.respond(addr, "+\r").await?;
+                // DO NOT INLINE!
+                let response = format!(
+                    "{} {}",
+                    &state
+                        .peers
+                        .get(&addr)
+                        .expect("unable to find peer")
+                        .identifier,
+                    "NO credentials rejected\r"
+                );
+                state.respond(addr, &response).await?;
+
+                //Print to view for debug
+                debug!(
+                    "Responded: {} {}",
+                    &state
+                        .peers
+                        .get(&addr)
+                        .expect("unable to find peer")
+                        .identifier,
+                    "NO credentials rejected\r"
+                );
+            }
         }
+
         debug!("user: {} \r\n password: {}", up[1], up[2]);
         Ok(())
     }
