@@ -11,7 +11,9 @@ use crate::database::establish_connection;
 use crate::models::{NewUser, User};
 use crate::schema::users;
 use crate::schema::users::dsl::*;
+use argon2::{ThreadMode, Variant, Version};
 
+#[derive(Clone)]
 pub struct Mailbox {
     pub user: String,
     pub mailbox_root: String,
@@ -26,11 +28,23 @@ impl Mailbox {
     pub async fn new(user: String, password: String) -> Option<Self> {
         let config = Config::load().await.expect("unable to load config");
 
-        let key = config.shared_secret;
-        let key = key.as_bytes();
-
-        let password_hash_new = easy_password::bcrypt::hash_password(&password, key, 12)
-            .expect("unable to hash password");
+        let hash_config = argon2::Config {
+            variant: Variant::default(),
+            version: Version::default(),
+            mem_cost: 4096,
+            time_cost: 3,
+            lanes: 4,
+            thread_mode: ThreadMode::Parallel,
+            secret: &[],
+            ad: &[],
+            hash_length: 32,
+        };
+        let password_hash_new = argon2::hash_encoded(
+            password.as_bytes(),
+            config.shared_secret.as_bytes(),
+            &hash_config,
+        )
+        .expect("unable to hash password");
 
         let mut rng = StdRng::from_entropy();
 
@@ -132,13 +146,9 @@ impl Mailbox {
     }
 
     pub async fn check_password_plain(&self, password: String) -> Result<(), ()> {
-        let config = Config::load().await.expect("unable to load config");
-
         let local_hash = self.password_hash.clone();
 
-        let key = config.shared_secret;
-        let key = key.as_bytes();
-        let verified = easy_password::bcrypt::verify_password(&password, &local_hash, key);
+        let verified = argon2::verify_encoded(&local_hash, password.as_bytes());
         match verified {
             Ok(v) => {
                 if v {

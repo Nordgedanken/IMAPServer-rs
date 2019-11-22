@@ -1,10 +1,9 @@
+use std::borrow::Borrow;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
 use log::debug;
 use tokio::sync::{mpsc, Mutex};
-
-use IMAPServer_shared::mailbox::Mailbox;
 
 use crate::{Shared, State};
 
@@ -114,10 +113,11 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                let email = &state.peers.get(&addr).expect("unable to find peer").user;
-
-                let mailbox = Mailbox::load(email.to_string())
-                    .await
+                let mailbox = &state
+                    .peers
+                    .get(&addr)
+                    .expect("unable to find peer")
+                    .mailbox.borrow().as_ref()
                     .expect("failed to get mailbox");
 
                 let mut folders: Vec<String> =
@@ -159,10 +159,11 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                let email = &state.peers.get(&addr).expect("unable to find peer").user;
-
-                let mailbox = Mailbox::load(email.to_string())
-                    .await
+                let mailbox = &state
+                    .peers
+                    .get(&addr)
+                    .expect("unable to find peer")
+                    .mailbox.borrow().as_ref()
                     .expect("failed to get mailbox");
 
                 let mut folders: Vec<String> =
@@ -382,10 +383,7 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                let email = &state.peers.get(&addr).expect("unable to find peer").user;
-
-                let mailbox = Mailbox::load(email.to_string())
-                    .await
+                let mailbox = &state.peers.get(&addr).expect("unable to find peer").mailbox.borrow().as_ref()
                     .expect("failed to get mailbox");
 
                 let path = path.replace("\"", "").replace(".", "/");

@@ -58,7 +58,7 @@ impl Authentication {
                             .peers
                             .get_mut(&addr)
                             .expect("unable to find peer")
-                            .user = up[1].to_string();
+                            .mailbox = Some(mailbox);
 
                         state
                             .peers

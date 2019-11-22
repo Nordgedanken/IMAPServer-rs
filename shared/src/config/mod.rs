@@ -2,8 +2,8 @@ use log::error;
 use rand::distributions::Alphanumeric;
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
-use tokio::fs::File;
 use tokio::fs::metadata;
+use tokio::fs::File;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -17,7 +17,7 @@ impl Config {
         let mut rng = StdRng::from_entropy();
         // This does need to stay mutable even when the compiler says otherwise. If it is not mut it fails to generate random numbers
         #[allow(unused_mut)]
-            let mut random_string: String;
+        let mut random_string: String;
 
         if rng.gen() {
             random_string = rng.sample_iter(&Alphanumeric).take(100).collect::<String>();

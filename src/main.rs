@@ -102,7 +102,7 @@ struct Connection {
     state: State,
     identifier: String,
     tx: Tx,
-    user: String,
+    mailbox: Option<Mailbox>,
 }
 
 /// Data that is shared between all peers in the chat server.
@@ -173,7 +173,7 @@ impl Peer {
         let connection = Connection {
             identifier: "".to_string(),
             state: State::LoggedOut,
-            user: String::new(),
+            mailbox: None,
             tx,
         };
         state.lock().await.peers.insert(addr, connection);
