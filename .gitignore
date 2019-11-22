@@ -16,3 +16,4 @@ IMAPServer-rs.iml
 output.log
 mailbox_root
 mailbox.db
+Config.yml

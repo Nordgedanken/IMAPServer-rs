@@ -3,9 +3,10 @@ use std::path::Path;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use futures::StreamExt;
 use log::warn;
-use rand::{thread_rng, Rng};
+use rand::prelude::*;
 use tokio::fs::{create_dir_all, metadata, read_dir};
 
+use crate::config::Config;
 use crate::database::establish_connection;
 use crate::models::{NewUser, User};
 use crate::schema::users;
@@ -22,8 +23,10 @@ fn string_to_static_str(s: String) -> &'static str {
 
 impl Mailbox {
     pub fn new(user: String, password: String) -> Option<Self> {
-        // TODO define secure key in config
-        let key = b"secure_key";
+        let config = Config::load().expect("unable to load config");
+
+        let key = config.shared_secret;
+        let key = key.as_bytes();
 
         let password_hash_new = easy_password::bcrypt::hash_password(&password, key, 12)
             .expect("unable to hash password");
@@ -52,8 +55,7 @@ impl Mailbox {
 
         match results {
             Ok(m) => {
-                let mailbox_root = format!("./mailbox_root/{}", m.email);
-                warn!("here");
+                let mailbox_root = format!("{}/{}", config.mailbox_root, m.email);
                 return Some(Mailbox { mailbox_root, user });
             }
             Err(_) => {
@@ -68,8 +70,7 @@ impl Mailbox {
                     .execute(&connection)
                     .expect("Failed to add new User");
 
-                // TODO Define in config
-                let mailbox_root = format!("./mailbox_root/{}", user);
+                let mailbox_root = format!("{}/{}", config.mailbox_root, user);
 
                 return Some(Mailbox {
                     mailbox_root,
@@ -81,6 +82,7 @@ impl Mailbox {
 
     pub fn load(user: String) -> Option<Self> {
         let connection = establish_connection();
+        let config = Config::load().expect("unable to load config");
         let user_local = user.clone();
 
         let results: Result<User, diesel::result::Error> = users
@@ -90,7 +92,7 @@ impl Mailbox {
 
         match results {
             Ok(results) => {
-                let mailbox_root = format!("./mailbox_root/{}", results.email);
+                let mailbox_root = format!("{}/{}", config.mailbox_root, results.email);
                 Some(Mailbox {
                     mailbox_root,
                     user: user_local,
@@ -102,6 +104,7 @@ impl Mailbox {
 
     pub fn load_all() -> Option<Vec<Self>> {
         let connection = establish_connection();
+        let config = Config::load().expect("unable to load config");
 
         let results: Vec<User> = users
             .load::<User>(&connection)
@@ -110,7 +113,7 @@ impl Mailbox {
         let mut returns: Vec<Self> = Vec::new();
 
         for entry in &results {
-            let mailbox_root = format!("./mailbox_root/{}", entry.email);
+            let mailbox_root = format!("{}/{}", config.mailbox_root, entry.email);
             returns.push(Mailbox {
                 mailbox_root,
                 user: entry.email.clone(),
@@ -122,6 +125,7 @@ impl Mailbox {
 
     pub fn check_password_plain(&self, password: String) -> Result<(), ()> {
         let connection = establish_connection();
+        let config = Config::load().expect("unable to load config");
 
         let user = self.user.clone();
 
@@ -132,8 +136,8 @@ impl Mailbox {
 
         match results {
             Ok(result) => {
-                // TODO define secure key in config
-                let key = b"secure_key";
+                let key = config.shared_secret;
+                let key = key.as_bytes();
                 let verified =
                     easy_password::bcrypt::verify_password(&password, &result.password_hash, key);
                 match verified {

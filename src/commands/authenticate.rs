@@ -6,7 +6,7 @@ use base64::decode;
 use log::debug;
 use tokio::sync::{mpsc, Mutex};
 
-use IMAPServer_database::mailbox::Mailbox;
+use IMAPServer_shared::mailbox::Mailbox;
 
 use crate::{Shared, State};
 

@@ -17,8 +17,9 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::prelude::*;
 use tokio::sync::{mpsc, Mutex};
 
-use IMAPServer_database::mailbox::Mailbox;
-use IMAPServer_database::setup;
+use IMAPServer_shared::config::Config;
+use IMAPServer_shared::mailbox::Mailbox;
+use IMAPServer_shared::setup;
 
 mod commands;
 mod config;
@@ -29,6 +30,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     log_helper::setup_logger().expect("Unable to start logger.");
 
     setup();
+    Config::load();
 
     // Create the shared state. This is how all the peers communicate.
     //
@@ -54,9 +56,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         // Create Trash if needed
         mailbox.check_mailbox_folder("Trash").await?;
-
-        // Create test if needed
-        mailbox.check_mailbox_folder("test").await?;
     }
 
     // Listening

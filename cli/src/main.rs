@@ -6,8 +6,9 @@ use std::error::Error;
 use clap::{App, Arg, SubCommand};
 use log::{error, info};
 
-use IMAPServer_database::mailbox::Mailbox;
-use IMAPServer_database::setup;
+use IMAPServer_shared::config::Config;
+use IMAPServer_shared::mailbox::Mailbox;
+use IMAPServer_shared::setup;
 
 mod log_helper;
 
@@ -41,6 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .get_matches();
 
     setup();
+    Config::load();
 
     if matches.is_present("add") {
         if let Some(ref matches) = matches.subcommand_matches("add") {
