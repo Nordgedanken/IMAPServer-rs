@@ -16,7 +16,7 @@ tokio = "0.2.0-alpha.6"
 tokio-io = "0.2.0-alpha.6"
 log = "0.4"
 dotenv = "0.15.0"
-rust-argon2 = "0.6"
+argonautica = { version = "0.2", features = ["simd"] }
 rand  = { version = "0.7", features = ["log"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"

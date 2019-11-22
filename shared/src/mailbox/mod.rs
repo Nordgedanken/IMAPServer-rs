@@ -11,7 +11,7 @@ use crate::database::establish_connection;
 use crate::models::{NewUser, User};
 use crate::schema::users;
 use crate::schema::users::dsl::*;
-use argon2::{ThreadMode, Variant, Version};
+use argonautica::{Hasher, Verifier};
 
 #[derive(Clone)]
 pub struct Mailbox {
@@ -28,23 +28,12 @@ impl Mailbox {
     pub async fn new(user: String, password: String) -> Option<Self> {
         let config = Config::load().await.expect("unable to load config");
 
-        let hash_config = argon2::Config {
-            variant: Variant::default(),
-            version: Version::default(),
-            mem_cost: 4096,
-            time_cost: 3,
-            lanes: 4,
-            thread_mode: ThreadMode::Parallel,
-            secret: &[],
-            ad: &[],
-            hash_length: 32,
-        };
-        let password_hash_new = argon2::hash_encoded(
-            password.as_bytes(),
-            config.shared_secret.as_bytes(),
-            &hash_config,
-        )
-        .expect("unable to hash password");
+        let mut hasher = Hasher::default();
+        let password_hash_new = hasher
+            .with_password(password)
+            .with_secret_key(config.shared_secret)
+            .hash()
+            .expect("unable to hash password");
 
         let mut rng = StdRng::from_entropy();
 
@@ -146,9 +135,15 @@ impl Mailbox {
     }
 
     pub async fn check_password_plain(&self, password: String) -> Result<(), ()> {
+        let config = Config::load().await.expect("unable to load config");
         let local_hash = self.password_hash.clone();
 
-        let verified = argon2::verify_encoded(&local_hash, password.as_bytes());
+        let mut verifier = Verifier::default();
+        let verified = verifier
+            .with_hash(local_hash)
+            .with_password(password)
+            .with_secret_key(config.shared_secret)
+            .verify();
         match verified {
             Ok(v) => {
                 if v {

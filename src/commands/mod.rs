@@ -117,7 +117,9 @@ impl Commands {
                     .peers
                     .get(&addr)
                     .expect("unable to find peer")
-                    .mailbox.borrow().as_ref()
+                    .mailbox
+                    .borrow()
+                    .as_ref()
                     .expect("failed to get mailbox");
 
                 let mut folders: Vec<String> =
@@ -163,7 +165,9 @@ impl Commands {
                     .peers
                     .get(&addr)
                     .expect("unable to find peer")
-                    .mailbox.borrow().as_ref()
+                    .mailbox
+                    .borrow()
+                    .as_ref()
                     .expect("failed to get mailbox");
 
                 let mut folders: Vec<String> =
@@ -383,7 +387,13 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                let mailbox = &state.peers.get(&addr).expect("unable to find peer").mailbox.borrow().as_ref()
+                let mailbox = &state
+                    .peers
+                    .get(&addr)
+                    .expect("unable to find peer")
+                    .mailbox
+                    .borrow()
+                    .as_ref()
                     .expect("failed to get mailbox");
 
                 let path = path.replace("\"", "").replace(".", "/");
