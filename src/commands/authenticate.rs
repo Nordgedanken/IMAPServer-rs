@@ -17,7 +17,7 @@ impl Authentication {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         let bytes = decode(args[0]).expect("unable to decode");
         let string = match String::from_utf8(bytes) {
             Ok(v) => v,
@@ -140,7 +140,7 @@ impl Authentication {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         let identifier = args[0];
 
         let mut state = state.lock().await;

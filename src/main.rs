@@ -7,15 +7,16 @@ use std::pin::Pin;
 use std::sync::Arc;
 
 use futures::io::ErrorKind::{ConnectionAborted, ConnectionReset};
-use futures::task::Context;
-use futures::Poll;
+use futures::task::Poll;
+use futures::Stream;
 use futures::StreamExt;
+use futures::task::Context;
+use futures::sink::SinkExt;
 use log::{debug, error, info};
-use tokio::codec::{Framed, LinesCodec, LinesCodecError};
 use tokio::io;
 use tokio::net::{TcpListener, TcpStream};
-use tokio::prelude::*;
 use tokio::sync::{mpsc, Mutex};
+use tokio_util::codec::{Framed, LinesCodec, LinesCodecError};
 
 use IMAPServer_shared::config::Config;
 use IMAPServer_shared::mailbox::Mailbox;
@@ -145,10 +146,10 @@ impl Shared {
         &mut self,
         sender: SocketAddr,
         message: &str,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         for peer in self.peers.iter_mut() {
             if *peer.0 == sender {
-                peer.1.tx.send(message.into()).await?;
+                peer.1.tx.send(message.into()).expect("failed to send message");
                 break;
             }
         }

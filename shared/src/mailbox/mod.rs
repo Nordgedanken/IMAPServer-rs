@@ -12,6 +12,7 @@ use crate::models::{NewUser, User};
 use crate::schema::users;
 use crate::schema::users::dsl::*;
 use argonautica::{Hasher, Verifier};
+use futures::compat::Future01CompatExt;
 
 #[derive(Clone)]
 pub struct Mailbox {
@@ -32,7 +33,9 @@ impl Mailbox {
         let password_hash_new = hasher
             .with_password(password)
             .with_secret_key(config.shared_secret)
-            .hash()
+            .hash_non_blocking()
+            .compat()
+            .await
             .expect("unable to hash password");
 
         let mut rng = StdRng::from_entropy();
@@ -143,7 +146,9 @@ impl Mailbox {
             .with_hash(local_hash)
             .with_password(password)
             .with_secret_key(config.shared_secret)
-            .verify();
+            .verify_non_blocking()
+            .compat()
+            .await;
         match verified {
             Ok(v) => {
                 if v {

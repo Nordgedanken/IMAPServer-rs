@@ -16,7 +16,7 @@ impl Commands {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         let identifier = args[0];
 
         let mut state = state.lock().await;
@@ -44,7 +44,7 @@ impl Commands {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         let identifier = args[0];
 
         let mut state = state.lock().await;
@@ -69,7 +69,7 @@ impl Commands {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         let identifier = args[0];
 
         let mut state = state.lock().await;
@@ -88,7 +88,7 @@ impl Commands {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         let identifier = args[0];
 
         let mut state = state.lock().await;
@@ -106,7 +106,7 @@ impl Commands {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         let identifier = args[0];
 
         let mut state = state.lock().await;
@@ -154,7 +154,7 @@ impl Commands {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         let identifier = args[0];
 
         let mut state = state.lock().await;
@@ -201,7 +201,7 @@ impl Commands {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         let identifier = args[0];
         let path = args[2];
 
@@ -244,7 +244,7 @@ impl Commands {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         let identifier = args[0];
 
         let mut state = state.lock().await;
@@ -280,7 +280,7 @@ impl Commands {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         let identifier = args[0];
 
         let mut state = state.lock().await;
@@ -319,7 +319,7 @@ impl Commands {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         let identifier = args[0];
         let command = args[1];
         let mut state = state.lock().await;
@@ -379,7 +379,7 @@ impl Commands {
         args: Vec<&str>,
         addr: SocketAddr,
         state: Arc<Mutex<Shared>>,
-    ) -> Result<(), mpsc::error::UnboundedSendError> {
+    ) -> Result<(), mpsc::error::SendError<String>> {
         let identifier = args[0];
         let path = args[2];
 
