@@ -233,7 +233,7 @@ async fn process(
 
     // Send Capabilities
     lines
-        .send(String::from("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ONLY NAMESPACE ID LIST-EXTENDED ENABLE LOGINDISABLED] IMAP4rev1 Service Ready\r"))
+        .send(String::from("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ONLY NAMESPACE LIST-EXTENDED ID ENABLE LOGINDISABLED] IMAP4rev1 Service Ready\r"))
         .await?;
 
     // Register our peer with state which internally sets up some channels.

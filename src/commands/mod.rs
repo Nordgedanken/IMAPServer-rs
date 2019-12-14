@@ -21,7 +21,7 @@ impl Commands {
 
         let mut state = state.lock().await;
 
-        let one = "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ONLY NAMESPACE ID LIST-EXTENDED ENABLE LOGINDISABLED\r\n";
+        let one = "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ONLY NAMESPACE LIST-EXTENDED ID ENABLE LOGINDISABLED\r\n";
 
         let response = format!("{}{}", identifier, " OK CAPABILITY completed\r");
         let complete = [one, &response].concat();
@@ -122,7 +122,7 @@ impl Commands {
                 let mut folders: Vec<String> =
                     mailbox.get_list(args).await.expect("unable to get folders");
 
-                let response = format!("{} {}", identifier, "OK LIST Completed\r");
+                let response = format!("{} {}", identifier, "OK LIST completed\r");
                 folders.push(response);
 
                 let complete = folders.concat();
@@ -170,7 +170,7 @@ impl Commands {
                 let mut folders: Vec<String> =
                     mailbox.get_lsub(args).await.expect("unable to get folders");
 
-                let response = format!("{} {}", identifier, "OK LSUB Completed\r");
+                let response = format!("{} {}", identifier, "OK LSUB completed\r");
                 folders.push(response);
 
                 let complete = folders.concat();
@@ -254,11 +254,10 @@ impl Commands {
 
                 let complete = [one, &response].concat();
 
+                //Print to view for debug
+                debug!("Responded: {}", complete);
                 state.respond(addr, &complete).await?;
 
-                //Print to view for debug
-                debug!("Responded: {}", "* NAMESPACE ((\"\" \".\")) NIL NIL");
-                debug!("Responded: {} {}", identifier, "OK Namespace completed.");
             }
             _ => {
                 let response = format!("{} {}", identifier, "NO Please Login first!\r");
