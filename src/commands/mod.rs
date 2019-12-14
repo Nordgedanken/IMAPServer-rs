@@ -21,15 +21,12 @@ impl Commands {
 
         let mut state = state.lock().await;
 
-        state
-            .respond(
-                addr,
-                "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT NAMESPACE ID LIST-EXTENDED ENABLE LOGINDISABLED\r",
-            )
-            .await?;
+        let one = "* CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ONLY NAMESPACE ID LIST-EXTENDED ENABLE LOGINDISABLED\r\n";
 
         let response = format!("{}{}", identifier, " OK CAPABILITY completed\r");
-        state.respond(addr, &response).await?;
+        let complete = [one, &response].concat();
+
+        state.respond(addr, &complete).await?;
 
         //Print to view for debug
         debug!(
@@ -123,13 +120,13 @@ impl Commands {
                     .expect("failed to get mailbox");
 
                 let mut folders: Vec<String> =
-                    mailbox.get_list().await.expect("unable to get folders");
-                debug!("Responded: {:?}", folders);
+                    mailbox.get_list(args).await.expect("unable to get folders");
 
                 let response = format!("{} {}", identifier, "OK LIST Completed\r");
                 folders.push(response);
 
                 let complete = folders.concat();
+                debug!("Responded: {}", complete);
 
                 state.respond(addr, &complete).await?;
 
@@ -171,13 +168,13 @@ impl Commands {
                     .expect("failed to get mailbox");
 
                 let mut folders: Vec<String> =
-                    mailbox.get_lsub().await.expect("unable to get folders");
-                debug!("Responded: {:?}", folders);
+                    mailbox.get_lsub(args).await.expect("unable to get folders");
 
                 let response = format!("{} {}", identifier, "OK LSUB Completed\r");
                 folders.push(response);
 
                 let complete = folders.concat();
+                debug!("Responded: {}", complete);
 
                 state.respond(addr, &complete).await?;
 
@@ -210,7 +207,7 @@ impl Commands {
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
                 let response = format!(
-                    "* STATUS {} (MESSAGES 2 UIDNEXT 44292 UNSEEN 1 RECENT 1)\r\n",
+                    "* STATUS {} (MESSAGES 2 UIDNEXT 2 UNSEEN 0 RECENT 0)\r\n",
                     path.replace("\"", "")
                 );
 
@@ -251,17 +248,17 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                let one = "* NAMESPACE ((\"\" \".\")) NIL  NIL\r\n";
+                let one = "* NAMESPACE ((\"\" \".\")) NIL NIL\r\n";
 
-                let response = format!("{} {}", identifier, "OK NAMESPACE Completed\r");
+                let response = format!("{} {}", identifier, "OK Namespace completed.\r");
 
                 let complete = [one, &response].concat();
 
                 state.respond(addr, &complete).await?;
 
                 //Print to view for debug
-                debug!("Responded: {}", "* NAMESPACE ((\"\" \".\")) NIL  NIL");
-                debug!("Responded: {} {}", identifier, "OK NAMESPACE Completed");
+                debug!("Responded: {}", "* NAMESPACE ((\"\" \".\")) NIL NIL");
+                debug!("Responded: {} {}", identifier, "OK Namespace completed.");
             }
             _ => {
                 let response = format!("{} {}", identifier, "NO Please Login first!\r");
@@ -327,31 +324,28 @@ impl Commands {
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
                 let one = "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n";
-                let two = "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r\n";
-                let three = "* 2 EXISTS\r\n";
-                let four = "* 1 RECENT\r\n";
-                let five = "* OK [UNSEEN 1] First unseen\r\n";
+                let two = "* OK [PERMANENTFLAGS (\\*)] Limited\r\n";
+                let three = "* OK [UIDVALIDITY 1] UIDs valid\r\n";
+                let four = "* OK [UIDNEXT 2] Predicted next UID\r\n";
+                let five = "* 1 EXISTS\r\n";
+                let six = "* 0 RECENT\r\n";
+                //let seven = "* OK [UNSEEN 1] First unseen\r\n";
 
-                /*state
-                    .respond(addr, "* OK [UIDVALIDITY 3857529045] UIDs valid\r")
-                    .await?;
-
-                state
-                    .respond(addr, "* OK [UIDNEXT 44292] Predicted next UID\r")
-                    .await?;*/
-
+                debug!("{}", command);
+                debug!("{}", identifier);
                 if command == "select" {
                     let response =
                         format!("{} {}", identifier, "OK [READ-WRITE] SELECT completed\r");
 
-                    let complete = [one, two, three, four, five, &response].concat();
+                    let complete = [one, two, three, four, five, six, &response].concat();
 
+                    debug!("{}", complete);
                     state.respond(addr, &complete).await?;
                 } else {
                     let response =
                         format!("{} {}", identifier, "OK [READ-ONLY] SELECT completed\r");
 
-                    let complete = [one, two, three, four, five, &response].concat();
+                    let complete = [one, two, three, four, five, six, &response].concat();
 
                     state.respond(addr, &complete).await?;
                 }

@@ -50,7 +50,7 @@ impl Authentication {
                                 .get(&addr)
                                 .expect("unable to find peer")
                                 .identifier,
-                            "OK PLAIN authentication successful"
+                            "OK PLAIN authentication successful\r"
                         );
                         state.respond(addr, &response).await?;
 
@@ -74,7 +74,7 @@ impl Authentication {
                                 .get(&addr)
                                 .expect("unable to find peer")
                                 .identifier,
-                            "OK PLAIN authentication successful"
+                            "OK PLAIN authentication successful\r"
                         );
                     }
 

@@ -1,7 +1,10 @@
 use std::path::Path;
 
+use argonautica::{Hasher, Verifier};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use futures::compat::Future01CompatExt;
 use futures::StreamExt;
+use log::debug;
 use log::warn;
 use rand::prelude::*;
 use tokio::fs::{create_dir_all, metadata, read_dir};
@@ -11,8 +14,6 @@ use crate::database::establish_connection;
 use crate::models::{NewUser, User};
 use crate::schema::users;
 use crate::schema::users::dsl::*;
-use argonautica::{Hasher, Verifier};
-use futures::compat::Future01CompatExt;
 
 #[derive(Clone)]
 pub struct Mailbox {
@@ -164,7 +165,13 @@ impl Mailbox {
     }
 
     // TODO get filtered if wanted by the client
-    pub async fn get_lsub(&self) -> Option<Vec<String>> {
+    pub async fn get_lsub(&self, args: Vec<&str>) -> Option<Vec<String>> {
+        if args.len() == 4 {
+            debug!("get_lsub 4");
+        } else if args.len() == 5 {
+            debug!("get_lsub 5");
+        }
+
         let mut dirs = read_dir(self.mailbox_root.to_owned())
             .await
             .expect("unable to read dir");
@@ -173,15 +180,15 @@ impl Mailbox {
 
         while let Some(dir) = dirs.next().await {
             let dir = dir.expect("unable to get dir");
-            if dir.file_name() == "INBOX" {
-                dirs_lsub.push("* LSUB (\\HasNoChildren) \".\" INBOX\r\n");
-                continue;
-            } else {
-                let path_string = format!("* LSUB  (\\Subscribed) \".\" {:?}\r\n", dir.file_name());
-                let path_string = string_to_static_str(path_string);
-                dirs_lsub.push(path_string);
-                continue;
-            }
+            let path_string = format!(
+                "* LSUB  (\\Subscribed) \".\" {}\r\n",
+                dir.file_name()
+                    .into_string()
+                    .expect("unable to get filename")
+            );
+            let path_string = string_to_static_str(path_string);
+            dirs_lsub.push(path_string);
+            continue;
         }
 
         if dirs_lsub.len() > 0 {
@@ -193,7 +200,13 @@ impl Mailbox {
     }
 
     // TODO get filtered if wanted by the client
-    pub async fn get_list(&self) -> Option<Vec<String>> {
+    pub async fn get_list(&self, args: Vec<&str>) -> Option<Vec<String>> {
+        if args.len() == 4 {
+            debug!("get_list 4");
+        } else if args.len() == 5 {
+            debug!("get_list 5");
+        }
+
         let mut dirs = read_dir(self.mailbox_root.to_owned())
             .await
             .expect("unable to read dir");
@@ -202,16 +215,16 @@ impl Mailbox {
 
         while let Some(dir) = dirs.next().await {
             let dir = dir.expect("unable to get dir");
-            if dir.file_name() == "INBOX" {
-                dirs_list.push("* LIST (\\HasNoChildren) \".\" \"INBOX\"\r\n");
-                continue;
-            } else {
-                // TODO actually check if subscribed or not.
-                let path_string = format!("* LIST (\\Subscribed) \".\" {:?}\r\n", dir.file_name());
-                let path_string = string_to_static_str(path_string);
-                dirs_list.push(path_string);
-                continue;
-            }
+            // TODO actually check if subscribed or not.
+            let path_string = format!(
+                "* LIST (\\Subscribed) \".\" {}\r\n",
+                dir.file_name()
+                    .into_string()
+                    .expect("unable to get filename")
+            );
+            let path_string = string_to_static_str(path_string);
+            dirs_list.push(path_string);
+            continue;
         }
 
         if dirs_list.len() > 0 {

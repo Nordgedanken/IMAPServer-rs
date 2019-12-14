@@ -7,11 +7,11 @@ use std::pin::Pin;
 use std::sync::Arc;
 
 use futures::io::ErrorKind::{ConnectionAborted, ConnectionReset};
+use futures::sink::SinkExt;
+use futures::task::Context;
 use futures::task::Poll;
 use futures::Stream;
 use futures::StreamExt;
-use futures::task::Context;
-use futures::sink::SinkExt;
 use log::{debug, error, info};
 use tokio::io;
 use tokio::net::{TcpListener, TcpStream};
@@ -149,7 +149,10 @@ impl Shared {
     ) -> Result<(), mpsc::error::SendError<String>> {
         for peer in self.peers.iter_mut() {
             if *peer.0 == sender {
-                peer.1.tx.send(message.into()).expect("failed to send message");
+                peer.1
+                    .tx
+                    .send(message.into())
+                    .expect("failed to send message");
                 break;
             }
         }
@@ -230,7 +233,7 @@ async fn process(
 
     // Send Capabilities
     lines
-        .send(String::from("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ACCEPT NAMESPACE ID LIST-EXTENDED ENABLE LOGINDISABLED] IMAP4rev1 Service Ready\r"))
+        .send(String::from("* OK [CAPABILITY IMAP4rev1 AUTH=PLAIN UTF8=ONLY NAMESPACE ID LIST-EXTENDED ENABLE LOGINDISABLED] IMAP4rev1 Service Ready\r"))
         .await?;
 
     // Register our peer with state which internally sets up some channels.
