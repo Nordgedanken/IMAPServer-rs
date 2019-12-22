@@ -33,6 +33,7 @@ serde_yaml = "0.8"
 
 [dependencies.IMAPServer-shared]
 path = "shared"
+version = "0.1.0"
 
 [workspace]
 members = ["shared", "cli"]

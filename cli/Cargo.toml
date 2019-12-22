@@ -16,6 +16,7 @@ clap = "2.33.0"
 
 [dependencies.IMAPServer-shared]
 path = "../shared"
+version = "0.1.0"
 
 [[bin]]
 name = "mailbox-cli"
