@@ -15,7 +15,7 @@ mod schema;
 #[cfg(test)]
 mod tests;
 
-embed_migrations!("../migrations");
+embed_migrations!("./migrations");
 
 pub fn setup() {
     let connection = database::establish_connection();
