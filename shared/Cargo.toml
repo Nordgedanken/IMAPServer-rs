@@ -3,6 +3,11 @@ name = "IMAPServer-shared"
 version = "0.1.0"
 authors = ["MTRNord <mtrnord1@gmail.com>"]
 edition = "2018"
+description = "A shared module for the IMAPServer crate and it's cli"
+repository = "https://github.com/Nordgedanken/IMAPServer-rs.git"
+keywords = ["imap","tcp", "server", "bin", "email"]
+categories = ["email", "network-programming"]
+license = "GPL-3.0"
 
 [lib]
 doc = true

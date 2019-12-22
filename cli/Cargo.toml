@@ -3,6 +3,11 @@ name = "IMAPServer-cli"
 version = "0.1.0"
 authors = ["MTRNord <mtrnord1@gmail.com>"]
 edition = "2018"
+description = "A cli for the IMAPServer crate"
+repository = "https://github.com/Nordgedanken/IMAPServer-rs.git"
+keywords = ["imap","tcp", "server", "bin", "email"]
+categories = ["email", "network-programming"]
+license = "GPL-3.0"
 
 [dependencies]
 futures = {version = "0.3", features=["compat"]}
