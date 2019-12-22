@@ -131,8 +131,6 @@ impl Authentication {
                 );
             }
         }
-
-        debug!("user: {} \r\n password: {}", up[1], up[2]);
         Ok(())
     }
 

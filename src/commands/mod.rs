@@ -322,16 +322,14 @@ impl Commands {
 
         match state.peers.get(&addr).expect("unable to find peer").state {
             State::LoggedIn => {
-                let one = "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n";
-                let two = "* OK [PERMANENTFLAGS (\\*)] Limited\r\n";
+                let one = "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft NonJunk Junk)\r\n";
+                let two = "* OK [PERMANENTFLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft NonJunk Junk \\*)] Flags permitted\r\n";
                 let three = "* OK [UIDVALIDITY 1] UIDs valid\r\n";
                 let four = "* OK [UIDNEXT 2] Predicted next UID\r\n";
                 let five = "* 1 EXISTS\r\n";
                 let six = "* 0 RECENT\r\n";
                 //let seven = "* OK [UNSEEN 1] First unseen\r\n";
 
-                debug!("{}", command);
-                debug!("{}", identifier);
                 if command == "select" {
                     let response =
                         format!("{} {}", identifier, "OK [READ-WRITE] SELECT completed\r");

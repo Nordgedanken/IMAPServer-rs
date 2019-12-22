@@ -2,16 +2,17 @@
 
 use std::collections::HashMap;
 use std::error::Error;
+use std::io::{BufWriter, Write};
 use std::net::SocketAddr;
 use std::pin::Pin;
 use std::sync::Arc;
 
 use futures::io::ErrorKind::{ConnectionAborted, ConnectionReset};
 use futures::sink::SinkExt;
-use futures::task::Context;
-use futures::task::Poll;
 use futures::Stream;
 use futures::StreamExt;
+use futures::task::Context;
+use futures::task::Poll;
 use log::{debug, error, info};
 use tokio::io;
 use tokio::net::{TcpListener, TcpStream};
@@ -278,7 +279,7 @@ async fn process(
                             addr,
                             state.clone(),
                         )
-                        .await?;
+                            .await?;
                     } else {
                         error!("Command {} by {} is not known. dropping it.", command, addr);
 
@@ -294,7 +295,7 @@ async fn process(
                         addr,
                         state.clone(),
                     )
-                    .await?;
+                        .await?;
                 }
             }
 

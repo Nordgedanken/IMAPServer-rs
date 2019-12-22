@@ -1,5 +1,5 @@
 [package]
-name = "IMAPServer-CLI"
+name = "IMAPServer-cli"
 version = "0.1.0"
 authors = ["MTRNord <mtrnord1@gmail.com>"]
 edition = "2018"

@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "IMAPServer-CLI"
+name = "IMAPServer-cli"
 version = "0.1.0"
 dependencies = [
  "IMAPServer-shared 0.1.0",
