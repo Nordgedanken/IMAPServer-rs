@@ -1,6 +1,6 @@
 [package]
 name = "IMAPServer"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["MTRNord <mtrnord1@gmail.com>"]
 description = "A Basic IMAP Server written in Rust (WIP)"
 repository = "https://github.com/Nordgedanken/IMAPServer-rs.git"

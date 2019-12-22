@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 [[package]]
 name = "IMAPServer"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "IMAPServer-shared 0.1.0",
  "app_dirs 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
