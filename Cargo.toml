@@ -20,7 +20,7 @@ include = [
 app_dirs = "1.2.1"
 futures = {version = "0.3", features=["compat"]}
 tokio = { version = "0.2", features = ["full"] }
-tokio-util = { version = "0.2", features = ["codec"] }
+tokio-util = { version = "0.3", features = ["codec"] }
 #tokio-io = "0.2.0-alpha.6"
 bytes = "0.5.4"
 mailparse = "0.12.0"
