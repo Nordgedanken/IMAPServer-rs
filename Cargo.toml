@@ -24,7 +24,7 @@ tokio-util = { version = "0.3", features = ["codec"] }
 #tokio-io = "0.2.0-alpha.6"
 bytes = "0.5.4"
 mailparse = "0.12.0"
-base64 = "0.11.0"
+base64 = "0.12.0"
 log = "0.4"
 fern = {version = "0.5", features = ["colored"]}
 chrono = "0.4"
