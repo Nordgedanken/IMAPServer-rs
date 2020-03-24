@@ -14,7 +14,7 @@ doc = true
 test = true
 
 [dependencies]
-diesel = { version = "1.0.0", features = ["sqlite"] }
+diesel = { version = "1.4.4", features = ["sqlite"] }
 diesel_migrations = "1.4.0"
 futures = {version = "0.3", features=["compat"]}
 tokio = { version = "0.2", features = ["full"] }
