@@ -107,7 +107,7 @@ async fn process(stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> 
     // Process incoming messages until our stream is exhausted by a disconnect.
     while let Some(result) = peer.next().await {
         match result {
-            Ok(Message::Received(ref msg)) => {
+            Ok(Message::Received(msg)) => {
                 tracing::info!("Message received: {}", msg);
                 match peer.state {
                     State::None => {
