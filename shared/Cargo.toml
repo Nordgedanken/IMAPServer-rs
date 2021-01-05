@@ -17,12 +17,12 @@ test = true
 diesel = { version = "1.4.4", features = ["sqlite"] }
 diesel_migrations = "1.4.0"
 futures = {version = "0.3", features=["compat"]}
-tokio = { version = "0.2", features = ["full"] }
-tokio-util = { version = "0.3", features = ["codec"] }
+tokio = { version = "1", features = ["full"] }
+tokio-util = { version = "0.6", features = ["codec"] }
 #tokio-io = "0.2.0-alpha.6"
 log = "0.4"
 dotenv = "0.15.0"
 argonautica = { version = "0.2", features = ["simd"] }
-rand  = { version = "0.7", features = ["log"] }
+rand  = { version = "0.8", features = ["log"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"

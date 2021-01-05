@@ -3,7 +3,7 @@ use std::result::Result::{Err, Ok};
 use std::sync::Arc;
 
 use base64::decode;
-use log::debug;
+use tracing::debug;
 use tokio::sync::{mpsc, Mutex};
 
 use IMAPServer_shared::mailbox::Mailbox;

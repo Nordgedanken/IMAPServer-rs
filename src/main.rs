@@ -6,30 +6,37 @@ use std::io::{BufWriter, Write};
 use std::net::SocketAddr;
 use std::pin::Pin;
 use std::sync::Arc;
-
 use futures::io::ErrorKind::{ConnectionAborted, ConnectionReset};
 use futures::sink::SinkExt;
 use futures::Stream;
 use futures::StreamExt;
 use futures::task::Context;
 use futures::task::Poll;
-use log::{debug, error, info};
+use tracing::{debug, error, info, Level};
 use tokio::io;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::{mpsc, Mutex};
 use tokio_util::codec::{Framed, LinesCodec, LinesCodecError};
-
 use IMAPServer_shared::config::Config;
 use IMAPServer_shared::mailbox::Mailbox;
 use IMAPServer_shared::setup;
+use tracing_subscriber::FmtSubscriber;
 
 mod commands;
 mod config;
-mod log_helper;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    log_helper::setup_logger().expect("Unable to start logger.");
+    // a builder for `FmtSubscriber`.
+    let subscriber = FmtSubscriber::builder()
+        // all spans/events with a level higher than TRACE (e.g, debug, info, warn, etc.)
+        // will be written to stdout.
+        .with_max_level(Level::INFO)
+        // completes the builder.
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("setting default subscriber failed");
 
     setup();
     Config::load().await;
@@ -42,7 +49,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let state = Arc::new(Mutex::new(Shared::new()));
 
     let addr: SocketAddr = "0.0.0.0:143".parse()?;
-    let mut listener = TcpListener::bind(&addr).await?;
+    let listener = TcpListener::bind(&addr).await?;
     info!("Listening on: {}", addr);
 
     // Startup procedure
@@ -204,7 +211,7 @@ impl Stream for Peer {
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         // First poll the `UnboundedReceiver`.
 
-        if let Poll::Ready(Some(v)) = self.rx.poll_next_unpin(cx) {
+        if let Poll::Ready(Some(v)) = self.rx.poll_recv(cx) {
             return Poll::Ready(Some(Ok(Message::Response(v))));
         }
 

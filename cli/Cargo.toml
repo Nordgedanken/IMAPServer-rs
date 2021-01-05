@@ -11,8 +11,8 @@ license = "GPL-3.0"
 
 [dependencies]
 futures = {version = "0.3", features=["compat"]}
-tokio = { version = "0.2", features = ["full"] }
-tokio-util = { version = "0.3", features = ["codec"] }
+tokio = { version = "1", features = ["full"] }
+tokio-util = { version = "0.6", features = ["codec"] }
 #tokio-io = "0.2.0-alpha.6"
 log = "0.4"
 fern = {version = "0.6", features = ["colored"]}

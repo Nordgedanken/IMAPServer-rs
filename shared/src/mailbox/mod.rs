@@ -179,8 +179,7 @@ impl Mailbox {
 
         let mut dirs_lsub: Vec<&str> = Vec::new();
 
-        while let Some(dir) = dirs.next().await {
-            let dir = dir.expect("unable to get dir");
+        while let Ok(Some(dir)) = dirs.next_entry().await {
             // FIXME this will break with subdirs
             if dir.file_name().into_string().unwrap() != searched && searched != "*" { continue; }
             let subscribed_str: &str = "(subscribed)";
@@ -230,8 +229,7 @@ impl Mailbox {
 
         let mut dirs_list: Vec<&str> = Vec::new();
 
-        while let Some(dir) = dirs.next().await {
-            let dir = dir.expect("unable to get dir");
+        while let Ok(Some(dir)) = dirs.next_entry().await {
             // FIXME this will break with subdirs
             if dir.file_name().into_string().unwrap() != searched && searched != "*" { continue; }
             let subscribed_str: &str = "(subscribed)";
