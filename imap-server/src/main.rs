@@ -41,8 +41,8 @@ async fn main() -> Result<()> {
     let opts: Opts = Opts::parse();
 
     match opts.subcmd {
-        SubCommand::Server(s) => server::run().await?,
-        SubCommand::Cli(c) => {}
+        SubCommand::Server(_) => server::run().await?,
+        SubCommand::Cli(_) => {}
     }
     Ok(())
 }

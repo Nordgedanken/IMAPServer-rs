@@ -97,10 +97,9 @@ async fn process(stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> 
     let mut lines = Framed::new(stream, LinesCodec::new());
 
     // Tell the client what we can do
-    /*lines
-    .send("* OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN AUTH=LOGIN] Rust Imap-Server ready.")
-    .await?;*/
-    lines.send("* OK Rust Imap-Server ready.").await?;
+    lines
+        .send("* OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN AUTH=LOGIN] Rust Imap-Server ready.")
+        .await?;
 
     let mut peer = Peer::new(lines).await?;
 
@@ -111,19 +110,29 @@ async fn process(stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> 
                 tracing::info!("Message received: {}", msg);
                 match peer.state {
                     State::None => {
-                        match parser::commands(&msg)? {
-                            (_, ParserResult::CapabilityRequest(_)) => {
-                                tracing::info!("Responding capabilities");
-                                peer.lines.send("* OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN AUTH=LOGIN] Rust Imap-Server ready.").await?;
+                        match parser::commands(&msg) {
+                            Ok((_, result)) => {
+                                match result {
+                                    ParserResult::CapabilityRequest(_) => {
+                                        tracing::info!("Responding capabilities");
+                                        peer.lines.send("* OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN AUTH=LOGIN] Rust Imap-Server ready.").await?;
+                                    }
+                                    ParserResult::AuthPlainRequest(tag) => {
+                                        tracing::info!("Tag: {:?}", tag);
+                                        // New state: Auth
+                                        peer.state = State::PlainAuth(tag.to_string());
+                                        // Tell client to continue
+                                        peer.lines.send("+").await?;
+                                    }
+                                    _ => {
+                                        tracing::error!("Whoops");
+                                    }
+                                }
                             }
-                            (_, ParserResult::AuthPlainRequest(tag)) => {
-                                tracing::info!("Tag: {:?}", tag);
-                                // New state: Auth
-                                peer.state = State::PlainAuth(tag.to_string());
-                                // Tell client to continue
-                                peer.lines.send("+").await?;
+                            Err(e) => {
+                                tracing::error!("Unable to parse command: {}", e);
+                                peer.lines.send("* BAD unknown command").await?;
                             }
-                            (_, ParserResult::Unknown) => tracing::info!("unknown command"),
                         }
                     }
                     State::PlainAuth(ref tag) => {
@@ -148,7 +157,54 @@ async fn process(stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> 
                             Err(_) => peer.lines.send("* BAD invalid passwords").await?,
                         }
                     }
-                    State::LoggedIn => {}
+                    State::LoggedIn => {
+                        match parser::commands(&msg) {
+                            Ok((_, result)) => {
+                                match result {
+                                    ParserResult::ListRequest(tag, _, _) => {
+                                        //TODO real logic
+                                        peer.lines
+                                            .send(format!("{} OK LIST Completed", tag))
+                                            .await?;
+                                    }
+                                    ParserResult::LSUBRequest(tag, _, _) => {
+                                        //TODO real logic
+                                        peer.lines
+                                            .send(format!("{} OK LSUB Completed", tag))
+                                            .await?;
+                                    }
+                                    ParserResult::CreateRequest(tag, _) => {
+                                        //TODO real logic
+                                        peer.lines
+                                            .send(format!("{} OK CREATE Completed", tag))
+                                            .await?;
+                                    }
+                                    ParserResult::SubscribeRequest(tag, _) => {
+                                        //TODO real logic
+                                        peer.lines
+                                            .send(format!("{} OK SUBSCRIBE Completed", tag))
+                                            .await?;
+                                    }
+                                    ParserResult::SelectRequest(tag, _) => {
+                                        //TODO real logic
+                                        peer.lines
+                                            .send(format!(
+                                                "{} OK [READ-ONLY] SELECT Completed",
+                                                tag
+                                            ))
+                                            .await?;
+                                    }
+                                    _ => {
+                                        tracing::error!("Whoops");
+                                    }
+                                }
+                            }
+                            Err(e) => {
+                                tracing::error!("Unable to parse command: {}", e);
+                                peer.lines.send("* BAD unknown command").await?;
+                            }
+                        }
+                    }
                 }
             }
             Err(e) => {
