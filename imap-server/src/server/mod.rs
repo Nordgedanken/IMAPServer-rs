@@ -1,12 +1,13 @@
+use crate::server::parser::ParserResult;
 use futures::SinkExt;
 use std::net::SocketAddr;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
-use tokio::sync::mpsc;
 use tokio_stream::{Stream, StreamExt};
 use tokio_util::codec::{Framed, LinesCodec, LinesCodecError};
+
+mod parser;
 
 pub async fn run() -> color_eyre::Result<()> {
     let addr = "127.0.0.1:143";
@@ -42,12 +43,6 @@ struct Peer {
     /// raw byte operations.
     lines: Framed<TcpStream, LinesCodec>,
 
-    /// Receive half of the message channel.
-    ///
-    /// This is used to receive messages from peers. When a message is received
-    /// off of this `Rx`, it will be written to the socket.
-    rx: Pin<Box<dyn Stream<Item = String> + Send>>,
-
     /// State of the peer
     state: State,
 }
@@ -55,21 +50,8 @@ struct Peer {
 impl Peer {
     /// Create a new instance of `Peer`.
     async fn new(lines: Framed<TcpStream, LinesCodec>) -> color_eyre::Result<Peer> {
-        // Get the client socket address
-        let addr = lines.get_ref().peer_addr()?;
-
-        // Create a channel for this peer
-        let (_, mut rx) = mpsc::unbounded_channel();
-
-        let rx = Box::pin(async_stream::stream! {
-            while let Some(item) = rx.recv().await {
-                yield item;
-            }
-        });
-
         Ok(Peer {
             lines,
-            rx,
             state: State::None,
         })
     }
@@ -115,40 +97,44 @@ async fn process(stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> 
     let mut lines = Framed::new(stream, LinesCodec::new());
 
     // Tell the client what we can do
-    lines
-        .send("* OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN AUTH=LOGIN] Rust Imap-Server ready.")
-        .await?;
+    /*lines
+    .send("* OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN AUTH=LOGIN] Rust Imap-Server ready.")
+    .await?;*/
+    lines.send("* OK Rust Imap-Server ready.").await?;
 
     let mut peer = Peer::new(lines).await?;
 
     // Process incoming messages until our stream is exhausted by a disconnect.
     while let Some(result) = peer.next().await {
         match result {
-            Ok(Message::Received(msg)) => {
+            Ok(Message::Received(ref msg)) => {
                 tracing::info!("Message received: {}", msg);
                 match peer.state {
                     State::None => {
-                        if msg.to_lowercase().contains("capability") {
-                            tracing::info!("Responding capabilities");
-                            peer.lines.send("* OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN AUTH=LOGIN] Rust Imap-Server ready.").await?;
-                        } else if msg.to_lowercase().contains("authenticate plain") {
-                            let tag = msg.get(0..1).unwrap();
-                            tracing::info!("Tag: {:?}", tag);
-                            // New state: Auth
-                            peer.state = State::PlainAuth(tag.to_string());
-                            // Tell client to continue
-                            peer.lines.send("+").await?;
+                        match parser::commands(&msg)? {
+                            (_, ParserResult::CapabilityRequest(_)) => {
+                                tracing::info!("Responding capabilities");
+                                peer.lines.send("* OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN AUTH=LOGIN] Rust Imap-Server ready.").await?;
+                            }
+                            (_, ParserResult::AuthPlainRequest(tag)) => {
+                                tracing::info!("Tag: {:?}", tag);
+                                // New state: Auth
+                                peer.state = State::PlainAuth(tag.to_string());
+                                // Tell client to continue
+                                peer.lines.send("+").await?;
+                            }
+                            (_, ParserResult::Unknown) => tracing::info!("unknown command"),
                         }
                     }
                     State::PlainAuth(ref tag) => {
-                        let decoded = base64::decode(msg)?;
+                        let decoded = base64::decode(msg.to_string())?;
 
                         let possible_user_pass = std::str::from_utf8(&decoded);
                         match possible_user_pass {
                             Ok(user_pass) => {
                                 let without_leading_null = user_pass.strip_prefix("\u{0}").unwrap();
                                 let split: Vec<&str> =
-                                    without_leading_null.split("\u{0}").collect();
+                                    without_leading_null.split('\u{0}').collect();
                                 let user = split[0];
                                 let pass = split[1];
                                 tracing::info!("user: {:?}, Pass: {:?}", user, pass);

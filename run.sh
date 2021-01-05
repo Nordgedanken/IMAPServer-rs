@@ -1,3 +1,3 @@
 #!/bin/bash
-cargo build
+cargo build || exit $?
 sudo target/debug/imap-server server
