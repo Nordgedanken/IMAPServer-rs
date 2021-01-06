@@ -1,4 +1,7 @@
+use crate::database::Database;
+use crate::passwords;
 use crate::server::parser::ParserResult;
+use color_eyre::Report;
 use futures::SinkExt;
 use std::net::SocketAddr;
 use std::pin::Pin;
@@ -9,7 +12,7 @@ use tokio_util::codec::{Framed, LinesCodec, LinesCodecError};
 
 mod parser;
 
-pub async fn run() -> color_eyre::Result<()> {
+pub async fn run(db: Database) -> color_eyre::Result<()> {
     let addr = "127.0.0.1:143";
     let listener = TcpListener::bind(&addr).await?;
     println!("Listening on: {}", addr);
@@ -25,9 +28,10 @@ pub async fn run() -> color_eyre::Result<()> {
         // Essentially here we're executing a new task to run concurrently,
         // which will allow all of our clients to be processed concurrently.
 
+        let cloned_db = db.clone();
         tokio::spawn(async move {
             tracing::info!("accepted connection");
-            if let Err(e) = process(socket, addr).await {
+            if let Err(e) = process(cloned_db.clone(), socket, addr).await {
                 tracing::error!("an error occurred; error = {:?}", e);
             }
         });
@@ -94,12 +98,12 @@ impl Stream for Peer {
 }
 
 /// Process an individual mail client
-async fn process(stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> {
+async fn process(db: Database, stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> {
     let mut lines = Framed::new(stream, LinesCodec::new());
 
     // Tell the client what we can do
     lines
-        .send("* OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN AUTH=LOGIN] Rust Imap-Server ready.")
+        .send("* OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN] Rust Imap-Server ready.")
         .await?;
 
     let mut peer = Peer::new(lines).await?;
@@ -116,13 +120,30 @@ async fn process(stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> 
                                 match result {
                                     ParserResult::CapabilityRequest(_) => {
                                         tracing::info!("Responding capabilities");
-                                        peer.lines.send("* OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN AUTH=LOGIN] Rust Imap-Server ready.").await?;
+                                        peer.lines.send("* OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN] Rust Imap-Server ready.").await?;
                                     }
-                                    ParserResult::AuthPlainRequest(tag) => {
+                                    ParserResult::AuthPlainContinueRequest(tag) => {
                                         // New state: Auth
                                         peer.state = State::PlainAuth(tag.to_string());
                                         // Tell client to continue
                                         peer.lines.send("+").await?;
+                                    }
+                                    ParserResult::LoginRequest(tag, user, pass) => {
+                                        if let Ok(hash) = db.get_user_hash(&user).await {
+                                            if passwords::verify(hash, &pass) {
+                                                peer.lines
+                                                    .send(format!("{} OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN] AUTHENTICATE completed", tag))
+                                                    .await?;
+                                                peer.state = State::LoggedIn;
+                                                continue;
+                                            }
+                                        }
+
+                                        peer.lines
+                                            .send(format!("{} NO credentials invalid", tag))
+                                            .await?;
+                                        tracing::warn!("user: {:?} tried to login with invalid password or is unknown",user);
+                                        peer.state = State::None;
                                     }
                                     _ => {
                                         tracing::error!("Whoops");
@@ -146,13 +167,25 @@ async fn process(stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> 
                                     without_leading_null.split('\u{0}').collect();
                                 let user = split[0];
                                 let pass = split[1];
-                                tracing::info!("user: {:?}, Pass: {:?}", user, pass);
 
-                                // TODO actual auth
+                                if let Ok(hash) = db.get_user_hash(user).await {
+                                    if passwords::verify(hash, pass) {
+                                        peer.lines
+                                            .send(format!("{} OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN] AUTHENTICATE completed", tag))
+                                            .await?;
+                                        peer.state = State::LoggedIn;
+                                        continue;
+                                    }
+                                }
+
                                 peer.lines
-                                    .send(format!("{} OK  [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN AUTH=LOGIN] AUTHENTICATE completed", tag))
+                                    .send(format!("{} NO credentials invalid", tag))
                                     .await?;
-                                peer.state = State::LoggedIn;
+                                tracing::warn!(
+                                    "user: {:?} tried to login with invalid password or is unknown",
+                                    user
+                                );
+                                peer.state = State::None;
                             }
                             Err(_) => peer.lines.send("* BAD invalid passwords").await?,
                         }

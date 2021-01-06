@@ -2,6 +2,8 @@ use clap::clap_app;
 use color_eyre::eyre::Result;
 
 mod cli;
+mod database;
+mod passwords;
 mod server;
 
 #[tokio::main]
@@ -26,15 +28,16 @@ async fn main() -> Result<()> {
     )
     .get_matches();
 
+    let database = database::Database::open().await?;
     match opts.subcommand() {
         Some(("add-user", add_user)) => {
             if let Some(username) = add_user.value_of("USERNAME") {
                 if let Some(password) = add_user.value_of("PASSWORD") {
-                    cli::add(username.to_string(), password.to_string()).await?;
+                    cli::add(database, username.to_string(), password.to_string()).await?;
                 }
             }
         }
-        _ => server::run().await?,
+        _ => server::run(database).await?,
     }
     Ok(())
 }
