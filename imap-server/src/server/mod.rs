@@ -68,6 +68,7 @@ enum State {
     // Plain auth requires the tag
     PlainAuth(String),
     LoggedIn,
+    MailboxSelected(String),
 }
 
 // Peer implements `Stream` in a way that polls both the `Rx`, and `Framed` types.
@@ -157,10 +158,19 @@ async fn process(stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> 
                             Err(_) => peer.lines.send("* BAD invalid passwords").await?,
                         }
                     }
+                    // TODO add select state and handle close in it
                     State::LoggedIn => {
                         match parser::commands(&msg) {
                             Ok((_, result)) => {
                                 match result {
+                                    ParserResult::LogoutRequest(tag) => {
+                                        peer.lines
+                                            .send("* BYE Rust Imap-Server logging out")
+                                            .await?;
+                                        peer.lines
+                                            .send(format!("{} OK LOGOUT completed", tag))
+                                            .await?;
+                                    }
                                     ParserResult::ListRequest(tag, _, _) => {
                                         //TODO real logic
                                         peer.lines
@@ -185,8 +195,9 @@ async fn process(stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> 
                                             .send(format!("{} OK SUBSCRIBE Completed", tag))
                                             .await?;
                                     }
-                                    ParserResult::SelectRequest(tag, _) => {
+                                    ParserResult::SelectRequest(tag, mailbox) => {
                                         //TODO real logic
+                                        peer.state = State::MailboxSelected(mailbox);
                                         peer.lines
                                             .send(format!(
                                                 "{} OK [READ-ONLY] SELECT Completed",
@@ -205,6 +216,23 @@ async fn process(stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> 
                             }
                         }
                     }
+                    State::MailboxSelected(ref mailbox) => match parser::commands(&msg) {
+                        Ok((_, result)) => match result {
+                            ParserResult::CloseRequest(tag) => {
+                                peer.lines
+                                    .send(format!("{} OK CLOSE completed", tag))
+                                    .await?;
+                                peer.state = State::LoggedIn;
+                            }
+                            _ => {
+                                tracing::error!("Whoops");
+                            }
+                        },
+                        Err(e) => {
+                            tracing::error!("Unable to parse command: {}", e);
+                            peer.lines.send("* BAD unknown command").await?;
+                        }
+                    },
                 }
             }
             Err(e) => {

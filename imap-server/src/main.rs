@@ -1,6 +1,7 @@
 use clap::Clap;
 use color_eyre::eyre::Result;
 
+mod cli;
 mod server;
 
 #[derive(Clap)]

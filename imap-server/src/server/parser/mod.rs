@@ -1,6 +1,4 @@
 use nom::branch::alt;
-use nom::character::complete::{char, one_of};
-use nom::combinator::opt;
 use nom::sequence::tuple;
 use nom::{delimited, named, tag, tag_no_case, take_while, take_while1, IResult};
 
@@ -8,6 +6,8 @@ use nom::{delimited, named, tag, tag_no_case, take_while, take_while1, IResult};
 pub enum ParserResult {
     CapabilityRequest(String),
     AuthPlainRequest(String),
+    CloseRequest(String),
+    LogoutRequest(String),
     ListRequest(String, String, String),
     LSUBRequest(String, String, String),
     CreateRequest(String, String),
@@ -22,6 +22,8 @@ named!(lsub_command ( &str ) -> &str, tag_no_case!("lsub"));
 named!(create_command ( &str ) -> &str, tag_no_case!("create"));
 named!(subscribe_command ( &str ) -> &str, tag_no_case!("subscribe"));
 named!(select_command ( &str ) -> &str, tag_no_case!("select"));
+named!(close_command ( &str ) -> &str, tag_no_case!("close"));
+named!(logout_command ( &str ) -> &str, tag_no_case!("logout"));
 named!(imaptag ( &str ) -> &str, take_while1!(|c: char| c.is_alphanumeric()));
 named!(space ( &str ) -> &str, take_while1!(|c: char| c.is_whitespace()));
 
@@ -35,6 +37,16 @@ named!(basic_string ( &str ) -> &str, delimited!(
 fn capability(input: &str) -> IResult<&str, ParserResult> {
     let (input, (imap_tag, _, _)) = tuple((imaptag, space, cap_command))(input)?;
     Ok((input, ParserResult::CapabilityRequest(imap_tag.to_string())))
+}
+
+fn close(input: &str) -> IResult<&str, ParserResult> {
+    let (input, (imap_tag, _, _)) = tuple((imaptag, space, close_command))(input)?;
+    Ok((input, ParserResult::CloseRequest(imap_tag.to_string())))
+}
+
+fn logout(input: &str) -> IResult<&str, ParserResult> {
+    let (input, (imap_tag, _, _)) = tuple((imaptag, space, logout_command))(input)?;
+    Ok((input, ParserResult::LogoutRequest(imap_tag.to_string())))
 }
 
 fn auth_plain(input: &str) -> IResult<&str, ParserResult> {
@@ -110,7 +122,7 @@ fn select(input: &str) -> IResult<&str, ParserResult> {
 
 pub fn commands(input: &str) -> IResult<&str, ParserResult> {
     let (input, result) = alt((
-        capability, auth_plain, list, lsub, create, subscribe, select,
+        capability, auth_plain, list, lsub, create, subscribe, select, close, logout,
     ))(input)?;
     Ok((input, result))
 }
