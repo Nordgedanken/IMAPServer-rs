@@ -1,33 +1,8 @@
-use clap::Clap;
+use clap::clap_app;
 use color_eyre::eyre::Result;
 
 mod cli;
 mod server;
-
-#[derive(Clap)]
-#[clap(version = "0.1.0", author = "MTRNord <mtrnord1@gmail.com>")]
-struct Opts {
-    #[clap(short, long, default_value = "config.yml")]
-    config: String,
-    /// Print debug info
-    #[clap(short)]
-    debug: bool,
-
-    #[clap(subcommand)]
-    subcmd: SubCommand,
-}
-
-#[derive(Clap)]
-enum SubCommand {
-    Server(Server),
-    Cli(Cli),
-}
-
-#[derive(Clap)]
-struct Server {}
-
-#[derive(Clap)]
-struct Cli {}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -39,11 +14,27 @@ async fn main() -> Result<()> {
         .with_max_level(tracing::Level::INFO)
         .init();
     tracing::info!("Starting...");
-    let opts: Opts = Opts::parse();
+    let opts = clap_app!("imap-server" =>
+        (about: "A Rust imap server")
+        (@arg CONFIG: -c --config +takes_value "Sets a custom config file")
+        (@arg verbose: -v --verbose "Print test information verbosely")
+        (@subcommand "add-user" =>
+            (about: "adds a user")
+            (@arg USERNAME: -u --username +takes_value +required "The username of the new user")
+            (@arg PASSWORD: -p --password +takes_value +required "The password of the new user")
+        )
+    )
+    .get_matches();
 
-    match opts.subcmd {
-        SubCommand::Server(_) => server::run().await?,
-        SubCommand::Cli(_) => {}
+    match opts.subcommand() {
+        Some(("add-user", add_user)) => {
+            if let Some(username) = add_user.value_of("USERNAME") {
+                if let Some(password) = add_user.value_of("PASSWORD") {
+                    cli::add(username.to_string(), password.to_string()).await?;
+                }
+            }
+        }
+        _ => server::run().await?,
     }
     Ok(())
 }

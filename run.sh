@@ -1,3 +1,3 @@
 #!/bin/bash
 cargo build || exit $?
-sudo target/debug/imap-server server
+sudo target/debug/imap-server

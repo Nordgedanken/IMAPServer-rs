@@ -119,7 +119,6 @@ async fn process(stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> 
                                         peer.lines.send("* OK [CAPABILITY IMAP4rev1 LITERAL+ AUTH=PLAIN AUTH=LOGIN] Rust Imap-Server ready.").await?;
                                     }
                                     ParserResult::AuthPlainRequest(tag) => {
-                                        tracing::info!("Tag: {:?}", tag);
                                         // New state: Auth
                                         peer.state = State::PlainAuth(tag.to_string());
                                         // Tell client to continue
@@ -158,7 +157,6 @@ async fn process(stream: TcpStream, addr: SocketAddr) -> color_eyre::Result<()> 
                             Err(_) => peer.lines.send("* BAD invalid passwords").await?,
                         }
                     }
-                    // TODO add select state and handle close in it
                     State::LoggedIn => {
                         match parser::commands(&msg) {
                             Ok((_, result)) => {

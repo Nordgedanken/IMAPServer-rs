@@ -64,7 +64,6 @@ fn list(input: &str) -> IResult<&str, ParserResult> {
         space,
         basic_string,
     ))(input)?;
-    tracing::info!("mailbox: {:?}", mailbox);
     Ok((
         input,
         ParserResult::ListRequest(
